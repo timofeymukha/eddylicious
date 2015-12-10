@@ -1,21 +1,32 @@
 import os
 import numpy as np
 from sys import exit
+import argparse
 from eddylicous.generators.helper_functions import delta_99
 from eddylicous.generators.helper_functions import theta
 from eddylicous.generators.helper_functions import delta_star
 from eddylicous.readers.foamfile_readers import read_points_from_foamfile
-from eddylicous.readers.foamfile_readers import read_u_from_foamfile
-from eddylicous.writers.tvmfv_writers import write_u_to_tvmfv
 from eddylicous.writers.tvmfv_writers import write_points_to_tvmfv
 from eddylicous.generators.lund_rescaling import lund_generate
 from eddylicous.generators.lund_rescaling import lund_rescale_mean_velocity
 
 
+# Define the command-line arguments
+parser = argparse.ArgumentParser(
+            description="A script for generating inflow \
+                         velocity fields using Lund et al's rescaling.")
+
+parser.add_argument('--config',
+                    type=str,
+                    help='The config file',
+                    required=True)
+
+args = parser.parse_args()
+
 # Read the config file into a dictionary
 configDict = {}
 
-configFile = open('testConfig', mode='r')
+configFile = open(args.config, mode='r')
 
 for line in configFile:
     if (line[0] == '#') or (line == '\n'):
@@ -25,7 +36,7 @@ for line in configFile:
 readPath = configDict["readPath"]
 mainCaseDir = configDict["writePath"]
 
-sampleSurfaceName = configDict["samleSurfaceName"]
+sampleSurfaceName = configDict["sampleSurfaceName"]
 inletPatchName = configDict["inletPatchName"]
 
 reader = configDict["reader"]
@@ -96,7 +107,7 @@ nuPrec = float(configDict["nuPrecursor"])
 
 
 # Boundary layer thickneses
-deltaInfl = float(configDict["delta"])
+deltaInfl = float(configDict["delta99"])
 
 # Freestream velocity, and centerline velocity
 U0 = np.max(uMean)
@@ -118,8 +129,8 @@ ReTauInfl = uTauInfl*deltaInfl/nuInfl
 gamma = uTauInfl/uTauPrec
 
 # Shift in coordinates
-xOrigen = float(configDict["xOrigen"])
-yOrigen = float(configDict["yOrigen"])
+xOrigin = float(configDict["xOrigin"])
+yOrigin = float(configDict["yOrigin"])
 
 # Time-step and initial time for the writer
 dt = float(configDict["dt"])
@@ -128,7 +139,7 @@ t = t0
 
 # Get the grid points along y as 1d arrays for convenience
 yPrec = pointsY[:, 0]
-yInfl = pointsYInfl[:, 0] - yOrigen
+yInfl = pointsYInfl[:, 0] - yOrigin
 
 deltaPrec = delta_99(yPrec, uMean)
 ReTauPrec = uTauPrec*deltaPrec/nuPrec
@@ -141,8 +152,20 @@ etaInfl = yInfl/deltaInfl
 yPlusPrec = yPrec*uTauPrec/nuPrec
 yPlusInfl = yInfl*uTauInfl/nuInfl
 
+# Points containing the boundary layer at the inflow plane
+nInfl = 0
+for i in xrange(etaInfl.size):
+    if etaInfl[i] <= etaPrec[-1]:
+        nInfl += 1
 
-# Sanity checks
+# Points where inner scaling will be used
+nInner = 0
+for i in xrange(etaInfl.size):
+    if etaInfl[i] <= 0.7:
+        nInner += 1
+
+
+# Simple sanity checks
 if (deltaInfl > yInfl[-1]):
     print "ERROR. Desired delta_99 is larger then maximum y."
     exit()
@@ -153,20 +176,29 @@ if ReTauInfl > ReTauPrec:
 
 if (writer == "tvmfv"):
     write_points_to_tvmfv(os.path.join(boundaryDataDir, "points"), pointsYInfl,
-                          pointsZInfl, xOrigen)
+                          pointsZInfl, xOrigin)
 else:
     print "ERROR. Unknown writer ", configDict["writer"]
     exit()
 
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
-                                       etaInfl, yPlusInfl)
+                                       nInfl, nInner,
+                                       etaInfl, yPlusInfl, nPointsZInfl,
+                                       Ue, U0, gamma)
 
 ReThetaInfl = theta(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 
-lund_generate(read_u_from_foamfile, dataDir,
-              write_u_to_tvmfv, boundaryDataDir,
+
+# Generate the inflow fields
+
+print "Generating the inflow fields."
+lund_generate(reader, dataDir, sampleSurfaceName,
+              writer, boundaryDataDir,
               times, dt,
               uMean, uMeanInfl,
               etaPrec, yPlusPrec, pointsZ,
-              etaInfl, yPlusInfl, pointsZInfl)
+              etaInfl, yPlusInfl, pointsZInfl,
+              nInfl, nInner, gamma,
+              yInd, zInd)
+print "Done."

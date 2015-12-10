@@ -1,37 +1,29 @@
 import os
 import numpy as np
+from sys import exit
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from .helper_functions import blending_function
+from ..readers.foamfile_readers import read_u_from_foamfile
+from ..writers.tvmfv_writers import write_u_to_tvmfv
 
 """Function for generating inlfow velocity fields using
 Lund et al's rescaling, see
 
 Lund T.S., Wu X., Squires K.D. Generation of turbulent inflow
 data for spatially-developing boundary layer simulations.
-J. Comp. Phys. 1998; 140:233–58.
+J. Comp. Phys. 1998; 140:233-58.
 """
 
 
 def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
+                               nInfl, nInner,
                                etaInfl, yPlusInfl, nPointsZInfl,
                                Ue, U0, gamma):
     """Rescale the mean velocity profile using Lunds rescaling.
 
     Returns a 2d numpy array with the values of mean velocity.
     """
-
-# Points containing the boundary layer at the inflow plane
-    nInfl = 0
-    for i in xrange(etaInfl.size):
-        if etaInfl[i] <= etaPrec[-1]:
-            nInfl += 1
-
-# Points where inner scaling will be used
-    nInner = 0
-    for i in xrange(etaInfl.size):
-        if etaInfl[i] <= 0.7:
-            nInner += 1
 
     uMeanInterp = interp1d(etaPrec, uMeanPrec)
     uMeanInterpPlus = interp1d(yPlusPrec, uMeanPrec)
@@ -50,7 +42,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
 
 def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
                               uPrimeX, uPrimeY, uPrimeZ, gamma,
-                              etaInfl, yPlusInfl, pointsZInfl, nInfl):
+                              etaInfl, yPlusInfl, pointsZInfl,
+                              nInfl, nInner):
     """Rescale the fluctuations using Lund et al's rescaling.
 
     Returns a list with 3 items: numpy arrays for each of
@@ -108,6 +101,7 @@ def lund_generate(reader, readPath, surfaceName,
                   uMeanPrec, uMeanInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
+                  nInfl, nInner, gamma,
                   yInd, zInd):
     """Generate the files with the inflow velocity using
     Lund's rescaling.
@@ -118,12 +112,16 @@ def lund_generate(reader, readPath, surfaceName,
         print timeI
 
         # Read U data
-        [U_X, U_Y, U_Z] = reader(
-            os.path.join(readPath, times[timeI], surfaceName,
-                         "vectorField", "U"),
-            uMeanPrec.size,
-            yInd,
-            zInd)
+        if (reader == "foamFile"):
+            [U_X, U_Y, U_Z] = read_u_from_foamfile(
+                os.path.join(readPath, times[timeI], surfaceName,
+                             "vectorField", "U"),
+                pointsZ.shape[0], pointsZ.shape[1],
+                yInd, zInd)
+
+        else:
+            print "ERROR. Unknown reader ", reader
+            exit()
 
         # Claculate UPrime
         uPrimeX = U_X - uMeanPrec[:, np.newaxis]
@@ -133,8 +131,9 @@ def lund_generate(reader, readPath, surfaceName,
         [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl] = \
             lund_rescale_fluctuations(
                 etaPrec, yPlusPrec, pointsZ,
-                uPrimeX, uPrimeY, uPrimeZ,
-                etaInfl, yPlusInfl, pointsZInfl)
+                uPrimeX, uPrimeY, uPrimeZ, gamma,
+                etaInfl, yPlusInfl, pointsZInfl,
+                nInfl, nInner)
 
         # Combine and flatten
         UInfl_X = np.reshape(uPrimeXInfl+uMeanInfl, (uPrimeXInfl.size, -1),
@@ -144,6 +143,10 @@ def lund_generate(reader, readPath, surfaceName,
 
         UInfl = np.concatenate((UInfl_X, UInfl_Y, UInfl_Z), axis=1)
 
-        writer(writePath, t, UInfl)
+        if (writer == "tvmfv"):
+            write_u_to_tvmfv(writePath, t, UInfl)
+        else:
+            print "ERROR. Unknown writer ", writer
+            exit()
 
         t += dt
