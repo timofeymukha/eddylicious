@@ -1,195 +1,172 @@
 import os
-import shutil
 import numpy as np
 from sys import exit
-import matplotlib.pyplot as plt
+from eddylicous.generators.helper_functions import delta_99
+from eddylicous.generators.helper_functions import theta
+from eddylicous.generators.helper_functions import delta_star
+from eddylicous.readers.foamfile_readers import read_points_from_foamfile
+from eddylicous.readers.foamfile_readers import read_u_from_foamfile
+from eddylicous.writers.tvmfv_writers import write_u_to_tvmfv
+from eddylicous.writers.tvmfv_writers import write_points_to_tvmfv
+from eddylicous.generators.lund_rescaling import lund_generate
+from eddylicous.generators.lund_rescaling import lund_rescale_mean_velocity
 
 
-#channelCaseDir = "../../../../project-2.3.1/run/channel_flow/channel550"
-channelCaseDir = "../channelPronkRefined"
-mainCaseDir = "../../ramp/bll/bll_coarse"
+# Read the config file into a dictionary
+configDict = {}
 
-surfaceName = "inletSurface"
-mainPatchName = "inletBot"
+configFile = open('testConfig', mode='r')
 
-dataDir = os.path.join(channelCaseDir, "postProcessing", "sampledSurface")
-#dataDir = path.join("..", "databases", "channel395_1e-1")
-boundaryDataDir = os.path.join(mainCaseDir, "constant", "boundaryData", mainPatchName)
+for line in configFile:
+    if (line[0] == '#') or (line == '\n'):
+        continue
+    configDict[line.split()[0]] = line.split()[1]
+
+readPath = configDict["readPath"]
+mainCaseDir = configDict["writePath"]
+
+sampleSurfaceName = configDict["samleSurfaceName"]
+inletPatchName = configDict["inletPatchName"]
+
+reader = configDict["reader"]
+inflowReader = configDict["inflowReader"]
+writer = configDict["writer"]
+
+if (reader == "foamFile"):
+    dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
+else:
+    print "ERROR: unknown reader ", configDict["reader"]
+    exit()
+
+if (writer == "tvmfv"):
+    boundaryDataDir = os.path.join(mainCaseDir, "constant",
+                                   "boundaryData", inletPatchName)
+else:
+    print "ERROR. Unknown writer ", configDict["writer"]
+    exit()
 
 # Grab the existing times and sort
-times = os.listdir(dataDir)
+if (reader == "foamFile"):
+    times = os.listdir(dataDir)
+    times = np.sort(times)
+else:
+    print "ERROR: unknown reader ", configDict["reader"]
+    exit()
 
 # Get the mean profile
-UMean = np.append( np.zeros((1,1)), np.genfromtxt(os.path.join(channelCaseDir,
-    "postProcessing", "collapsedFields", "240", "UMean_X.xy"))[:,1])
-UMeanTbl = np.genfromtxt("../tblDNS/Schlatter/vel_670_dns.prof")[:,0:3]
+if (reader == "foamFile"):
+    uMean = np.append(np.zeros((1, 1)),
+                      np.genfromtxt(os.path.join(readPath, "postProcessing",
+                                                 "collapsedFields", "240",
+                                                 "UMean_X.xy"))[:, 1])
+else:
+    print "ERROR: unknown reader ", configDict["reader"]
+    exit()
 
+nPointsY = uMean.size
 
-NPointsY = UMean.size
+# Read grid for the recycling plane
+if (reader == "foamFile"):
+    [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
+        os.path.join(dataDir, times[0], sampleSurfaceName, "faceCentres"),
+        nPointsY=nPointsY)
+else:
+    print "ERROR: unknown reader ", configDict["reader"]
+    exit()
 
-# Read grid for the recycling plane 
-[pointsY, pointsZ, yInd, zInd ]= read_points_from_foamfile(
-    os.path.join(dataDir, times[0], surfaceName, "faceCentres"), 
-    NPointsY=NPointsY)
+[nPointsY, nPointsZ] = pointsY.shape
 
-[NPointsY, NPointsZ] = pointsY.shape
+# Read grid for the inflow plane
+if (inflowReader == "foamFile"):
+    [pointsYInfl, pointsZInfl, yIndInfl, zIndInfl] = read_points_from_foamfile(
+        os.path.join(mainCaseDir, "postProcessing", "surfaces", "0",
+                     inletPatchName, "faceCentres"),
+        addZeros=False)
+else:
+    print "ERROR: unknown reader ", configDict["inflowReader"]
+    exit()
 
-# Read grid for the inflow plane 
-[pointsYInfl, pointsZInfl, yIndInfl, zIndInfl] = read_points_from_foamfile(
-    os.path.join(mainCaseDir, "postProcessing", "surfaces", "0", mainPatchName, "faceCentres"),
-    #path.join(dataDir, times[0], surfaceName, "faceCentres"),
-    addZeros=False)
-    
-[NPointsYInfl, NPointsZInfl] = pointsYInfl.shape
+[nPointsYInfl, nPointsZInfl] = pointsYInfl.shape
 
+# Define and compute the parameters of the boundary layer
 
-# TBL AND CHANNEL FLOW PARAMETERS 
-nuInfl = 0.0000023 
-nuRecy = 0.001937 
- 
+# Viscosity
+nuInfl = float(configDict["nuInflow"])
+nuPrec = float(configDict["nuPrecursor"])
+
 
 # Boundary layer thickneses
-deltaInfl = 0.85*31.5e-3 
-deltaRecy = 1
+deltaInfl = float(configDict["delta"])
 
 # Freestream velocity, and centerline velocity
-U0 = np.max(UMean) 
-Ue = 1 
+U0 = np.max(uMean)
+Ue = float(configDict["Ue"])
 
 # Reynolds number based on delta
 ReDelta = Ue*deltaInfl/nuInfl
 
 # Cf at the inflow, to get u_tau
-CfInfl = 0.02*pow(1.0/ReDelta, 1.0/6)
+cfInfl = 0.02*pow(1.0/ReDelta, 1.0/6)
 
-# u_tau 
-uTauInfl = Ue*np.sqrt(CfInfl/2)
-uTauRecy = np.sqrt(nuRecy*UMean[1]/pointsY[1,0])
+# Friction velocities
+uTauInfl = Ue*np.sqrt(cfInfl/2)
+uTauPrec = float(configDict["uTauPrecursor"])
 
 ReTauInfl = uTauInfl*deltaInfl/nuInfl
-ReTauRecy = uTauRecy*deltaRecy/nuRecy
 
 # gamma, the ratio of friction velocities
-gamma = uTauInfl/uTauRecy
+gamma = uTauInfl/uTauPrec
 
 # Shift in coordinates
-xShift = -0.23121
-yShift = 0.127
+xOrigen = float(configDict["xOrigen"])
+yOrigen = float(configDict["yOrigen"])
 
-# Get the grid points along y as 1d arrays for convenience 
-yRecy = pointsY[:,0]
-yInfl = pointsYInfl[:,0]-yShift
+# Time-step and initial time for the writer
+dt = float(configDict["dt"])
+t0 = float(configDict["t0"])
+t = t0
 
-deltaRecy = delta_99(yRecy, UMean)
-#deltaInfl = deltaRecy
+# Get the grid points along y as 1d arrays for convenience
+yPrec = pointsY[:, 0]
+yInfl = pointsYInfl[:, 0] - yOrigen
+
+deltaPrec = delta_99(yPrec, uMean)
+ReTauPrec = uTauPrec*deltaPrec/nuPrec
 
 # Outer scale coordinates
-etaRecy = yRecy/deltaRecy 
+etaPrec = yPrec/deltaPrec
 etaInfl = yInfl/deltaInfl
 
 # Inner scale coordinates
-yPlusRecy = yRecy*uTauRecy/nuRecy
+yPlusPrec = yPrec*uTauPrec/nuPrec
 yPlusInfl = yInfl*uTauInfl/nuInfl
 
 
 # Sanity checks
 if (deltaInfl > yInfl[-1]):
-    print "FATAL ERROR: desired delta_99 is larger then the upper boundary of the mesh"
+    print "ERROR. Desired delta_99 is larger then maximum y."
     exit()
 
-if ReTauInfl > ReTauRecy:
-    print "WARNING: Re_tau in the channel flow is lower than in the desired TBL\n"
-
-# Points containing the boundary layer at the inflow plane
-
-    # Headers to add to the files
-scalarHeader = "FoamFile\n{\nversion 2.0;\nformat ascii;\nclass scalarAverageField;\nobject values;\n}\n\n0\n"
+if ReTauInfl > ReTauPrec:
+    print "WARNING: Re_tau in the precursor is lower than in the desired TBL"
 
 
-write_points_to_tvmfv(os.path.join(boundaryDataDir, "points"), pointsYInfl, pointsZInfl, xShift)
+if (writer == "tvmfv"):
+    write_points_to_tvmfv(os.path.join(boundaryDataDir, "points"), pointsYInfl,
+                          pointsZInfl, xOrigen)
+else:
+    print "ERROR. Unknown writer ", configDict["writer"]
+    exit()
 
-UMeanInfl = lund_rescale_mean_velocity(etaRecy, yPlusRecy, UMean,
-                                        etaInfl, yPlusInfl)
+uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
+                                       etaInfl, yPlusInfl)
 
+ReThetaInfl = theta(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
+ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 
-ReThetaInfl = theta(yInfl, UMeanInfl[:,0])*Ue/nuInfl
-
-#exit()
-
-dt = 5e-4 
-t = 0
-timePrecision = 5
-
-times = np.sort(times)
-
-
-#lund_generate(read_u_from_foamfile, dataDir, 
-#             write_u_to_tvmfv, boundaryDataDir, 
-#             times, dt,
-#             UMean, UMeanInfl,
-#             etaRecy, yPlusRecy, pointsZ,
-#             etaInfl, yPlusInfl, pointsZInfl)
-
-
-WVals = W(etaInfl)[:,np.newaxis]
-
-N = 45000
-
-print "Loading database..."
-UPrime_X = np.load("dbtest/UPrime_X.npy")[:,:,:N]
-UPrime_Y = np.load("dbtest/UPrime_Y.npy")[:,:,:N]
-UPrime_Z = np.load("dbtest/UPrime_Z.npy")[:,:,:N]
-
-#interp_X = [interp2d(pointsZ[0,:]/pointsZ[0,-1], etaRecy, UPrime_X[:,:,i])\
-#        for i in xrange(N)]
-#plusInterp_X = [interp2d(pointsZ[0,:]/pointsZ[0,-1], yPlusRecy, UPrime_X[:,:,i])\
-#        for i in xrange(N)]
-
-#UPrime_X_infl = [(1-WVals[:NInfl,:])*gamma*plusInterp_X[i](pointsZInfl[0,:]/pointsZInfl[0,-1], 
-#    yPlusInfl[0:NInfl])+ WVals[:NInfl,:]*gamma*interp_X[i](pointsZInfl[0,:]/pointsZInfl[0,-1], 
-#    etaInfl[0:NInfl]) for i in xrange(len(plusInterp_X))]
-
-#UPrime_X_infl = np.dstack(UPrime_X_infl)
-
-#UPrime2Mean_XX  = np.mean(np.var(UPrime_X, axis=2), axis=1)
-#UPrimeMean_X  = np.mean(np.mean(UPrime_X, axis=2), axis=1)
-
-#UPrime2Mean_XX_infl  = np.mean(np.var(UPrime_X_infl, axis=2), axis=1)
-#UPrimeMean_X_infl  = np.mean(np.mean(UPrime_X_infl, axis=2), axis=1)
-
-#del interp_X
-#del plusInterp_X
-#del UPrime_X
-#gc.collect()
-
-print "Rescaling!"
-
-
-printCounter = -1
-for timeI in xrange(len(times)):
-    printCounter += 1
-    if (printCounter == 100):
-        print timeI
-        printCounter = 0
-
-    if timeI > 40000:
-        break
-
-    [UPrime_X_infl, UPrime_Y_infl, UPrime_Z_infl] = \
-                lund_rescale_fluctuations(etaRecy, yPlusRecy, pointsZ,
-                                         UPrime_X[:,:,timeI],
-                                         UPrime_Y[:,:,timeI], 
-                                         UPrime_Z[:,:,timeI],
-                                         etaInfl, yPlusInfl, pointsZInfl)
-
-    # Combine and flatten
-    U_infl_X = np.reshape(UPrime_X_infl+UMeanInfl, (UPrime_X_infl.size, -1), order='F')
-    U_infl_Y = np.reshape(UPrime_Y_infl, (UPrime_X_infl.size, -1), order='F')
-    U_infl_Z = np.reshape(UPrime_Z_infl, (UPrime_X_infl.size, -1), order='F')
-
-    UInfl = np.concatenate((U_infl_X, U_infl_Y, U_infl_Z), axis = 1)
-
-    write_u_to_tvmfv(boundaryDataDir, t, UInfl)
-
-    t += dt
-
+lund_generate(read_u_from_foamfile, dataDir,
+              write_u_to_tvmfv, boundaryDataDir,
+              times, dt,
+              uMean, uMeanInfl,
+              etaPrec, yPlusPrec, pointsZ,
+              etaInfl, yPlusInfl, pointsZInfl)

@@ -4,8 +4,16 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from .helper_functions import blending_function
 
+"""Function for generating inlfow velocity fields using
+Lund et al's rescaling, see
 
-def lund_rescale_mean_velocity(etaRecy, yPlusRecy, uMeanRecy,
+Lund T.S., Wu X., Squires K.D. Generation of turbulent inflow
+data for spatially-developing boundary layer simulations.
+J. Comp. Phys. 1998; 140:233–58.
+"""
+
+
+def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
                                etaInfl, yPlusInfl, nPointsZInfl,
                                Ue, U0, gamma):
     """Rescale the mean velocity profile using Lunds rescaling.
@@ -16,7 +24,7 @@ def lund_rescale_mean_velocity(etaRecy, yPlusRecy, uMeanRecy,
 # Points containing the boundary layer at the inflow plane
     nInfl = 0
     for i in xrange(etaInfl.size):
-        if etaInfl[i] <= etaRecy[-1]:
+        if etaInfl[i] <= etaPrec[-1]:
             nInfl += 1
 
 # Points where inner scaling will be used
@@ -25,8 +33,8 @@ def lund_rescale_mean_velocity(etaRecy, yPlusRecy, uMeanRecy,
         if etaInfl[i] <= 0.7:
             nInner += 1
 
-    uMeanInterp = interp1d(etaRecy, uMeanRecy)
-    uMeanInterpPlus = interp1d(yPlusRecy, uMeanRecy)
+    uMeanInterp = interp1d(etaPrec, uMeanPrec)
+    uMeanInterpPlus = interp1d(yPlusPrec, uMeanPrec)
 
     uMeanInner = np.append(gamma*uMeanInterpPlus(yPlusInfl[0:nInner]),
                            np.zeros(nInfl-nInner))
@@ -40,10 +48,10 @@ def lund_rescale_mean_velocity(etaRecy, yPlusRecy, uMeanRecy,
     return uMeanInfl
 
 
-def lund_rescale_fluctuations(etaRecy, yPlusRecy, pointsZ,
+def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
                               uPrimeX, uPrimeY, uPrimeZ, gamma,
                               etaInfl, yPlusInfl, pointsZInfl, nInfl):
-    """Rescale the fluctuations using Lund's rescaling.
+    """Rescale the fluctuations using Lund et al's rescaling.
 
     Returns a list with 3 items: numpy arrays for each of
     the components of the fluctuations.
@@ -53,15 +61,15 @@ def lund_rescale_fluctuations(etaRecy, yPlusRecy, pointsZ,
     uPrimeYInfl = np.zeros(pointsZInfl.shape)
     uPrimeZInfl = np.zeros(pointsZInfl.shape)
 
-    uPrimeXInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], etaRecy, uPrimeX)
-    uPrimeYInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], etaRecy, uPrimeY)
-    uPrimeZInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], etaRecy, uPrimeZ)
+    uPrimeXInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], etaPrec, uPrimeX)
+    uPrimeYInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], etaPrec, uPrimeY)
+    uPrimeZInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], etaPrec, uPrimeZ)
 
-    uPrimeXPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusRecy,
+    uPrimeXPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusPrec,
                                  uPrimeX)
-    uPrimeYPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusRecy,
+    uPrimeYPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusPrec,
                                  uPrimeY)
-    uPrimeZPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusRecy,
+    uPrimeZPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusPrec,
                                  uPrimeZ)
 
     uPrimeXInner = \
@@ -97,8 +105,8 @@ def lund_rescale_fluctuations(etaRecy, yPlusRecy, pointsZ,
 def lund_generate(reader, readPath, surfaceName,
                   writer, writePath,
                   times, dt,
-                  uMeanRecy, uMeanInfl,
-                  etaRecy, yPlusRecy, pointsZ,
+                  uMeanPrec, uMeanInfl,
+                  etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   yInd, zInd):
     """Generate the files with the inflow velocity using
@@ -113,18 +121,18 @@ def lund_generate(reader, readPath, surfaceName,
         [U_X, U_Y, U_Z] = reader(
             os.path.join(readPath, times[timeI], surfaceName,
                          "vectorField", "U"),
-            uMeanRecy.size,
+            uMeanPrec.size,
             yInd,
             zInd)
 
         # Claculate UPrime
-        uPrimeX = U_X - uMeanRecy[:, np.newaxis]
+        uPrimeX = U_X - uMeanPrec[:, np.newaxis]
         uPrimeY = U_Y
         uPrimeZ = U_Z
 
         [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl] = \
             lund_rescale_fluctuations(
-                etaRecy, yPlusRecy, pointsZ,
+                etaPrec, yPlusPrec, pointsZ,
                 uPrimeX, uPrimeY, uPrimeZ,
                 etaInfl, yPlusInfl, pointsZInfl)
 

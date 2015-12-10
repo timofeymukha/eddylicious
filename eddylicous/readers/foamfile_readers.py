@@ -1,5 +1,7 @@
 import numpy as np
 
+"""Functions for reading fields stored in the foamFile format"""
+
 
 def read_points_from_foamfile(readPath, addZeros=1, nPointsY=0, delta=1):
     """Read the coordinates of the points from foamFile-format file.
