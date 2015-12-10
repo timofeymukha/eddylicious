@@ -2,6 +2,7 @@ import os
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
+from .helper_functions import blending_function
 
 
 def lund_rescale_mean_velocity(etaRecy, yPlusRecy, uMeanRecy,

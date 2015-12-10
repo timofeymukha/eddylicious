@@ -16,7 +16,7 @@ uPrimeY = np.load(os.path.join(dbDir, "uPrimeY.npy"))
 uPrimeZ = np.load(os.path.join(dbDir, "uPrimeZ.npy"))
 
 # Create the hdf5 database
-dbFile = h5py.File('testDb.hdf5','a')
+dbFile = h5py.File('testDb.hdf5', 'a')
 
 pointsGroup = dbFile.create_group("points")
 velocityGroup = dbFile.create_group("velocity")
@@ -38,4 +38,3 @@ dbFile.attrs["deltaT"] = 0.0008
 pointsGroup.attrs["nPointsY"] = pointsY.shape[0]
 pointsGroup.attrs["nPointsZ"] = pointsY.shape[1]
 pointsGroup.attrs["nPoints"] = pointsY.size
-

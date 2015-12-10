@@ -7,5 +7,8 @@ setup(name='eddylicous',
       author='Timofey Mukha',
       author_email='TimofeyMukha@it.uu.se',
       packages=['eddylicous'],
+      install_requires=[
+                    'numpy',
+                       ],
       zip_safe=False)
 
