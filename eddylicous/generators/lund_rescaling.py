@@ -208,6 +208,11 @@ def lund_generate(reader, readPath,
                   surfaceName="None", times="None"):
     """Generate the files with the inflow velocity using Lund's rescaling.
 
+        This function will use Lund et al's rescaling in order to
+        generate velocity fields for the inflow boundary.
+        The rescaling for the mean profile should be done before-
+        hand and is one of the input parameters for this funcion.
+
 
         Parameters
         ----------

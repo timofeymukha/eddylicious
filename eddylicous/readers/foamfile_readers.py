@@ -7,27 +7,65 @@ def read_points_from_foamfile(readPath, addZeros=1, nPointsY=0, delta=1):
     """Read the coordinates of the points from foamFile-format file.
 
 
-    Reads in the locations of the face centers, stored in foamFile
-    format by OpenFOAM, and transforms them into 2d numpy arrays.
+    Reads in the locations of the face centers, stored
+    in foamFile format by OpenFOAM, and transforms them
+    into 2d numpy arrays.
 
-    The locations are sorted along y and z.
+    The points are sorted so that the axes of the arrays
+    correspond to the wall-normal and spanwise directions.
+    The points are first sorted along y, then reshaped
+    into 2d array and then sorted along z for each value
+    of z.
 
-    There is a possibility to add a coordinates for y=0.
-    Also, one can keep only a part of the points in the y
-    direction and exchange the last value of y to some
-    delta.
-    This is used when reading in precursor data from channel
-    flow, since we are only interested in half of the channel.
+    The function supports considering only a number of
+    points in the wall-normal direction and exchanging
+    the last wall-normal position the value of the
+    half-width of the channel. 
+    Also, adding a row of zeros as the first wall-normal
+    position is possible.
 
-    Returns a list with 4 items: pointsY, pointsZ, indY and indZ.
-    The first two are 2d numpy array with the locations.
-    The last two are the sorting indices.
+    This is convenient when rescaling from channel flow
+    is performed using Lund et al's method, which requires
+    a liner interpolat across the domain half-width.
+    Adding the value the center of the channel and at the wall,
+    which are otherwise abscent on a finite volume grid, insures 
+    that the interpolat will cover the whole interval [0,delta].
 
-    Keyword argments:
-    addZeros -- whether to add coordinates for y=0 (default 1)
-    nPointsY -- how many points to keep in the y direction.
-               Zeros means all points are kept (default 0).
-    delta -- the  value of the channel-half width. (default 1)
+
+    Parameters
+    ----------
+    readPath : str
+        The path to the file containing the points
+    addZeros : bool, optional,
+        Whether to add coordinates for y=0 (default is 1)
+    nPointsY : int, optional
+        How many points to keep in the y direction. Zero
+        means all points are kept (default 0). This is useful
+        for considering only half of the points from channel
+        flow.
+        
+        If nPointsY is provided, the last value in the wall-
+        normal direction is exchanged to value of delta,
+        see below.
+    delta : bool, optional
+        The value of the channel-half width. (default 1).
+        Must be provided if nPoints is provided.
+
+
+    Returns
+    -------
+    List of ndarrays
+        The list contains 4 items
+        pointsY :
+            A 2d ndarray containing the y coordinates of the
+            points.
+        pointsZ :
+            A 2d ndarray containing the z coordinates of the
+            points.
+        indY :
+            The sorting indices from the sorting performed.
+        indZ :
+            The sorting indices from the sorting performed.
     """
 
     with file(readPath) as pointsFile:
@@ -84,14 +122,41 @@ def read_points_from_foamfile(readPath, addZeros=1, nPointsY=0, delta=1):
 def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
     """ Read the values of the velocity field from a foamFile-format file.
 
-        Reads in the values of the velocity components stored
-        as in foamFile file-format.
-        Requires the number of points to keep in the y
-        direction and the sorting indices, so that one can
-        sort in the same way as the face-centers are sorted.
+    Reads in the values of the velocity components stored
+    as in foamFile file-format.
+    The velcocity field is read and the transformed into a
+    2d numpy arrayi, where the array axes correspond to
+    wall-normal and spanwise direction.
+    To achieve this, the sorting indices obtained when
+    reordering the mesh points are used.
 
-        Returns a list with three items: numpy arrays for the
-        three components of velocity.
+
+    Paramters
+    ---------
+    readPath : str
+        The path to the file containing the velocity field.
+    nPointsY : int
+        The number of points in the wall-normal direction to
+        consider. For a single TBL it is enough to only
+        consider half of the channel, for instance.
+    nPointsZ : int
+        The amount of points in the mesh in the spanwise
+        direction.
+    yInd : ndarray
+        The sorting indices for sorting in the wall-normal
+        direction.
+    zInd : ndarray
+        The sorting indices for sorting in the spanwise
+        direction.
+
+
+    Returns
+    -------
+    List of ndarrays
+        The list contains three items, each a 2d array,
+        corresponding to the three components of the
+        velocity field, the order of the components in the
+        list is x, y and the z.
     """
 
     with file(readPath) as UFile:

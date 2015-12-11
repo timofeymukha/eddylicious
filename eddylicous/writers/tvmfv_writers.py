@@ -9,6 +9,20 @@ timeVaryingMappedFixedValue boundary in OpenFOAM.
 def write_points_to_tvmfv(writePath, pointsY, pointsZ, xVal):
     """Write the points in a format used by OpenFOAM's
     timeVaryingMappedFixedValue boundary conidition.
+
+    Parameters
+    ----------
+    writePath : str
+        The path where to write the points file.Should
+        commonly be constant/boundaryData/nameOfInletPatch.
+    pointsY : ndarray
+        A 2d array containing the values of y for the face
+        centres.
+    pointsZ : ndarray
+        A 2d array containing the values of z for the face
+        centres.
+    xVal : float
+        The x-location of the inflow plane.
     """
 
     pointsHeader = \
@@ -28,6 +42,18 @@ def write_points_to_tvmfv(writePath, pointsY, pointsZ, xVal):
 def write_u_to_tvmfv(writePath, t, u):
     """Write the velocity field in a format used by OpenFOAM's
     timeVaryingMappedFixedValue boundary conidition.
+
+    Parameters
+    ---------
+    writePath : str
+        The path where to write the time directories
+        containing the U files. Should commonly be
+        constant/boundaryData/nameOfInletPatch.
+    t : float
+        The value of time associated with the written
+        velocity field.
+    u : ndarray
+        Array containing the velocity field
     """
 
     vectorHeader = \
