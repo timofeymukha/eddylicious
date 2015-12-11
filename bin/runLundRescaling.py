@@ -193,12 +193,13 @@ ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 # Generate the inflow fields
 
 print "Generating the inflow fields."
-lund_generate(reader, dataDir, sampleSurfaceName,
+lund_generate(reader, dataDir,
               writer, boundaryDataDir,
-              times, dt,
+              dt, t0,
               uMean, uMeanInfl,
               etaPrec, yPlusPrec, pointsZ,
               etaInfl, yPlusInfl, pointsZInfl,
               nInfl, nInner, gamma,
-              yInd, zInd)
+              yInd, zInd,
+              surfaceName=sampleSurfaceName, times=times)
 print "Done."
