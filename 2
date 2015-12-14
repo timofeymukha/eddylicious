@@ -8,10 +8,13 @@ inflowReader    foamFile
 readPath        /cfs/klemming/nobackup/t/tmu/OpenFOAM/tmu-2.3.1/run/LundBC/channelPronkRefined
 
 # What writer to use
-writer          tvmfv 
+writer          hdf5 
 
 # Where to write
-writePath       /cfs/klemming/nobackup/t/tmu/OpenFOAM/tmu-2.3.1/run/ramp/bll/bll_coarse
+/cfs/klemming/nobackup/t/tmu/OpenFOAM/tmu-2.3.1/run/ramp/bll/bll_coarse
+
+# Written hdf5 file name
+hdf5FileName    dbTest.hdf5
 
 # The name of the inlet patch (for the tvmfv writer)
 inletPatchName  inletBot

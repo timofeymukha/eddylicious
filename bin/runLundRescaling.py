@@ -7,6 +7,7 @@ from eddylicous.generators.helper_functions import theta
 from eddylicous.generators.helper_functions import delta_star
 from eddylicous.readers.foamfile_readers import read_points_from_foamfile
 from eddylicous.writers.tvmfv_writers import write_points_to_tvmfv
+from eddylicous.writers.hdf5_writers import write_points_to_hdf5
 from eddylicous.generators.lund_rescaling import lund_generate
 from eddylicous.generators.lund_rescaling import lund_rescale_mean_velocity
 
@@ -34,7 +35,8 @@ for line in configFile:
     configDict[line.split()[0]] = line.split()[1]
 
 readPath = configDict["readPath"]
-mainCaseDir = configDict["writePath"]
+inflowReadPath = configDict["inflowReadPath"]
+writePath = configDict["writePath"]
 
 sampleSurfaceName = configDict["sampleSurfaceName"]
 inletPatchName = configDict["inletPatchName"]
@@ -43,25 +45,21 @@ reader = configDict["reader"]
 inflowReader = configDict["inflowReader"]
 writer = configDict["writer"]
 
+hdf5FileName = configDict["hdf5FileName"]
+
 if (reader == "foamFile"):
     dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
 else:
-    print "ERROR: unknown reader ", configDict["reader"]
+    print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
 
-if (writer == "tvmfv"):
-    boundaryDataDir = os.path.join(mainCaseDir, "constant",
-                                   "boundaryData", inletPatchName)
-else:
-    print "ERROR. Unknown writer ", configDict["writer"]
-    exit()
 
 # Grab the existing times and sort
 if (reader == "foamFile"):
     times = os.listdir(dataDir)
     times = np.sort(times)
 else:
-    print "ERROR: unknown reader ", configDict["reader"]
+    print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
 
 # Get the mean profile
@@ -71,7 +69,7 @@ if (reader == "foamFile"):
                                                  "collapsedFields", "240",
                                                  "UMean_X.xy"))[:, 1])
 else:
-    print "ERROR: unknown reader ", configDict["reader"]
+    print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
 
 nPointsY = uMean.size
@@ -82,7 +80,7 @@ if (reader == "foamFile"):
         os.path.join(dataDir, times[0], sampleSurfaceName, "faceCentres"),
         nPointsY=nPointsY)
 else:
-    print "ERROR: unknown reader ", configDict["reader"]
+    print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
 
 [nPointsY, nPointsZ] = pointsY.shape
@@ -90,11 +88,11 @@ else:
 # Read grid for the inflow plane
 if (inflowReader == "foamFile"):
     [pointsYInfl, pointsZInfl, yIndInfl, zIndInfl] = read_points_from_foamfile(
-        os.path.join(mainCaseDir, "postProcessing", "surfaces", "0",
-                     inletPatchName, "faceCentres"),
+        os.path.join(inflowReadPath, inletPatchName, "faceCentres"),
         addZeros=False)
 else:
-    print "ERROR: unknown reader ", configDict["inflowReader"]
+    print "ERROR in runLundRescaling.py: unknown reader ", \
+          configDict["inflowReader"]
     exit()
 
 [nPointsYInfl, nPointsZInfl] = pointsYInfl.shape
@@ -167,18 +165,26 @@ for i in xrange(etaInfl.size):
 
 # Simple sanity checks
 if (deltaInfl > yInfl[-1]):
-    print "ERROR. Desired delta_99 is larger then maximum y."
+    print "ERROR in runLundRescaling.py. Desired delta_99 is \
+          larger then maximum y."
     exit()
 
 if ReTauInfl > ReTauPrec:
     print "WARNING: Re_tau in the precursor is lower than in the desired TBL"
 
 
+# Write points and modify writePath appropriatly
 if (writer == "tvmfv"):
-    write_points_to_tvmfv(os.path.join(boundaryDataDir, "points"), pointsYInfl,
-                          pointsZInfl, xOrigin)
+    write_points_to_tvmfv(os.path.join(writePath, "constant", "boundaryData",
+                                       "points"),
+                          pointsYInfl, pointsZInfl, xOrigin)
+    writePath = os.path.join(writePath, "constant", "boundaryData",
+                             inletPatchName)
+elif (writer == "hdf5"):
+    writePath = os.path.join(writePath, hdf5FileName)
+    write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 else:
-    print "ERROR. Unknown writer ", configDict["writer"]
+    print "ERROR in runLundRescaling.py. Unknown writer ", configDict["writer"]
     exit()
 
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
@@ -189,12 +195,11 @@ uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
 ReThetaInfl = theta(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 
-
 # Generate the inflow fields
 
 print "Generating the inflow fields."
 lund_generate(reader, dataDir,
-              writer, boundaryDataDir,
+              writer, writePath,
               dt, t0,
               uMean, uMeanInfl,
               etaPrec, yPlusPrec, pointsZ,

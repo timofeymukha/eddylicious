@@ -6,6 +6,7 @@ from scipy.interpolate import interp2d
 from .helper_functions import blending_function
 from ..readers.foamfile_readers import read_u_from_foamfile
 from ..writers.tvmfv_writers import write_u_to_tvmfv
+from ..writers.hdf5_writers import write_u_to_hdf5
 
 """Function for generating inlfow velocity fields using
 Lund et al's rescaling, see
@@ -324,8 +325,10 @@ def lund_generate(reader, readPath,
 
         if (writer == "tvmfv"):
             write_u_to_tvmfv(writePath, t, UInfl)
+        elif (writer == "hdf5"):
+            write_u_to_hdf5(writePath, t, UInfl)
         else:
-            print "ERROR. Unknown writer ", writer
+            print "ERROR in lund_generate(). Unknown writer ", writer
             exit()
 
         t += dt
