@@ -1,12 +1,12 @@
 from setuptools import setup
 
-setup(name='eddylicous',
+setup(name='eddylicious',
       version='0.1',
       description='A package for generating inflow velocity fields for Large Eddy Simulation',
-      url='http://://bitbucket.org/lesituu/eddylicous',
+      url='http://://bitbucket.org/lesituu/eddylicious',
       author='Timofey Mukha',
       author_email='TimofeyMukha@it.uu.se',
-      packages=['eddylicous'],
+      packages=['eddylicious'],
       scripts=['bin/convertFoamFileToNpy.py',
                'bin/convertNpyToHDF5.py',
                'bin/runLundRescaling.py'],

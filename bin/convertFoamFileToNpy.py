@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from eddylicous.readers.foamfile_readers import read_points_from_foamfile
-from eddylicous.readers.foamfile_readers import read_u_from_foamfile
+from eddylicious.readers.foamfile_readers import read_points_from_foamfile
+from eddylicious.readers.foamfile_readers import read_u_from_foamfile
 import argparse
 
 

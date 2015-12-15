@@ -2,14 +2,14 @@ import os
 import numpy as np
 from sys import exit
 import argparse
-from eddylicous.generators.helper_functions import delta_99
-from eddylicous.generators.helper_functions import theta
-from eddylicous.generators.helper_functions import delta_star
-from eddylicous.readers.foamfile_readers import read_points_from_foamfile
-from eddylicous.writers.tvmfv_writers import write_points_to_tvmfv
-from eddylicous.writers.hdf5_writers import write_points_to_hdf5
-from eddylicous.generators.lund_rescaling import lund_generate
-from eddylicous.generators.lund_rescaling import lund_rescale_mean_velocity
+from eddylicious.generators.helper_functions import delta_99
+from eddylicious.generators.helper_functions import theta
+from eddylicious.generators.helper_functions import delta_star
+from eddylicious.readers.foamfile_readers import read_points_from_foamfile
+from eddylicious.writers.tvmfv_writers import write_points_to_tvmfv
+from eddylicious.writers.hdf5_writers import write_points_to_hdf5
+from eddylicious.generators.lund_rescaling import lund_generate
+from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
 
 
 # Define the command-line arguments
