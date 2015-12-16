@@ -133,7 +133,7 @@ yOrigin = float(configDict["yOrigin"])
 # Time-step and initial time for the writer
 dt = float(configDict["dt"])
 t0 = float(configDict["t0"])
-t = t0
+tEnd = float(configDict["tEnd"])
 
 # Get the grid points along y as 1d arrays for convenience
 yPrec = pointsY[:, 0]
@@ -182,7 +182,12 @@ if (writer == "tvmfv"):
                              inletPatchName)
 elif (writer == "hdf5"):
     writePath = os.path.join(writePath, hdf5FileName)
+# If the hdf5 file exists, delete it.
+    if (os.path.isfile(writePath)):
+        print "HDF5 database already exsists. It it will be overwritten."
+        os.remove(writePath)
     write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
+
 else:
     print "ERROR in runLundRescaling.py. Unknown writer ", configDict["writer"]
     exit()
@@ -200,7 +205,7 @@ ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 print "Generating the inflow fields."
 lund_generate(reader, dataDir,
               writer, writePath,
-              dt, t0,
+              dt, t0, tEnd,
               uMean, uMeanInfl,
               etaPrec, yPlusPrec, pointsZ,
               etaInfl, yPlusInfl, pointsZInfl,

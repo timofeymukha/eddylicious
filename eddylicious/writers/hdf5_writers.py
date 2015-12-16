@@ -42,8 +42,10 @@ def write_points_to_hdf5(writePath, pointsY, pointsZ, xVal):
     dbFile.close()
 
 
-def write_u_to_hdf5(writePath, t, u):
+def write_u_to_hdf5(writePath, t, u, iter, size):
     """Write the velocity field into an HDF5 file.
+
+    Will add datasets "time" and "velocity"
 
     Parameters
     ---------
@@ -53,31 +55,30 @@ def write_u_to_hdf5(writePath, t, u):
         The value of time associated with the written
         velocity field.
     u : ndarray
-        Array containing the velocity field
+        Array containing the velocity field.
+    iter: int
+        The position of along the time axis.
+    size: inte
+        The total size of the time axis.
     """
+
+    if (iter > size-1):
+        print "WARNING in write_u_to_hdf5. Write position larger \
+              than total database size. Not writing."
+        return
 
     dbFile = h5py.File(writePath, 'a')
 
-    time = "/time" in dbFile
+    # DEBUGGING
+    u = np.ones(u.shape)
 
-    if time:
-        size = dbFile["time"].size
-        dbFile["time"].resize(size+1, axis=0)
-        dbFile["time"][-1] = t
+    if (iter > 0):
+        dbFile["time"][iter] = t
+        dbFile["velocity"][:, :, iter] = u
     else:
-        time = dbFile.create_dataset("time", data=t*np.ones((1, 1)),
-                                     chunks=True, maxshape=(None, 1))
-
-    velocity = "/velocity" in dbFile
-
-    if velocity:
-        size = dbFile["velocity"].shape[2]
-        dbFile["velocity"].resize(size+1, axis=2)
-        dbFile["velocity"][:,:,-1] = u
-    else:
-        velocity = dbFile.create_dataset(
+        dbFile.create_dataset("time", data=t*np.ones((size, 1)))
+        dbFile.create_dataset(
             "velocity",
-            data=u[:, :, np.newaxis]*np.ones((u.shape[0], u.shape[1], 1)),
-            chunks=True, maxshape=(u.shape[0], u.shape[1], None))
+            data=u[:, :, np.newaxis]*np.ones((u.shape[0], u.shape[1], size)))
 
     dbFile.close()

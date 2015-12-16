@@ -46,3 +46,6 @@ dt              0.0005
 
 # Initial time for the writer
 t0              0.0
+#
+# End time for the writer
+tEnd              0.0

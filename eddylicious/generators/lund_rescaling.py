@@ -200,7 +200,7 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
 
 def lund_generate(reader, readPath,
                   writer, writePath,
-                  dt, t0,
+                  dt, t0, tEnd,
                   uMeanPrec, uMeanInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
@@ -234,7 +234,8 @@ def lund_generate(reader, readPath,
         t0 : float
             The starting time to be used in the simulation. This will
             be used to associate a time-value with the produced velocity
-            fields.
+        tEnd : float
+            The ending time for the simulation.
         uMeanPrec : 1d ndarray
             The values of the mean velocity from the precursor.
         uMeanInfl : 1d ndarray
@@ -288,17 +289,25 @@ def lund_generate(reader, readPath,
     """
 
     t = t0
-    for timeI in xrange(len(times)):
-        print timeI
+
+    readTimeI = 0
+    writeTimeI = 0
+    size = int((tEnd-t0)/dt+1)
+
+    while (t <= tEnd):
+        print "    Generating for time", t
 
         # Read U data
         if (reader == "foamFile"):
             [U_X, U_Y, U_Z] = read_u_from_foamfile(
-                os.path.join(readPath, times[timeI], surfaceName,
+                os.path.join(readPath, times[readTimeI], surfaceName,
                              "vectorField", "U"),
                 pointsZ.shape[0], pointsZ.shape[1],
                 yInd, zInd)
+            readTimeI += 1
 
+            if (readTimeI == len(times)):
+                readTimeI = 0
         else:
             print "ERROR. Unknown reader ", reader
             exit()
@@ -326,9 +335,10 @@ def lund_generate(reader, readPath,
         if (writer == "tvmfv"):
             write_u_to_tvmfv(writePath, t, UInfl)
         elif (writer == "hdf5"):
-            write_u_to_hdf5(writePath, t, UInfl)
+            write_u_to_hdf5(writePath, t, UInfl, writeTimeI, size)
         else:
             print "ERROR in lund_generate(). Unknown writer ", writer
             exit()
 
+        writeTimeI += 1
         t += dt
