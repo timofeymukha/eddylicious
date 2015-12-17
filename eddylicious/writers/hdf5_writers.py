@@ -69,9 +69,6 @@ def write_u_to_hdf5(writePath, t, u, iter, size):
 
     dbFile = h5py.File(writePath, 'a')
 
-    # DEBUGGING
-    u = np.ones(u.shape)
-
     if (iter > 0):
         dbFile["time"][iter] = t
         dbFile["velocity"][:, :, iter] = u

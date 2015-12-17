@@ -134,6 +134,8 @@ yOrigin = float(configDict["yOrigin"])
 dt = float(configDict["dt"])
 t0 = float(configDict["t0"])
 tEnd = float(configDict["tEnd"])
+timePrecision = int(configDict["tPrecision"])
+
 
 # Get the grid points along y as 1d arrays for convenience
 yPrec = pointsY[:, 0]
@@ -205,7 +207,7 @@ ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 print "Generating the inflow fields."
 lund_generate(reader, dataDir,
               writer, writePath,
-              dt, t0, tEnd,
+              dt, t0, tEnd, timePrecision,
               uMean, uMeanInfl,
               etaPrec, yPlusPrec, pointsZ,
               etaInfl, yPlusInfl, pointsZInfl,

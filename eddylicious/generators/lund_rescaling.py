@@ -200,7 +200,7 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
 
 def lund_generate(reader, readPath,
                   writer, writePath,
-                  dt, t0, tEnd,
+                  dt, t0, tEnd, timePrecision,
                   uMeanPrec, uMeanInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
@@ -234,6 +234,8 @@ def lund_generate(reader, readPath,
         t0 : float
             The starting time to be used in the simulation. This will
             be used to associate a time-value with the produced velocity
+        timePrecision : int
+            Number of points after the decimal to keep for the time value.
         tEnd : float
             The ending time for the simulation.
         uMeanPrec : 1d ndarray
@@ -342,3 +344,4 @@ def lund_generate(reader, readPath,
 
         writeTimeI += 1
         t += dt
+        t = float(("{0:."+str(timePrecision)+"f}").format(t))

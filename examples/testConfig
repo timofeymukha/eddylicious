@@ -48,4 +48,7 @@ dt              0.0005
 t0              0.0
 #
 # End time for the writer
-tEnd              0.0
+tEnd            0.005
+
+# Time value precision, number of decimals after the dot
+tPrecision      6 
