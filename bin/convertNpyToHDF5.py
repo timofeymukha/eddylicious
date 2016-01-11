@@ -51,9 +51,9 @@ pointsGroup.create_dataset("pointsY", data=pointsY)
 pointsGroup.create_dataset("pointsZ", data=pointsY)
 
 velocityGroup.create_dataset("uMean", data=uMean)
-velocityGroup.create_dataset("uPrimeX", data=uPrimeX, compression="gzip")
-velocityGroup.create_dataset("uPrimeY", data=uPrimeY, compression="gzip")
-velocityGroup.create_dataset("uPrimeZ", data=uPrimeZ, compression="gzip")
+velocityGroup.create_dataset("uPrimeX", data=uPrimeX)
+velocityGroup.create_dataset("uPrimeY", data=uPrimeY)
+velocityGroup.create_dataset("uPrimeZ", data=uPrimeZ)
 
 pointsGroup.attrs["nPointsY"] = pointsY.shape[0]
 pointsGroup.attrs["nPointsZ"] = pointsY.shape[1]

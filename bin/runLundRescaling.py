@@ -136,7 +136,6 @@ t0 = float(configDict["t0"])
 tEnd = float(configDict["tEnd"])
 timePrecision = int(configDict["tPrecision"])
 
-
 # Get the grid points along y as 1d arrays for convenience
 yPrec = pointsY[:, 0]
 yInfl = pointsYInfl[:, 0] - yOrigin
@@ -178,7 +177,7 @@ if ReTauInfl > ReTauPrec:
 # Write points and modify writePath appropriatly
 if (writer == "tvmfv"):
     write_points_to_tvmfv(os.path.join(writePath, "constant", "boundaryData",
-                                       "points"),
+                                       inletPatchName, "points"),
                           pointsYInfl, pointsZInfl, xOrigin)
     writePath = os.path.join(writePath, "constant", "boundaryData",
                              inletPatchName)

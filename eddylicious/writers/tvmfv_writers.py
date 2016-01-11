@@ -13,7 +13,7 @@ def write_points_to_tvmfv(writePath, pointsY, pointsZ, xVal):
     Parameters
     ----------
     writePath : str
-        The path where to write the points file.Should
+        The path where to write the points file. Should
         commonly be constant/boundaryData/nameOfInletPatch.
     pointsY : ndarray
         A 2d array containing the values of y for the face

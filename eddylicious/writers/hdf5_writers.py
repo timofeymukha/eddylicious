@@ -76,6 +76,7 @@ def write_u_to_hdf5(writePath, t, u, iter, size):
         dbFile.create_dataset("time", data=t*np.ones((size, 1)))
         dbFile.create_dataset(
             "velocity",
-            data=u[:, :, np.newaxis]*np.ones((u.shape[0], u.shape[1], size)))
+            (u.shape[0], u.shape[1], size))
+        dbFile["velocity"][:,:,iter] = u
 
     dbFile.close()
