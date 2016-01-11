@@ -28,9 +28,23 @@ HDF5 allows to store large arrays of data in the form of datasets.
 
 Three datasets are created by the writer.
 
-:Points: 
-    A 2d array of size N-by 3, where N is the number of points. 
-    The points represent the location of the datapoints for the generated velocity fields in space. In the finite vol
+:points: 
+    A 2d array of size N-by-3, where N is the number of points. 
+    The three colums are the x, y and z coordinates of the points, respectively.
+    The points represent the location of the datapoints for the generated velocity fields in space.
+    In the finite volume setting, it is best that this corresponds to the face centers of the faces defining the inflow boundary.
+    
+:time:
+    A 1d array, the size corresponds to the number of time-values that the inflow boundary fields are generated for.
+    Each element contains a time value.
+
+:velocity:
+   A 3d array. the first dimension corresponds to time and has the same size as the time array. 
+   The second dimension is of size N and the third is of size 3, therefore for each timestep there is a N-by-3 array that contains the values of the velocity field.
+   The order corresponds to the points array.
+
+APIs for loading HDF5 datasets exist in most languages actively used in scientific computing.
+For using this output format with OpenFOAM see `this repository <https://bitbucket.org/lesituu/timevaryingmappedhdf5fixedvalue>`.
 
 * TimeVaryingMappedFixedValue.
 
