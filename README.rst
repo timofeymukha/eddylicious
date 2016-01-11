@@ -24,9 +24,9 @@ Two output formats are currently supported.
 
 * HDF5. This is a file-format specifically designed to be a container for large datasets.
   More information can be found at the `offical homepage <https://www.hdfgroup.org/HDF5/>`_.
-HDF5 allows to store large arrays of data in the form of datasets.
+  HDF5 allows to store large arrays of data in the form of datasets.
 
-Three datasets are created by the writer.
+  Three datasets are created by the writer.
 
 :points: 
     A 2d array of size N-by-3, where N is the number of points. 
