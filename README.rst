@@ -28,7 +28,8 @@ HDF5 allows to store large arrays of data in the form of datasets.
 
 Three datasets are created by the writer.
 
-- Points. A 2d array of size N-by 3, where N is the number of points. 
+:Points: 
+    A 2d array of size N-by 3, where N is the number of points. 
 The points represent the location of the datapoints for the generated velocity fields in space. In the finite vol
 
 * TimeVaryingMappedFixedValue.
