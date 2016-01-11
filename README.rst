@@ -64,4 +64,13 @@ Two output formats are currently supported.
 Currently one reader is implemented -- for the foamFile format, the native output format of OpenFOAM.
 This format is almost identical to tvmf, and is used by many utilities included in OpenFOAM.
 
+---------------
+ Executables
+---------------  
+
+runLundRescaling.py
+
+--config The configuration file
+=============
+
 [lund] T. S. Lund, X. Wu, and K. D. Squires. On the Generation of Turbulent Infow Conditions for Boundary Layer Simulations. Journal of Computational Physics, 140:233-258, 1998.
