@@ -71,7 +71,27 @@ This format is almost identical to tvmf, and is used by many utilities included 
 runLundRescaling.py
 =============
 Command line options:
+
 --config The configuration file, obligatory.
+
+This script is currently the main workhorse of the package.
+It performs the generation of the velocity field by rescaling a precursor database using the method of Lund et al [lund]_.
+The script is configured by a config file which should be provided as an argument to the script.
+
+Example config files can be found in the examples directory.
+The obligatory parameters in the config file are also dependent on the choice of reader and writer.
+
+Below is a discription of all the config paramters.
+
+reader
+    The reader that will be used to read in the data from the precursor simulation.
+    Currently the only option is foamFile.
+
+inflowReader
+    The reader that will be used to read in the points of the inflow surface.
+    foamFile
+        Should be provided the location of the directory, where it will expect to find a directory with a name determined by the inflowPatchName parameter (see below), and there a file called faceCentres.
+ 
 
 
 [lund] T. S. Lund, X. Wu, and K. D. Squires. On the Generation of Turbulent Infow Conditions for Boundary Layer Simulations. Journal of Computational Physics, 140:233-258, 1998.
