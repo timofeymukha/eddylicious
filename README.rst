@@ -89,6 +89,7 @@ reader
 
 inflowReader
     The reader that will be used to read in the points of the inflow surface.
+
     foamFile
         Should be provided the location of the directory, where it will expect to find a directory with a name determined by the inflowPatchName parameter (see below), and there a file called faceCentres.
  
