@@ -3,13 +3,18 @@ Eddylicious
 ================
 
 Eddylicious is a python package, designed for implementing methods for generating inflow boundary fields for Large Eddy Simulation (LES).
+Currently the existing functionality is heavily coupled with OpenFOAM, so the users of that software will probably find the package to be most attractive.
+However, by design the package is generic.
 
 The package is divided into three main parts: readers, writers and generators.
 Generators are functions that actually implement the generation of the boundary fields.
-Writers are functions that implement output of the generated fields into a specific format.
+Writers are functions that implement output of the generated fields into a specific format, so that they can be used by a CFD solver.
 Readers are functions that implement the input of either geometric data (such as point or face-center locations of the inflow plane) and/or flow field data, which can be needed for methods using a precursor-database.
 
 Additionally, conifgurable scripts that perform the generation and output are provided.
+
+Note, that this structure of the package means that independently of the generation method, the fields are stored in the form of a database.
+This is somewhat counterintuitive in the case of a syntetic method, but the rationale is that this package can be used for quick development of methods (thanks to python) and serve as a hub uniting several methods under a shared framework. 
 
 ---------------
  Implemented Generation Methods
@@ -48,10 +53,15 @@ Two output formats are currently supported.
 
 * TimeVaryingMappedFixedValue (tvmf). This format corresponds to the TimeVaryingMappedFixedValue boundary condition in OpenFOAM, which allows to read in the values at the boundary from a file and perform interpolation in both space and time.
   Basically, this is a text file, but with some specific formatting required by OpenFOAM. 
-  An example can be found `here <https://github.com/OpenFOAM/OpenFOAM-2.4.x/blob/master/tutorials/incompressible/simpleFoam/pitzDailyExptInlet/constant/boundaryData/inlet/points>`_.
+  An example can be found `here <https://github.com/OpenFOAM/OpenFOAM-2.4.x/blob/master/tutorials/incompressible/simpleFoam/pitzDailyExptInlet/constant/boundaryData/inlet/0/U>`_.
 
   The advantage of this format is that it is native to OpenFOAM, but a huge disadvantage is that a separate file has to be created for each time-step.
 
-   
+---------------
+ Implemented Input Formats
+---------------   
+
+Currently one reader is implemented -- for the foamFile format, the native output format of OpenFOAM.
+This format is almost identical to tvmf, and is used by many utilities included in OpenFOAM.
 
 [lund] T. S. Lund, X. Wu, and K. D. Squires. On the Generation of Turbulent Infow Conditions for Boundary Layer Simulations. Journal of Computational Physics, 140:233-258, 1998.
