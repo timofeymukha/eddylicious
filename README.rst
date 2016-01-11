@@ -85,12 +85,16 @@ Below is a discription of all the config paramters.
 
 reader
     The reader that will be used to read in the data from the precursor simulation.
+
     *Valid choices:*
+
     - foamFile.
 
 inflowReader
     The reader that will be used to read in the points of the inflow surface.
+
     *Valid choices:*
+
     - foamFile.
 
 readPath
