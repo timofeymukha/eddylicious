@@ -23,7 +23,7 @@ Currently, only one generation method is implemented in the package: the rescali
 Two output formats are currently supported.
 
 * HDF5. This is a format specifically designed to be a container for large datasets.
-More information can be found at the offica homepage. `Python home page <http://www.python.org>`_
+More information can be found at the `offical homepage <https://www.hdfgroup.org/HDF5/>`_
 
 * TimeVaryingMappedFixedValue.
 
