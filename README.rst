@@ -46,6 +46,12 @@ Two output formats are currently supported.
   APIs for loading HDF5 datasets exist in most languages actively used in scientific computing.
   For using this output format with OpenFOAM see `this repository <https://bitbucket.org/lesituu/timevaryingmappedhdf5fixedvalue>`_.
 
-* TimeVaryingMappedFixedValue.
+* TimeVaryingMappedFixedValue (tvmf). This format corresponds to the TimeVaryingMappedFixedValue boundary condition in OpenFOAM, which allows to read in the values at the boundary from a file and perform interpolation in both space and time.
+  Basically, this is a text file, but with some specific formatting required by OpenFOAM. 
+  An example can be found `here <https://github.com/OpenFOAM/OpenFOAM-2.4.x/blob/master/tutorials/incompressible/simpleFoam/pitzDailyExptInlet/constant/boundaryData/inlet/points>`_.
+
+  The advantage of this format is that it is native to OpenFOAM, but a huge disadvantage is that a separate file has to be created for each time-step.
+
+   
 
 [lund] T. S. Lund, X. Wu, and K. D. Squires. On the Generation of Turbulent Infow Conditions for Boundary Layer Simulations. Journal of Computational Physics, 140:233-258, 1998.
