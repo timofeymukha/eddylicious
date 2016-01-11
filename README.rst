@@ -15,6 +15,15 @@ Additionally, conifgurable scripts that perform the generation and output are pr
  Implemented Generation Methods
 ---------------
 
-Currently, only one generation method is implemented in the package: the rescaling procedure presented in [lund1998generation]_.
+Currently, only one generation method is implemented in the package: the rescaling procedure presented in [lund]_.
 
-[lund1998generation] T. S. Lund, X. Wu, and K. D. Squires. On the Generation of Turbulent Infow Conditions for Boundary Layer Simulations. Journal of Computational Physics, 140:233-258, 1998.
+---------------
+ Implemented Output Formats
+---------------
+Two output formats are currently supported.
+
+* HDF5.
+
+* TimeVaryingMappedFixedValue.
+
+[lund] T. S. Lund, X. Wu, and K. D. Squires. On the Generation of Turbulent Infow Conditions for Boundary Layer Simulations. Journal of Computational Physics, 140:233-258, 1998.
