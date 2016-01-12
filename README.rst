@@ -153,7 +153,8 @@ nuPrecursor
     The viscosity value in the precursor
 
 uTauInflow
-    The friction velocity in the simulation, at the inlet.
+    The friction velocity in the simulation, at the inlet. One can either provide the value of write "compute" withou the quotes.
+    In the latter case the friction velocity will be computed based on delta99 and Ue.
 
 uTauPrecursor
     The friction velocity in the precursor.
