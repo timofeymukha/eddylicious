@@ -3,7 +3,6 @@ import numpy as np
 from sys import exit
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
-from .helper_functions import blending_function
 from ..readers.foamfile_readers import read_u_from_foamfile
 from ..writers.tvmfv_writers import write_u_to_tvmfv
 from ..writers.hdf5_writers import write_u_to_hdf5
@@ -16,9 +15,9 @@ Lund T.S., Wu X., Squires K.D. Generation of turbulent inflow
 data for spatially-developing boundary layer simulations.
 J. Comp. Phys.m 140:233-58, 1998.
 
-Spalart, P. R., Strelets, M., & Travin, A. . Direct numerical
+Spalart, P. R., Strelets, M., & Travin, A. Direct numerical
 simulation of large-eddy-break-up devices in a boundary layer.
-International Journal of Heat and Fluid Flow, 27(5):902–910,
+International Journal of Heat and Fluid Flow, 27(5):902-910,
 2006.
 """
 
@@ -80,25 +79,22 @@ def spalart_rescale_mean_velocity(etaPrec, uMeanPrec,
     return uMeanInfl
 
 
-def spalart_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
+def spalart_rescale_fluctuations(etaPrec,  pointsZ,
                                  uPrimeX, uPrimeY, uPrimeZ, gamma,
-                                 etaInfl, yPlusInfl, pointsZInfl,
-                                 nInfl, nInner):
+                                 etaInfl, pointsZInfl, nInfl):
     """Rescale the fluctuations of velocity using Lund et al's
-    rescaling.
+    rescaling, but using the outer profile throughout.
 
     This function rescales the fluctuations of the three
     components of the velocity field taken from the precursor
-    simulation using Lund et al's rescaling.
+    simulation using Lund et al's rescaling, but using only
+    the outer scales.
 
 
     Parameters
     ----------
         etaPrec : ndarray
             The values of eta for the corresponding values
-            of the mean velocity from the precursor.
-        yPlusPrec : ndarray
-            The values of y+ for the corresponding values
             of the mean velocity from the precursor.
         pointsZ : ndarray
             A 2d array containing the values of z for the points
@@ -118,9 +114,6 @@ def spalart_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
         etaInfl : 1d ndarray
             The values of eta for the mesh points at the inflow
             boundary.
-        yPlusInfl : 1d ndarray
-            The values of y+ for the meshpoints at the inflow
-            boundary.
         pointsZInfl : int
             A 2d array containing the values of z for the points
             of the inflow boundary.
@@ -129,11 +122,6 @@ def spalart_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
             that contain the boundary layer at the inflow
             boundary. That is, for points beyound nInfl, 0 will
             be prescribed.
-        nInner : int
-            The amount of points where inner rescaling should be
-            considered. For points beyound nInner, the outer
-            rescaling only we be computed. The relaxes the demand
-            on Re_tau for the precursor.
 
 
     Returns
@@ -154,39 +142,16 @@ def spalart_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
     uPrimeYInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], etaPrec, uPrimeY)
     uPrimeZInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], etaPrec, uPrimeZ)
 
-    uPrimeXPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusPrec,
-                                 uPrimeX)
-    uPrimeYPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusPrec,
-                                 uPrimeY)
-    uPrimeZPlusInterp = interp2d(pointsZ[0, :]/pointsZ[0, -1], yPlusPrec,
-                                 uPrimeZ)
-
-    uPrimeXInner = \
-        gamma*uPrimeXPlusInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                yPlusInfl[0:nInfl])
-    uPrimeYInner = \
-        gamma*uPrimeYPlusInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                yPlusInfl[0:nInfl])
-    uPrimeZInner = \
-        gamma*uPrimeZPlusInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                yPlusInfl[0:nInfl])
-
-    uPrimeXOuter = gamma*uPrimeXInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                       etaInfl[0:nInfl])
-    uPrimeYOuter = gamma*uPrimeYInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                       etaInfl[0:nInfl])
-    uPrimeZOuter = gamma*uPrimeZInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
+    uPrimeX = gamma*uPrimeXInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
+                                  etaInfl[0:nInfl])
+    uPrimeY = gamma*uPrimeYInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
+                                  etaInfl[0:nInfl])
+    uPrimeZ = gamma*uPrimeZInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
                                        etaInfl[0:nInfl])
 
-    uPrimeXInfl[0:nInfl] = \
-        uPrimeXInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeXOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
-    uPrimeYInfl[0:nInfl] = \
-        uPrimeYInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeYOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
-    uPrimeZInfl[0:nInfl] = \
-        uPrimeZInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeZOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
+    uPrimeXInfl[0:nInfl] = uPrimeX
+    uPrimeYInfl[0:nInfl] = uPrimeY
+    uPrimeZInfl[0:nInfl] = uPrimeZ 
 
     return [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl]
 
