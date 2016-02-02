@@ -43,3 +43,42 @@ def delta_star(y, v):
 def theta(y, v):
     """Compute the momentum thickness using Simpson's method."""
     return simps(v/v[-1]*(1-v/v[-1]), x=y)
+
+def chunks_and_offsets(nProcs, size):
+    """Given the size of a 1d array and the number of
+    processors, compute chunk-sizes for each processor
+    and the starting indices (offsets) for each 
+    processor.
+
+    Parameters
+    ----------
+        nProcs : int
+            The amount of processors.
+        size : int
+            The size of the 1d array to be distributed.
+
+    Returns
+    -------
+        List of two 1d ndarrays of size nProcs
+        The first array contains the chunk-size for each
+        processor.
+        The second array contains the offset (starting 
+        index) for each processor.
+    """
+
+    
+    chunks = np.zeros((nProcs, 1))
+    nrAlloced = 0
+    for i in xrange(nProcs):
+        remainder = size - nrAlloced
+        buckets = (nProcs - i)
+        chunks[i] = remainder / buckets
+        nrAlloced += chunks[i]
+
+    # Calculate the offset for each processor
+    offsets = np.zeros(chunks.shape)
+
+    for i in xrange(offsets.shape[0]-1):
+        offsets[i+1] = np.sum(chunks[:i+1])
+            
+    return [chunks, offsets]

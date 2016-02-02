@@ -1,22 +1,16 @@
-#!/pdc/vol/anaconda/2.1/py27/bin/python
 import os
 import numpy as np
 from sys import exit
 import argparse
-from mpi4py import MPI
-import h5py as h5py
 from eddylicious.generators.helper_functions import delta_99
 from eddylicious.generators.helper_functions import theta
 from eddylicious.generators.helper_functions import delta_star
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.writers.tvmfv_writers import write_points_to_tvmfv
 from eddylicious.writers.hdf5_writers import write_points_to_hdf5
-from eddylicious.generators.lund_rescaling import lund_generate
-from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
+from eddylicious.generators.spalart_rescaling import spalart_generate
+from eddylicious.generators.spalart_rescaling import spalart_rescale_mean_velocity
 
-# Get processor rank
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
 
 # Define the command-line arguments
 parser = argparse.ArgumentParser(
@@ -69,13 +63,10 @@ else:
     exit()
 
 # Get the mean profile
-uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
-                                     "collapsedFields"))
 if (reader == "foamFile"):
     uMean = np.append(np.zeros((1, 1)),
                       np.genfromtxt(os.path.join(readPath, "postProcessing",
-                                                 "collapsedFields",
-                                                 uMeanTimes[-1],
+                                                 "collapsedFields", "240",
                                                  "UMean_X.xy"))[:, 1])
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
@@ -160,21 +151,11 @@ ReTauPrec = uTauPrec*deltaPrec/nuPrec
 etaPrec = yPrec/deltaPrec
 etaInfl = yInfl/deltaInfl
 
-# Inner scale coordinates
-yPlusPrec = yPrec*uTauPrec/nuPrec
-yPlusInfl = yInfl*uTauInfl/nuInfl
-
 # Points containing the boundary layer at the inflow plane
 nInfl = 0
 for i in xrange(etaInfl.size):
     if etaInfl[i] <= etaPrec[-1]:
         nInfl += 1
-
-# Points where inner scaling will be used
-nInner = 0
-for i in xrange(etaInfl.size):
-    if etaInfl[i] <= 0.7:
-        nInner += 1
 
 
 # Simple sanity checks
@@ -189,54 +170,40 @@ if ReTauInfl > ReTauPrec:
 
 # Write points and modify writePath appropriatly
 if (writer == "tvmfv"):
-    if (rank == 0):
-        write_points_to_tvmfv(os.path.join(writePath, "constant",
-                                           "boundaryData", inletPatchName,
-                                           "points"),
-                              pointsYInfl, pointsZInfl, xOrigin)
+    write_points_to_tvmfv(os.path.join(writePath, "constant", "boundaryData",
+                                       inletPatchName, "points"),
+                          pointsYInfl, pointsZInfl, xOrigin)
     writePath = os.path.join(writePath, "constant", "boundaryData",
                              inletPatchName)
 elif (writer == "hdf5"):
     writePath = os.path.join(writePath, hdf5FileName)
-    # If the hdf5 file exists, delete it.
-    if (rank == 0):
-        if (os.path.isfile(writePath)):
-            print "HDF5 database already exsists. It it will be overwritten."
-            os.remove(writePath)
-        write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
-
-    # Prepare the hdf5 file by adding relevant datasets
-    # We change the writePath to be the hdf5 file itsel
-    size = int((tEnd-t0)/dt+1)
-    writePath = h5py.File(writePath, 'a', driver='mpio', comm=MPI.COMM_WORLD)
-    writePath.create_dataset("time", data=t0*np.ones((size, 1)))
-    writePath.create_dataset("velocity", (size, pointsZInfl.size, 3))
-
+# If the hdf5 file exists, delete it.
+    if (os.path.isfile(writePath)):
+        print "HDF5 database already exsists. It it will be overwritten."
+        os.remove(writePath)
+    write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
 else:
     print "ERROR in runLundRescaling.py. Unknown writer ", configDict["writer"]
     exit()
 
-uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
-                                       nInfl, nInner,
-                                       etaInfl, yPlusInfl, nPointsZInfl,
-                                       Ue, U0, gamma)
+uMeanInfl = spalart_rescale_mean_velocity(etaPrec, uMean,
+                                          nInfl, etaInfl, nPointsZInfl,
+                                          Ue, U0, gamma)
 
 ReThetaInfl = theta(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 
 # Generate the inflow fields
-if (rank == 0):
-    print "Generating the inflow fields."
 
-lund_generate(reader, dataDir,
-              writer, writePath,
-              dt, t0, tEnd, timePrecision,
-              uMean, uMeanInfl,
-              etaPrec, yPlusPrec, pointsZ,
-              etaInfl, yPlusInfl, pointsZInfl,
-              nInfl, nInner, gamma,
-              yInd, zInd,
-              surfaceName=sampleSurfaceName, times=times)
-if (rank == 0):
-    print "Done."
+print "Generating the inflow fields."
+spalart_generate(reader, dataDir,
+                 writer, writePath,
+                 dt, t0, tEnd, timePrecision,
+                 uMean, uMeanInfl,
+                 etaPrec, pointsZ,
+                 etaInfl, pointsZInfl,
+                 nInfl, gamma,
+                 yInd, zInd,
+                 surfaceName=sampleSurfaceName, times=times)
+print "Done."

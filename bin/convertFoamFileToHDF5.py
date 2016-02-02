@@ -22,7 +22,7 @@ parser.add_argument('--surfaceName',
                     type=str,
                     help='The name of the surface that contains the data.',
                     required=True)
-parser.add_argument('--writePath',
+parser.add_argument('--fileName',
                     type=str,
                     help='The location where to write the \
                           produced numpy arrays.',
@@ -39,7 +39,6 @@ args = parser.parse_args()
 
 precursorCaseDir = args.precursorPath
 surfaceName = args.surfaceName
-writeDir = args.writePath
 uMeanFile = args.uMeanFile
 
 
@@ -62,10 +61,23 @@ nPointsY = uMean.size
 [nPointsY, nPointsZ] = pointsY.shape
 
 # Allocate arrays for the fluctuations
-uPrimeX = np.zeros((pointsY.shape[0], pointsY.shape[1], len(times)))
-uPrimeY = np.zeros((pointsY.shape[0], pointsY.shape[1], len(times)))
-uPrimeZ = np.zeros((pointsY.shape[0], pointsY.shape[1], len(times)))
 
+dbFile = h5py.File(args.fileName, 'a')
+
+pointsGroup = dbFile.create_group("points")
+velocityGroup = dbFile.create_group("velocity")
+
+pointsGroup.create_dataset("pointsY", data=pointsY)
+pointsGroup.create_dataset("pointsZ", data=pointsY)
+
+velocityGroup.create_dataset("uMean", data=uMean)
+velocityGroup.create_dataset("uPrimeX", data=uPrimeX)
+velocityGroup.create_dataset("uPrimeY", data=uPrimeY)
+velocityGroup.create_dataset("uPrimeZ", data=uPrimeZ)
+
+pointsGroup.attrs["nPointsY"] = pointsY.shape[0]
+pointsGroup.attrs["nPointsZ"] = pointsY.shape[1]
+pointsGroup.attrs["nPoints"] = pointsY.size
 
 printCounter = 0
 

@@ -9,9 +9,13 @@ setup(name='eddylicious',
       packages=['eddylicious'],
       scripts=['bin/convertFoamFileToNpy.py',
                'bin/convertNpyToHDF5.py',
-               'bin/runLundRescaling.py'],
+               'bin/plotDatabaseStats.py',
+               'bin/runLundRescaling.py',
+               'bin/runSpalartRescaling.py'],
       install_requires=[
                     'numpy',
+                    'mpi4py',
+                    'matplotlib'
                        ],
       zip_safe=False)
 

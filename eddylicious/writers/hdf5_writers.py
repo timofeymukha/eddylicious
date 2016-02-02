@@ -1,5 +1,8 @@
 import numpy as np
 import h5py as h5py
+import mpi4py
+from mpi4py import MPI
+
 
 """Functions for writing to the native format of the
 timeVaryingMappedFixedValue boundary in OpenFOAM.
@@ -41,8 +44,7 @@ def write_points_to_hdf5(writePath, pointsY, pointsZ, xVal):
     dbFile.create_dataset("points", data=points)
     dbFile.close()
 
-
-def write_u_to_hdf5(writePath, t, u, iter, size):
+def write_u_to_hdf5(file, t, u, iter, size):
     """Write the velocity field into an HDF5 file.
 
     Will add datasets "time" and "velocity"
@@ -67,16 +69,7 @@ def write_u_to_hdf5(writePath, t, u, iter, size):
               than total database size. Not writing."
         return
 
-    dbFile = h5py.File(writePath, 'a')
 
-    if (iter > 0):
-        dbFile["time"][iter] = t
-        dbFile["velocity"][iter, :, :] = u
-    else:
-        dbFile.create_dataset("time", data=t*np.ones((size, 1)))
-        dbFile.create_dataset(
-            "velocity",
-            (size, u.shape[0], u.shape[1]))
-        dbFile["velocity"][iter, :, :] = u
+    file["time"][iter] = t
+    file["velocity"][iter, :, :] = u
 
-    dbFile.close()
