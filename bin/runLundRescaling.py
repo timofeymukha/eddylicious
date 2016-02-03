@@ -68,6 +68,9 @@ else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
 
+if (rank == 0):
+    print "Reading from database with ", len(times), " time-steps."
+
 # Get the mean profile
 uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
                                      "collapsedFields"))
@@ -186,7 +189,10 @@ if (deltaInfl > yInfl[-1]):
 if ReTauInfl > ReTauPrec:
     print "WARNING: Re_tau in the precursor is lower than in the desired TBL"
 
+size = int((tEnd-t0)/dt+1)
 
+if (rank == 0):
+    print "Producing database with", size, "time-steps."
 # Write points and modify writePath appropriatly
 if (writer == "tvmfv"):
     if (rank == 0):
@@ -207,7 +213,6 @@ elif (writer == "hdf5"):
 
     # Prepare the hdf5 file by adding relevant datasets
     # We change the writePath to be the hdf5 file itsel
-    size = int((tEnd-t0)/dt+1)
     writePath = h5py.File(writePath, 'a', driver='mpio', comm=MPI.COMM_WORLD)
     writePath.create_dataset("time", data=t0*np.ones((size, 1)))
     writePath.create_dataset("velocity", (size, pointsZInfl.size, 3))

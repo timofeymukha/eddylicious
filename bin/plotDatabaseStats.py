@@ -36,18 +36,20 @@ points = dbFile['points'][()]
 points = points[:, 1:]
 velocity = dbFile['velocity']
 
+size = len(times)
 
 uMean = np.zeros((points.shape[0], 3))
 uSquaredMean = np.zeros((points.shape[0], 3))
 
 print "Calculating the statistics"
 
-for i in xrange(int(len(times))):
+for i in xrange(size):
     uMean += velocity[i, :, :]
     uSquaredMean += velocity[i, :, :]**2
 
-uMean /= int(len(times))
-uSquaredMean /= int(len(times))
+
+uMean /= size
+uSquaredMean /= size
 
 uPrime2Mean = uSquaredMean - uMean**2
 
@@ -78,9 +80,12 @@ pointsZ = np.copy(np.reshape(points[:, 1], (-1, nPointsZ)))
 uMeanX = np.copy(np.reshape(uMean[:, 0], (-1, nPointsZ)))
 uMeanY = np.copy(np.reshape(uMean[:, 1], (-1, nPointsZ)))
 uMeanZ = np.copy(np.reshape(uMean[:, 2], (-1, nPointsZ)))
-uPrime2MeanX = np.copy(np.reshape(uPrime2Mean[:, 0], (-1, nPointsZ)))
-uPrime2MeanY = np.copy(np.reshape(uPrime2Mean[:, 1], (-1, nPointsZ)))
-uPrime2MeanZ = np.copy(np.reshape(uPrime2Mean[:, 2], (-1, nPointsZ)))
+uPrime2MeanX = np.copy(np.reshape(uPrime2Mean[:, 0],
+                                  (-1, nPointsZ)))
+uPrime2MeanY = np.copy(np.reshape(uPrime2Mean[:, 1],
+                                  (-1, nPointsZ)))
+uPrime2MeanZ = np.copy(np.reshape(uPrime2Mean[:, 2],
+                                  (-1, nPointsZ)))
 
 # For each y order the points in z
 
@@ -108,6 +113,9 @@ uPrime2MeanY = np.mean(uPrime2MeanY, axis=1)
 uPrime2MeanZ = np.mean(uPrime2MeanZ, axis=1)
 
 print "Outputting figures and data"
+
+if not os.path.exists(writeDir):
+    os.makedirs(writeDir)
 
 np.savetxt(os.path.join(writeDir, "y"), y)
 np.savetxt(os.path.join(writeDir, "uMeanX"), uMeanX)

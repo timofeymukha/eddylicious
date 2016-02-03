@@ -67,7 +67,7 @@ def chunks_and_offsets(nProcs, size):
     """
 
     
-    chunks = np.zeros((nProcs, 1))
+    chunks = np.zeros((nProcs, 1), dtype=np.int64)
     nrAlloced = 0
     for i in xrange(nProcs):
         remainder = size - nrAlloced
@@ -76,9 +76,12 @@ def chunks_and_offsets(nProcs, size):
         nrAlloced += chunks[i]
 
     # Calculate the offset for each processor
-    offsets = np.zeros(chunks.shape)
+    offsets = np.zeros(chunks.shape, dtype=np.int64)
 
     for i in xrange(offsets.shape[0]-1):
         offsets[i+1] = np.sum(chunks[:i+1])
+
+    if (np.sum(chunks) != size):
+        print "Apacha!"
             
     return [chunks, offsets]

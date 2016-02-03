@@ -458,11 +458,16 @@ def lund_generate(reader, readPath,
             print "     Rescaled about", i/float(chunks[rank])*100, "%" 
 
         # Read U data
+        flag = False 
         if (reader == "foamFile"):
             if (position < len(times)):
                 readPosition = position
             else:
-                readPosition = position - floor(position/len(times))*len(times)
+                if (not flag):
+                    print "Warning: precursor database small than required \
+                    number of time-steps"
+                    flag = True
+                readPosition = position - np.floor(position/len(times))*len(times)
                 
             [U_X, U_Y, U_Z] = read_u_from_foamfile(
                 os.path.join(readPath, times[readPosition], surfaceName,
