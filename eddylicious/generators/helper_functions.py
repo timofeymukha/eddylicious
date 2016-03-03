@@ -30,7 +30,7 @@ def delta_99(y, v):
     """Compute delta_99."""
     for i in xrange(y.size):
         if v[i] >= 0.99*np.max(v):
-            delta99 = y[i]
+            delta99 = y[i-1]
             break
     return delta99
 
@@ -85,3 +85,28 @@ def chunks_and_offsets(nProcs, size):
         print "Apacha!"
             
     return [chunks, offsets]
+
+def chauhan_U_inner(yPlus, kappa=0.384, a=-10.361):
+    alpha = (-1/kappa - a)/2
+    beta = np.sqrt(-2*a*alpha-alpha**2)
+    R = np.sqrt(alpha**2 + beta**2)
+    return  1/kappa*np.log(-(yPlus-a)/a) + R**2/(a*(4*alpha-a))* \
+            ((4*alpha+a)*np.log(-a/R*np.sqrt((yPlus-alpha)**2 + beta**2)/ \
+            (yPlus - a)) + alpha/beta*(4*alpha + 5*a)*(np.arctan((yPlus-alpha)/beta) \
+            + np.arctan(alpha/beta)))
+
+def chauhan_U_inner_mod(yPlus, kappa=0.384, a=-10.361):
+    return chauhan_U_inner(yPlus, kappa, a) + 1/2.85*np.exp(-np.log(yPlus/30)**2)
+
+def chauhan_wake(eta, Pi, a2=132.8410, a3=-166.2041, a4=71.9114):
+    nom1 = 1 - np.exp(-0.25*(5*a2 + 6*a3 + 7*a4)*eta**4 + a2*eta**5 + a3*eta**6 + a4*eta**7)
+    nom2 = 1 - 0.5/Pi*np.log(eta)
+    denom = 1 - np.exp(-0.25*(a2+2*a3+3*a4))
+    return nom1*nom2/denom
+
+def chauhan_U_composite(yPlus, eta, Pi, kappa=0.384, a=-10.361):
+    return chauhan_U_inner_mod(yPlus, kappa, a) + 2*Pi/kappa*chauhan_wake(eta, Pi)
+
+def epsilon_ReT(y, ReTau, kappa, APlus):
+    return (0.5*np.sqrt(1 + kappa**2*ReTau**2/9*(1 - (y - 1)**2)**2*(1 + 2*(y-1)**2)**2*(1 - np.exp(-y*ReTau/APlus))**2) - 0.5)
+

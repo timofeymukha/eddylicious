@@ -11,6 +11,7 @@ setup(name='eddylicious',
                'bin/convertNpyToHDF5.py',
                'bin/plotDatabaseStats.py',
                'bin/runLundRescaling.py',
+               'bin/runModLundRescaling.py',
                'bin/runSpalartRescaling.py'],
       install_requires=[
                     'numpy',
