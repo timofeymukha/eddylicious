@@ -44,6 +44,7 @@ def write_points_to_hdf5(writePath, pointsY, pointsZ, xVal):
     dbFile.create_dataset("points", data=points)
     dbFile.close()
 
+
 def write_u_to_hdf5(file, t, u, iter, size):
     """Write the velocity field into an HDF5 file.
 
@@ -60,7 +61,7 @@ def write_u_to_hdf5(file, t, u, iter, size):
         Array containing the velocity field.
     iter: int
         The position of along the time axis.
-    size: inte
+    size: int
         The total size of the time axis.
     """
 
@@ -68,7 +69,6 @@ def write_u_to_hdf5(file, t, u, iter, size):
         print "WARNING in write_u_to_hdf5. Write position larger \
               than total database size. Not writing."
         return
-
 
     file["time"][iter] = t
     file["velocity"][iter, :, :] = u
