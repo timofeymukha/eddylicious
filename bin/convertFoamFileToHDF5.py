@@ -121,5 +121,5 @@ for i in xrange(chunks[rank]):
     uY[position, :, :] = uYVal
     uZ[position, :, :] = uZVal
 
-if rank == 0
+if rank == 0:
     print "Wait for it.. Other processes finishing up."
