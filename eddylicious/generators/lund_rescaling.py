@@ -380,7 +380,7 @@ def lund_generate(reader, readPath,
         fields.
     t0 : float
         The starting time to be used in the simulation. This will
-        be used to associate a time-value with the produced velocity
+        be used to associate a time-value with the produced velocity.
     timePrecision : int
         Number of points after the decimal to keep for the time value.
     tEnd : float
@@ -460,14 +460,16 @@ def lund_generate(reader, readPath,
         # Read U data
         flag = False 
         if (reader == "foamFile"):
-            if (position < len(times)):
-                readPosition = position
-            else:
-                if (not flag):
-                    print "Warning: precursor database small than required \
-                    number of time-steps"
-                    flag = True
-                readPosition = position - np.floor(position/len(times))*len(times)
+            assert position < len(times)
+            readPosition = position
+            #if (position < len(times)):
+            #    readPosition = position
+            #else:
+            #    if (not flag):
+            #        print "Warning: precursor database smaller than required \
+            #        number of time-steps"
+            #        flag = True
+            #    readPosition = position - np.floor(position/len(times))*len(times)
                 
             [U_X, U_Y, U_Z] = read_u_from_foamfile(
                 os.path.join(readPath, times[readPosition], surfaceName,
@@ -475,7 +477,7 @@ def lund_generate(reader, readPath,
                 pointsZ.shape[0], pointsZ.shape[1],
                 yInd, zInd)
         else:
-            print "ERROR. Unknown reader ", reader
+            print "ERROR. Unknown reader", reader
             exit()
 
         # Claculate UPrime

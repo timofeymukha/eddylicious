@@ -38,7 +38,7 @@ def read_points_from_foamfile(readPath, addZeros=1, nPointsY=0, delta=1):
     readPath : str
         The path to the file containing the points
     addZeros : bool, optional,
-        Whether to add coordinates for y=0 (default is 1)
+        Whether to add coordinates for y=0 (default 1).
     nPointsY : int, optional
         How many points to keep in the y direction. Zero
         means all points are kept (default 0).

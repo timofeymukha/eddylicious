@@ -10,9 +10,15 @@ def blending_function(eta, alpha=4, b=0.2):
     and outer profiles produced by Lund's rescaling.
     For eta>1 the function returns 1.
 
-    Keyword arguments:
-    alpha -- the value of alpha (delfault 4.0)
-    b -- the value of b (defaul 0.2)
+    Parameters
+    ----------
+    eta : 1d ndarray
+        The values of the non-dimensionalized wall-normal
+        coordinate.
+    alpha : double, optional
+        The value of alpha (default 4.0).
+    b : double
+        The value of b (default 0.2).
     """
 
     val = np.zeros(eta.shape)
@@ -28,6 +34,7 @@ def blending_function(eta, alpha=4, b=0.2):
 
 def delta_99(y, v):
     """Compute delta_99."""
+
     for i in xrange(y.size):
         if v[i] >= 0.99*np.max(v):
             delta99 = y[i-1]
@@ -37,12 +44,15 @@ def delta_99(y, v):
 
 def delta_star(y, v):
     """Compute delta^* using Simpson's method."""
+
     return simps((1-v/v[-1]), x=y)
 
 
 def theta(y, v):
     """Compute the momentum thickness using Simpson's method."""
+
     return simps(v/v[-1]*(1-v/v[-1]), x=y)
+
 
 def chunks_and_offsets(nProcs, size):
     """Given the size of a 1d array and the number of
@@ -52,23 +62,32 @@ def chunks_and_offsets(nProcs, size):
 
     Parameters
     ----------
-        nProcs : int
-            The amount of processors.
-        size : int
-            The size of the 1d array to be distributed.
+    nProcs : int
+        The amount of processors.
+    size : int
+        The size of the 1d array to be distributed.
 
     Returns
     -------
-        List of two 1d ndarrays of size nProcs
+        List of two 1d ndarrays of size nProcs.
         The first array contains the chunk-size for each
         processor.
         The second array contains the offset (starting 
         index) for each processor.
     """
 
-    
-    chunks = np.zeros((nProcs, 1), dtype=np.int64)
+    # To ensure integer division later
+    nProcs = int(nProcs)
+
+    # Number of procs should be positive
+    assert nProcs > 0
+
+    # All procs should have at least a 1-sized chunk
+    assert nProcs <= size
+
+    chunks = np.zeros(nProcs, dtype=np.int64)
     nrAlloced = 0
+
     for i in xrange(nProcs):
         remainder = size - nrAlloced
         buckets = (nProcs - i)
@@ -81,9 +100,8 @@ def chunks_and_offsets(nProcs, size):
     for i in xrange(offsets.shape[0]-1):
         offsets[i+1] = np.sum(chunks[:i+1])
 
-    if (np.sum(chunks) != size):
-        print "Apacha!"
-            
+    assert np.sum(chunks) == size
+
     return [chunks, offsets]
 
 def chauhan_U_inner(yPlus, kappa=0.384, a=-10.361):
