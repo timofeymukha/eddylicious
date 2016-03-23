@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import h5py as h5py
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.readers.foamfile_readers import read_u_from_foamfile
 import argparse
@@ -9,7 +10,7 @@ import argparse
 parser = argparse.ArgumentParser(
             description="A script for converting a database stored \
                     as a collection of foamFile-formatted files to \
-                    npy files. \
+                    a single hdf5 file. \
                     Produces the following files: \
                     uMean, uPrimeX, uPrimeY, uPrimeZ, pointsY, pointsZ."
                     )
@@ -25,11 +26,11 @@ parser.add_argument('--surfaceName',
 parser.add_argument('--fileName',
                     type=str,
                     help='The location where to write the \
-                          produced numpy arrays.',
+                          produced hdf5 file.',
                     required=True)
 parser.add_argument('--uMeanFile',
                     type=str,
-                    help='The file containg the mean velocity profile. \
+                    help='The file containing the mean velocity profile. \
                           The file is assumed to have two columns, \
                           one with y coordinates, and the other one \
                           with the values of mean velocity.',
@@ -68,12 +69,18 @@ pointsGroup = dbFile.create_group("points")
 velocityGroup = dbFile.create_group("velocity")
 
 pointsGroup.create_dataset("pointsY", data=pointsY)
-pointsGroup.create_dataset("pointsZ", data=pointsY)
+pointsGroup.create_dataset("pointsZ", data=pointsZ)
 
 velocityGroup.create_dataset("uMean", data=uMean)
-velocityGroup.create_dataset("uPrimeX", data=uPrimeX)
-velocityGroup.create_dataset("uPrimeY", data=uPrimeY)
-velocityGroup.create_dataset("uPrimeZ", data=uPrimeZ)
+uPrimeX = velocityGroup.create_dataset("uPrimeX", (pointsY.size[0],
+                                                   pointsY.size[1],
+                                                   len(times)))
+uPrimeY = velocityGroup.create_dataset("uPrimeY", (pointsY.size[0],
+                                                   pointsY.size[1],
+                                                   len(times)))
+uPrimeZ = velocityGroup.create_dataset("uPrimeZ", (pointsY.size[0],
+                                                   pointsY.size[1],
+                                                   len(times)))
 
 pointsGroup.attrs["nPointsY"] = pointsY.shape[0]
 pointsGroup.attrs["nPointsZ"] = pointsY.shape[1]
@@ -85,7 +92,7 @@ printCounter = 0
 for timeI in xrange(len(times)):
     printCounter += 1
 
-    if (printCounter == 100):
+    if printCounter == 100:
         printCounter = 0
         print "Read in", timeI, "time-iterations out of", len(times), "."
 
@@ -99,15 +106,3 @@ for timeI in xrange(len(times)):
     uPrimeX[:, :, timeI] = uX - uMean[:, np.newaxis]
     uPrimeY[:, :, timeI] = uY
     uPrimeZ[:, :, timeI] = uZ
-
-uPrimeX = uPrimeX[:, :, 1:]
-uPrimeY = uPrimeY[:, :, 1:]
-uPrimeZ = uPrimeZ[:, :, 1:]
-
-# Write to disk ad npy files
-np.save(os.path.join(writeDir, "uPrimeX"), uPrimeX)
-np.save(os.path.join(writeDir, "uPrimeY"), uPrimeY)
-np.save(os.path.join(writeDir, "uPrimeZ"), uPrimeZ)
-np.save(os.path.join(writeDir, "pointsY"), pointsY)
-np.save(os.path.join(writeDir, "pointsZ"), pointsZ)
-np.save(os.path.join(writeDir, "uMean"), uMean)

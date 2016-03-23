@@ -19,7 +19,8 @@ def write_points_to_hdf5(writePath, pointsY, pointsZ, xVal):
 
     Parameters
     ----------
-    writePath : str The path of the HDF5 file.
+    writePath : str
+        The path of the HDF5 file.
     pointsY : ndarray
         A 2d array containing the values of y for the face
         centres.
