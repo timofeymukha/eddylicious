@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import h5py as h5py
+from mpi4py import MPI
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.readers.foamfile_readers import read_u_from_foamfile
 from eddylicious.generators.helper_functions import chunks_and_offsets
