@@ -97,11 +97,11 @@ for timeI in xrange(len(times)):
         print "Read in", timeI, "time-iterations out of", len(times), "."
 
     # Read in U
-    [uX, uY, uZ] = read_u_from_foamfile(
-        os.path.join(dataDir, times[timeI], surfaceName, "vectorField", "U"),
-        nPointsY, nPointsZ,
-        yInd,
-        zInd)
+    [uX, uY, uZ] = read_u_from_foamfile(os.path.join(dataDir,
+                                                     times[timeI],
+                                                     surfaceName,
+                                                     "vectorField", "U"),
+                                        nPointsY, nPointsZ, yInd, zInd)
 
     uPrimeX[:, :, timeI] = uX - uMean[:, np.newaxis]
     uPrimeY[:, :, timeI] = uY
