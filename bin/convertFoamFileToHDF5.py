@@ -41,6 +41,7 @@ args = parser.parse_args()
 precursorCaseDir = args.precursorPath
 surfaceName = args.surfaceName
 uMeanFile = args.uMeanFile
+fileName = args.fileName
 
 
 dataDir = os.path.join(precursorCaseDir, "postProcessing", "sampledSurface")
@@ -62,8 +63,11 @@ nPointsY = uMean.size
 [nPointsY, nPointsZ] = pointsY.shape
 
 # Allocate arrays for the fluctuations
+if os.path.isfile(fileName):
+    print "HDF5 file already exsists. It it will be overwritten."
+    os.remove(fileName)
 
-dbFile = h5py.File(args.fileName, 'a')
+dbFile = h5py.File(fileName, 'a')
 
 pointsGroup = dbFile.create_group("points")
 velocityGroup = dbFile.create_group("velocity")
@@ -72,27 +76,29 @@ pointsGroup.create_dataset("pointsY", data=pointsY)
 pointsGroup.create_dataset("pointsZ", data=pointsZ)
 
 velocityGroup.create_dataset("uMean", data=uMean)
-uPrimeX = velocityGroup.create_dataset("uPrimeX", (pointsY.size[0],
-                                                   pointsY.size[1],
-                                                   len(times)))
-uPrimeY = velocityGroup.create_dataset("uPrimeY", (pointsY.size[0],
-                                                   pointsY.size[1],
-                                                   len(times)))
-uPrimeZ = velocityGroup.create_dataset("uPrimeZ", (pointsY.size[0],
-                                                   pointsY.size[1],
-                                                   len(times)))
 
-pointsGroup.attrs["nPointsY"] = pointsY.shape[0]
-pointsGroup.attrs["nPointsZ"] = pointsY.shape[1]
-pointsGroup.attrs["nPoints"] = pointsY.size
+
+uPrimeX = velocityGroup.create_dataset("uPrimeX", (len(times),
+                                                   pointsY.shape[0],
+                                                   pointsY.shape[1]))
+uPrimeY = velocityGroup.create_dataset("uPrimeY", (len(times),
+                                                   pointsY.shape[0],
+                                                   pointsY.shape[1]))
+uPrimeZ = velocityGroup.create_dataset("uPrimeZ", (len(times),
+                                                   pointsY.shape[0],
+                                                   pointsY.shape[1]))
+
+dbFile.attrs["nPointsY"] = pointsY.shape[0]
+dbFile.attrs["nPointsZ"] = pointsY.shape[1]
+dbFile.attrs["nPoints"] = pointsY.size
 
 printCounter = 0
 
 # Read in the fluctuations
-for timeI in xrange(len(times)):
+for timeI in len(times)):
     printCounter += 1
 
-    if printCounter == 100:
+    if printCounter == 1:
         printCounter = 0
         print "Read in", timeI, "time-iterations out of", len(times), "."
 
@@ -103,6 +109,9 @@ for timeI in xrange(len(times)):
                                                      "vectorField", "U"),
                                         nPointsY, nPointsZ, yInd, zInd)
 
-    uPrimeX[:, :, timeI] = uX - uMean[:, np.newaxis]
-    uPrimeY[:, :, timeI] = uY
-    uPrimeZ[:, :, timeI] = uZ
+    uPrimeX[timeI, :, :] = uX - uMean[:, np.newaxis]
+#    uPrimeY[timeI, :, :] = uY
+#    uPrimeZ[timeI, :, :] = uZ
+
+print pointsGroup["pointsY"]
+dbFile.close()
