@@ -3,7 +3,13 @@ import numpy as np
 import h5py as h5py
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.readers.foamfile_readers import read_u_from_foamfile
+from eddylicious.generators.helper_functions import chunks_and_offsets
 import argparse
+
+
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+nProcs = comm.Get_size()
 
 
 # Define the command-line arguments
@@ -92,28 +98,23 @@ dbFile.attrs["nPointsY"] = pointsY.shape[0]
 dbFile.attrs["nPointsZ"] = pointsY.shape[1]
 dbFile.attrs["nPoints"] = pointsY.size
 
-printCounter = 0
+[chunks, offsets] = chunks_and_offsets(nProcs, len(times))
 
 # Read in the fluctuations
-for timeI in xrange(len(times)):
-    printCounter += 1
+for i in xrange(chunks[rank]):
+    if rank == 0:
+        print "Converted about", i/float(chunks[rank])*100, "%"
 
-    if printCounter == 10:
-        printCounter = 0
-        print "Read in", timeI, "time-iterations out of", len(times), "."
-
+    position = offsets[rank] + i
     # Read in U
     [uXVal, uYVal, uZVal] = read_u_from_foamfile(os.path.join(dataDir,
-                                                              times[timeI],
+                                                              times[position],
                                                               surfaceName,
                                                               "vectorField",
                                                               "U"),
                                                  nPointsY, nPointsZ,
                                                  yInd, zInd)
 
-    uX[timeI, :, :] = uXVal
-    uY[timeI, :, :] = uYVal
-    uZ[timeI, :, :] = uZVal
-
-print pointsGroup["pointsY"]
-dbFile.close()
+    uX[position, :, :] = uXVal
+    uY[position, :, :] = uYVal
+    uZ[position, :, :] = uZVal
