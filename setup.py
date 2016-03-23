@@ -9,7 +9,7 @@ setup(name='eddylicious',
       packages=['eddylicious'],
       scripts=['bin/convertFoamFileToHDF5.py',
                'bin/plotDatabaseStats.py',
-               'bin/precursorStats.py'
+               'bin/precursorStats.py',
                'bin/runLundRescaling.py',
                'bin/runModLundRescaling.py',
                'bin/runSpalartRescaling.py'],
