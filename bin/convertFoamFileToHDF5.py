@@ -74,7 +74,7 @@ if os.path.isfile(fileName):
     print "HDF5 file already exsists. It it will be overwritten."
     os.remove(fileName)
 
-dbFile = h5py.File(fileName, 'a')
+dbFile = h5py.File(fileName, 'a', driver='mpio', comm=MPI.COMM_WORLD)
 
 pointsGroup = dbFile.create_group("points")
 velocityGroup = dbFile.create_group("velocity")
