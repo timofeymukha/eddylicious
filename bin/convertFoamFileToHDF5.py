@@ -95,10 +95,10 @@ dbFile.attrs["nPoints"] = pointsY.size
 printCounter = 0
 
 # Read in the fluctuations
-for timeI in len(times)):
+for timeI in xrange(len(times)):
     printCounter += 1
 
-    if printCounter == 1:
+    if printCounter == 10:
         printCounter = 0
         print "Read in", timeI, "time-iterations out of", len(times), "."
 
@@ -110,8 +110,8 @@ for timeI in len(times)):
                                         nPointsY, nPointsZ, yInd, zInd)
 
     uPrimeX[timeI, :, :] = uX - uMean[:, np.newaxis]
-#    uPrimeY[timeI, :, :] = uY
-#    uPrimeZ[timeI, :, :] = uZ
+    uPrimeY[timeI, :, :] = uY
+    uPrimeZ[timeI, :, :] = uZ
 
 print pointsGroup["pointsY"]
 dbFile.close()

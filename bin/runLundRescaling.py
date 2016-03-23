@@ -53,7 +53,7 @@ writer = configDict["writer"]
 
 hdf5FileName = configDict["hdf5FileName"]
 
-if (reader == "foamFile"):
+if reader == "foamFile":
     dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
@@ -61,20 +61,20 @@ else:
 
 
 # Grab the existing times and sort
-if (reader == "foamFile"):
+if reader == "foamFile":
     times = os.listdir(dataDir)
     times = np.sort(times)
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
 
-if (rank == 0):
+if rank == 0:
     print "Reading from database with ", len(times), " time-steps."
 
 # Get the mean profile
 uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
                                      "collapsedFields"))
-if (reader == "foamFile"):
+if reader == "foamFile":
     uMean = np.append(np.zeros((1, 1)),
                       np.genfromtxt(os.path.join(readPath, "postProcessing",
                                                  "collapsedFields",
@@ -87,7 +87,7 @@ else:
 nPointsY = uMean.size
 
 # Read grid for the recycling plane
-if (reader == "foamFile"):
+if reader == "foamFile":
     [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
         os.path.join(dataDir, times[0], sampleSurfaceName, "faceCentres"),
         nPointsY=nPointsY)
@@ -98,7 +98,7 @@ else:
 [nPointsY, nPointsZ] = pointsY.shape
 
 # Read grid for the inflow plane
-if (inflowReader == "foamFile"):
+if inflowReader == "foamFile":
     [pointsYInfl, pointsZInfl, yIndInfl, zIndInfl] = read_points_from_foamfile(
         os.path.join(inflowReadPath, inletPatchName, "faceCentres"),
         addZeros=False)
@@ -130,7 +130,7 @@ ReDelta = Ue*deltaInfl/nuInfl
 cfInfl = 0.02*pow(1.0/ReDelta, 1.0/6)
 
 # Friction velocities
-if (configDict["uTauInflow"] == "compute"):
+if configDict["uTauInflow"] == "compute":
     uTauInfl = Ue*np.sqrt(cfInfl/2)
 else:
     uTauInfl = float(configDict["uTauInflow"])
@@ -181,7 +181,7 @@ for i in xrange(etaInfl.size):
 
 
 # Simple sanity checks
-if (deltaInfl > yInfl[-1]):
+if deltaInfl > yInfl[-1]:
     print "ERROR in runLundRescaling.py. Desired delta_99 is \
           larger then maximum y."
     exit()
@@ -191,22 +191,22 @@ if ReTauInfl > ReTauPrec:
 
 size = int((tEnd-t0)/dt+1)
 
-if (rank == 0):
+if rank == 0:
     print "Producing database with", size, "time-steps."
 # Write points and modify writePath appropriatly
-if (writer == "tvmfv"):
-    if (rank == 0):
+if writer == "tvmfv":
+    if rank == 0:
         write_points_to_tvmfv(os.path.join(writePath, "constant",
                                            "boundaryData", inletPatchName,
                                            "points"),
                               pointsYInfl, pointsZInfl, xOrigin)
     writePath = os.path.join(writePath, "constant", "boundaryData",
                              inletPatchName)
-elif (writer == "hdf5"):
+elif writer == "hdf5":
     writePath = os.path.join(writePath, hdf5FileName)
     # If the hdf5 file exists, delete it.
-    if (rank == 0):
-        if (os.path.isfile(writePath)):
+    if rank == 0:
+        if os.path.isfile(writePath):
             print "HDF5 database already exsists. It it will be overwritten."
             os.remove(writePath)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
@@ -231,7 +231,7 @@ ReThetaInfl = theta(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 
 # Generate the inflow fields
-if (rank == 0):
+if rank == 0:
     print "Generating the inflow fields."
 
 lund_generate(reader, dataDir,
@@ -243,5 +243,5 @@ lund_generate(reader, dataDir,
               nInfl, nInner, gamma,
               yInd, zInd,
               surfaceName=sampleSurfaceName, times=times)
-if (rank == 0):
+if rank == 0:
     print "Done."
