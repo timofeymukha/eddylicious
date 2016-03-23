@@ -70,9 +70,10 @@ nPointsY = uMean.size
 [nPointsY, nPointsZ] = pointsY.shape
 
 # Allocate arrays for the fluctuations
-if os.path.isfile(fileName):
-    print "HDF5 file already exsists. It it will be overwritten."
-    os.remove(fileName)
+if rank == 0:
+    if os.path.isfile(fileName):
+        print "HDF5 file already exsists. It it will be overwritten."
+        os.remove(fileName)
 
 dbFile = h5py.File(fileName, 'a', driver='mpio', comm=MPI.COMM_WORLD)
 
@@ -119,3 +120,6 @@ for i in xrange(chunks[rank]):
     uX[position, :, :] = uXVal
     uY[position, :, :] = uYVal
     uZ[position, :, :] = uZVal
+
+if rank = 0
+    print "Wait for it.. Other processes finishing up."
