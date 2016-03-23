@@ -15,6 +15,7 @@ setup(name='eddylicious',
                'bin/runSpalartRescaling.py'],
       install_requires=[
                     'numpy',
+                    'scipy',
                     'mpi4py',
                     'matplotlib'
                        ],
