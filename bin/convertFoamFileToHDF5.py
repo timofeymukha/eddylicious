@@ -78,15 +78,15 @@ pointsGroup.create_dataset("pointsZ", data=pointsZ)
 velocityGroup.create_dataset("uMean", data=uMean)
 
 
-uPrimeX = velocityGroup.create_dataset("uPrimeX", (len(times),
-                                                   pointsY.shape[0],
-                                                   pointsY.shape[1]))
-uPrimeY = velocityGroup.create_dataset("uPrimeY", (len(times),
-                                                   pointsY.shape[0],
-                                                   pointsY.shape[1]))
-uPrimeZ = velocityGroup.create_dataset("uPrimeZ", (len(times),
-                                                   pointsY.shape[0],
-                                                   pointsY.shape[1]))
+uX = velocityGroup.create_dataset("uX", (len(times),
+                                         pointsY.shape[0],
+                                         pointsY.shape[1]))
+uY = velocityGroup.create_dataset("uY", (len(times),
+                                         pointsY.shape[0],
+                                         pointsY.shape[1]))
+uZ = velocityGroup.create_dataset("uZ", (len(times),
+                                         pointsY.shape[0],
+                                         pointsY.shape[1]))
 
 dbFile.attrs["nPointsY"] = pointsY.shape[0]
 dbFile.attrs["nPointsZ"] = pointsY.shape[1]
@@ -103,15 +103,17 @@ for timeI in xrange(len(times)):
         print "Read in", timeI, "time-iterations out of", len(times), "."
 
     # Read in U
-    [uX, uY, uZ] = read_u_from_foamfile(os.path.join(dataDir,
-                                                     times[timeI],
-                                                     surfaceName,
-                                                     "vectorField", "U"),
-                                        nPointsY, nPointsZ, yInd, zInd)
+    [uXVal, uYVal, uZVal] = read_u_from_foamfile(os.path.join(dataDir,
+                                                              times[timeI],
+                                                              surfaceName,
+                                                              "vectorField",
+                                                              "U"),
+                                                 nPointsY, nPointsZ,
+                                                 yInd, zInd)
 
-    uPrimeX[timeI, :, :] = uX - uMean[:, np.newaxis]
-    uPrimeY[timeI, :, :] = uY
-    uPrimeZ[timeI, :, :] = uZ
+    uX[timeI, :, :] = uXVal
+    uY[timeI, :, :] = uYVal
+    uZ[timeI, :, :] = uZVal
 
 print pointsGroup["pointsY"]
 dbFile.close()
