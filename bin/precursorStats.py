@@ -83,7 +83,6 @@ if rank == 0:
 
 # Average along Z
     uMean = np.mean(uMean, axis=1)
-
     uPrime2Mean = np.mean(uPrime2Mean, axis=1)
 
     print "Outputting data"

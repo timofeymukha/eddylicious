@@ -1,6 +1,9 @@
 import numpy as np
 from scipy.integrate import simps
 
+__all__ = ["blending_function", "delta_99", "delta_star", "theta",
+           "chunks_and_offsets", "chauhan_U_inner", "chauhan_U_inner_mod",
+           "chauhan_wake", "chauhan_U_composite", "epsilon_ReT"]
 
 # Blending function for inner and outer scales
 def blending_function(eta, alpha=4, b=0.2):

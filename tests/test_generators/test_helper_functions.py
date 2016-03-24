@@ -3,6 +3,7 @@ from eddylicious.generators.helper_functions import chunks_and_offsets
 import numpy as np
 import pytest
 
+
 # Test the value of W for where it is known
 def test_blending_function_values_with_default_parameters():
 

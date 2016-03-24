@@ -1,5 +1,7 @@
 import numpy as np
 
+__all__ = ["read_points_from_foamfile", "read_u_from_foamfile"]
+
 """Functions for reading fields stored in the foamFile format"""
 
 

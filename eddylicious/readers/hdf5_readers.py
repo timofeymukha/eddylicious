@@ -1,6 +1,8 @@
 import numpy as np
 import h5py as h5py
 
+__all__ = ["read_points_from_hdf5", "read_u_from_hdf5"]
+
 """Functions for reading fields stored in the hdf5 format"""
 
 

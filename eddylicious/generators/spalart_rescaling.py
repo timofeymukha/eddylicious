@@ -7,6 +7,9 @@ from ..readers.foamfile_readers import read_u_from_foamfile
 from ..writers.tvmfv_writers import write_u_to_tvmfv
 from ..writers.hdf5_writers import write_u_to_hdf5
 
+__all__ = ["spalart_rescale_mean_velocity", "spalart_rescale_fluctuations",
+           "spalart_generate"]
+
 """Function for generating inlfow velocity fields using
 Lund et al's rescaling, but applying the outer profile
 througout, see

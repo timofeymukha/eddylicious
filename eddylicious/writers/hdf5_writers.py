@@ -3,6 +3,7 @@ import h5py as h5py
 import mpi4py
 from mpi4py import MPI
 
+__all__ = ["write_points_to_hdf5", "write_u_to_hdf5"]
 
 """Functions for writing to the native format of the
 timeVaryingMappedFixedValue boundary in OpenFOAM.
