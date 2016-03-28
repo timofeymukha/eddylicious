@@ -14,7 +14,7 @@ from ..writers.hdf5_writers import write_u_to_hdf5
 __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
            "lund_generate_legacy", "lund_generate"]
 
-"""Function for generating inlfow velocity fields using
+"""Function for generating inflow velocity fields using
 Lund et al's rescaling, see
 
 Lund T.S., Wu X., Squires K.D. Generation of turbulent inflow
@@ -78,6 +78,19 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
         As expected, the values only vary in the y direction.
     """
 
+    assert nInfl > 0
+    assert nInner > 0
+    assert nPointsZInfl > 0
+    assert Ue > 0
+    assert U0 > 0
+    assert gamma > 0
+    assert np.all(etaInfl >= 0)
+    assert np.all(etaPrec >= 0)
+    assert np.all(yPlusInfl >= 0)
+    assert np.all(yPlusPrec >= 0)
+    assert np.all(uMeanPrec >= 0)
+
+
     uMeanInterp = interp1d(etaPrec, uMeanPrec)
     uMeanInterpPlus = interp1d(yPlusPrec, uMeanPrec)
 
@@ -86,8 +99,9 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     uMeanOuter = gamma*uMeanInterp(etaInfl[0:nInfl]) + Ue - gamma*U0
 
     uMeanInfl = np.zeros(etaInfl.shape)
-    uMeanInfl[0:nInfl] = uMeanInner*(1-blending_function(etaInfl[0:nInfl])) + \
-        uMeanOuter*blending_function(etaInfl[0:nInfl])
+    uMeanInfl[0:nInner] = uMeanInner*(1-blending_function(etaInfl[0:nInner])) + \
+        uMeanOuter*blending_function(etaInfl[0:nInner])
+    uMeanInfl[nInner:] = uMeanOuter[nInner:]
     uMeanInfl[nInfl:] = Ue
     uMeanInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanInfl[:, np.newaxis]
     return uMeanInfl

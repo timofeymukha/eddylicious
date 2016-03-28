@@ -82,11 +82,15 @@ def chunks_and_offsets(nProcs, size):
     # To ensure integer division later
     nProcs = int(nProcs)
 
-    # Number of procs should be positive
-    assert nProcs > 0
+    try:
+        # Number of procs should be positive
+        assert nProcs > 0
 
-    # All procs should have at least a 1-sized chunk
-    assert nProcs <= size
+        # All procs should have at least a 1-sized chunk
+        assert nProcs <= size
+    except AssertionError as e:
+        raise AssertionError(e.message +
+                             "Number of processors (", nProcs, ") is invalid.")
 
     chunks = np.zeros(nProcs, dtype=np.int64)
     nrAlloced = 0
@@ -103,7 +107,11 @@ def chunks_and_offsets(nProcs, size):
     for i in xrange(offsets.shape[0]-1):
         offsets[i+1] = np.sum(chunks[:i+1])
 
-    assert np.sum(chunks) == size
+    try:
+        assert np.sum(chunks) == size
+    except AssertionError as e:
+        raise AssertionError(e.message + "Chunks don't sum up to array size.")
+
 
     return [chunks, offsets]
 

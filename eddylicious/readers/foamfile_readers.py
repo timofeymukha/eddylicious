@@ -5,7 +5,7 @@ __all__ = ["read_points_from_foamfile", "read_u_from_foamfile"]
 """Functions for reading fields stored in the foamFile format"""
 
 
-def read_points_from_foamfile(readPath, addZeros=1, nPointsY=0, delta=1):
+def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
     """Read the coordinates of the points from a foamFile-format file.
 
 
@@ -116,8 +116,6 @@ def read_points_from_foamfile(readPath, addZeros=1, nPointsY=0, delta=1):
         pointsY = pointsY[:nPointsY, :]
         pointsZ = pointsZ[:nPointsY, :]
         pointsY[-1, :] = delta
-    else:
-        nPointsY = pointsY.shape[0]
 
     return [pointsY, pointsZ, yInd, zInd]
 
