@@ -89,13 +89,14 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     assert np.all(yPlusInfl >= 0)
     assert np.all(yPlusPrec >= 0)
     assert np.all(uMeanPrec >= 0)
+    assert nInner <= nInfl
 
 
     uMeanInterp = interp1d(etaPrec, uMeanPrec)
     uMeanInterpPlus = interp1d(yPlusPrec, uMeanPrec)
 
-    uMeanInner = gamma*uMeanInterpPlus(yPlusInfl[0:nInner])
-    uMeanOuter = gamma*uMeanInterp(etaInfl[0:nInfl]) + Ue - gamma*U0
+    uMeanInner = gamma*uMeanInterpPlus(yPlusInfl[:nInner])
+    uMeanOuter = gamma*uMeanInterp(etaInfl[:nInfl]) + Ue - gamma*U0
 
     uMeanInfl = np.zeros(etaInfl.shape)
     uMeanInfl[:nInner] = uMeanInner*(1-blending_function(etaInfl[:nInner])) + \
@@ -171,6 +172,14 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
         component of velocity. The third -- of the z component
         of velocity.
     """
+
+    assert np.all(etaPrec > 0)
+    assert np.all(yPlusPrec > 0)
+    assert np.all(etaInfl > 0)
+    assert np.all(yPlusInfl > 0)
+    assert pointsZInfl > 0
+    assert nInfl > 0
+    assert gamma > 0
 
     uPrimeXInfl = np.zeros(pointsZInfl.shape)
     uPrimeYInfl = np.zeros(pointsZInfl.shape)
