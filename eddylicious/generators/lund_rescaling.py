@@ -104,6 +104,9 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     uMeanInfl[nInner:nInfl] = uMeanOuter[nInner:nInfl]
     uMeanInfl[nInfl:] = Ue
     uMeanInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanInfl[:, np.newaxis]
+
+    assert np.all(uMeanInfl >= 0)
+
     return uMeanInfl
 
 
