@@ -173,10 +173,10 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
         of velocity.
     """
 
-    assert np.all(etaPrec > 0)
-    assert np.all(yPlusPrec > 0)
-    assert np.all(etaInfl > 0)
-    assert np.all(yPlusInfl > 0)
+    assert np.all(etaPrec >= 0)
+    assert np.all(yPlusPrec >= 0)
+    assert np.all(etaInfl >= 0)
+    assert np.all(yPlusInfl >= 0)
     assert pointsZInfl > 0
     assert nInfl > 0
     assert gamma > 0
