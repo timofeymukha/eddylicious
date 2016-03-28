@@ -99,7 +99,7 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
 
     uMeanInfl = np.zeros(etaInfl.shape)
     uMeanInfl[:nInner] = uMeanInner*(1-blending_function(etaInfl[:nInner])) + \
-        uMeanOuter*blending_function(etaInfl[:nInner])
+        uMeanOuter[:nInner]*blending_function(etaInfl[:nInner])
     uMeanInfl[nInner:] = uMeanOuter[nInner:]
     uMeanInfl[nInfl:] = Ue
     uMeanInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanInfl[:, np.newaxis]
