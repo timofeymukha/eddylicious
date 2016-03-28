@@ -114,6 +114,7 @@ def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
 # Makes y=delta the last point
 # NOTE! nPoints includes the added zeros
     if nPointsY:
+        assert pointsY.shape[0] >= nPointsY
         pointsY = pointsY[:nPointsY, :]
         pointsZ = pointsZ[:nPointsY, :]
         pointsY[-1, :] = delta
