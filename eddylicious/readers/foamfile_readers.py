@@ -112,6 +112,7 @@ def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
 
 # Cap the points, to include ony one half of the channel
 # Makes y=delta the last point
+# NOTE! nPoints includes the added zeros
     if nPointsY:
         pointsY = pointsY[:nPointsY, :]
         pointsZ = pointsZ[:nPointsY, :]
@@ -125,9 +126,9 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
 
     Reads in the values of the velocity components stored
     as in foamFile file-format.
-    The velcocity field is read and the transformed into a
-    2d numpy arrayi, where the array axes correspond to
-    wall-normal and spanwise direction.
+    The velocity field is read and the transformed into a
+    2d numpy array, where the array's axes correspond to
+    wall-normal and spanwise directions.
     To achieve this, the sorting indices obtained when
     reordering the mesh points are used.
 
@@ -177,6 +178,7 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
     uY = np.copy(np.reshape(u[:, 1], (-1, nPointsZ)))
     uZ = np.copy(np.reshape(u[:, 2], (-1, nPointsZ)))
 
+
     # Sort along z
     for i in xrange(uX.shape[0]):
         uX[i, :] = uX[i, zInd[i, :]]
@@ -187,6 +189,10 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
     uX = np.append(np.zeros((1, nPointsZ)), uX, axis=0)
     uY = np.append(np.zeros((1, nPointsZ)), uY, axis=0)
     uZ = np.append(np.zeros((1, nPointsZ)), uZ, axis=0)
+
+    # To interpolate the velocities in the center, the we need an extra value
+    # (above the center-line)
+    assert uX.shape[0] >= nPointsY
 
     # Interpolate to get data at y=delta
     uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])

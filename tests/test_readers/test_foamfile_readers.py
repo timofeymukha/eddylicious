@@ -18,7 +18,6 @@ def test_read_points_no_add_zeros_all_points():
     [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(prefix,
                                                            "foam_file_output",
                                                            "1000.01",
-                                                           "inletSurface",
                                                            "faceCentres"),
                                                  addZeros=False, nPointsY=0)
 
@@ -41,7 +40,6 @@ def test_read_points_no_add_zeros_some_points():
     [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(prefix,
                                                            "foam_file_output",
                                                            "1000.01",
-                                                           "inletSurface",
                                                            "faceCentres"),
                                                  addZeros=False, nPointsY=n)
 
@@ -67,7 +65,6 @@ def test_read_points_add_zeros_all_points():
     [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(prefix,
                                                            "foam_file_output",
                                                            "1000.01",
-                                                           "inletSurface",
                                                            "faceCentres"),
                                                  addZeros=True, nPointsY=0)
 
@@ -94,7 +91,6 @@ def test_read_points_add_zeros_some_points():
     [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(prefix,
                                                            "foam_file_output",
                                                            "1000.01",
-                                                           "inletSurface",
                                                            "faceCentres"),
                                                  addZeros=True, nPointsY=n)
 
@@ -102,4 +98,34 @@ def test_read_points_add_zeros_some_points():
     assert np.all(pointsZ == pZ)
     assert np.all(yInd == yI)
     assert np.all(zInd == zI)
+
+
+def test_read_velocity():
+    prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
+                       "channel_flow_180")
+    uX = np.load(path.join(prefix, "dsv_output", "1000.01", "uX.npy"))
+    uY = np.load(path.join(prefix, "dsv_output", "1000.01", "uY.npy"))
+    uZ = np.load(path.join(prefix, "dsv_output", "1000.01", "uZ.npy"))
+    yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
+    zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
+
+    nPointsY = 15
+
+    uX = np.append(np.zeros((1, 72)), uX, axis=0)
+    uY = np.append(np.zeros((1, 72)), uY, axis=0)
+    uZ = np.append(np.zeros((1, 72)), uZ, axis=0)
+
+    uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
+    uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
+    uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
+
+    [uXR, uYR, uZR] = read_u_from_foamfile(path.join(prefix,
+                                                     "foam_file_output",
+                                                     "1000.01", "U" ),
+                                           nPointsY, 72, yInd, zInd)
+
+    assert np.all(uX[:nPointsY, :] == uXR[:nPointsY, :])
+    assert np.all(uY[:nPointsY, :] == uYR[:nPointsY, :])
+    assert np.all(uZ[:nPointsY, :] == uZR[:nPointsY, :])
+
 
