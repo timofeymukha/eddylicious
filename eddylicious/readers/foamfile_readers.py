@@ -192,7 +192,7 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
 
     # To interpolate the velocities in the center, the we need an extra value
     # (above the center-line)
-    assert uX.shape[0] >= nPointsY
+    assert uX.shape[0] > nPointsY
 
     # Interpolate to get data at y=delta
     uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
