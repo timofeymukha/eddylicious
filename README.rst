@@ -1,6 +1,6 @@
-================
+===========
 Eddylicious
-================
+===========
 
 Eddylicious is a python package, designed for implementing methods for generating inflow boundary fields for Large Eddy Simulation (LES).
 Currently the existing functionality is heavily coupled with OpenFOAM, so the users of that software will probably find the package to be most attractive.
@@ -16,15 +16,15 @@ Additionally, conifgurable scripts that perform the generation and output are pr
 Note, that this structure of the package means that independently of the generation method, the fields are stored in the form of a database.
 This is somewhat counterintuitive in the case of a syntetic method, but the rationale is that this package can be used for quick development of methods (thanks to python) and serve as a hub uniting several methods under a shared framework. 
 
----------------
- Implemented Generation Methods
----------------
+------------------------------
+Implemented Generation Methods
+------------------------------
 
 Currently, only one generation method is implemented in the package: the rescaling procedure presented in [lund]_.
 
----------------
- Implemented Output Formats
----------------
+--------------------------
+Implemented Output Formats
+--------------------------
 Two output formats are currently supported.
 
 * HDF5. This is a file-format specifically designed to be a container for large datasets.
@@ -57,19 +57,19 @@ Two output formats are currently supported.
 
   The advantage of this format is that it is native to OpenFOAM, but a huge disadvantage is that a separate file has to be created for each time-step.
 
----------------
- Implemented Input Formats
----------------   
+-------------------------
+Implemented Input Formats
+-------------------------
 
 Currently one reader is implemented -- for the foamFile format, the native output format of OpenFOAM.
 This format is almost identical to tvmf, and is used by many utilities included in OpenFOAM.
 
----------------
- Executables
----------------  
+-----------
+Executables
+-----------
 
 runLundRescaling.py
-=============
+===================
 Command line options:
 
 --config The configuration file, obligatory.
