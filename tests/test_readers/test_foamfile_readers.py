@@ -1,9 +1,7 @@
 import eddylicious
 from eddylicious.readers.foamfile_readers import *
 import numpy as np
-import pytest
 from os import path
-from numpy.testing import assert_almost_equal
 
 
 # Do not add zeros on top and bottom, take all points along y
