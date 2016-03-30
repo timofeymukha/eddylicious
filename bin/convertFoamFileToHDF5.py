@@ -16,11 +16,16 @@ nProcs = comm.Get_size()
 # Define the command-line arguments
 parser = argparse.ArgumentParser(
             description="A script for converting a database stored \
-                    as a collection of foamFile-formatted files to \
-                    a single hdf5 file. \
-                    Produces the following files: \
-                    uMean, uPrimeX, uPrimeY, uPrimeZ, pointsY, pointsZ."
-                    )
+                        as a collection of foamFile-formatted files to \
+                        a single hdf5 file. \
+                        The file contains two groups: points and velocity. \
+                        The points group contains the datasets pointsY and \
+                        pointsZ. \
+                        The velocity group contains the datasets: \
+                        uMean, uX, uY and uZ. \
+                        Also, the attributes nPointsY, nPointsZ and nPoints \
+                        are added to the root of the file."
+                                )
 
 parser.add_argument('--precursorPath',
                     type=str,
