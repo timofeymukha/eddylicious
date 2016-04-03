@@ -12,7 +12,7 @@ from ..writers.tvmfv_writers import write_u_to_tvmfv
 from ..writers.hdf5_writers import write_u_to_hdf5
 
 __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
-           "lund_generate_legacy", "lund_generate"]
+           "lund_generate"]
 
 """Function for generating inflow velocity fields using
 Lund et al's rescaling, see
