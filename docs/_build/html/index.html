@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to eddylicious documentation! &mdash; eddylicious 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="eddylicious 0.1 documentation" href="#" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-eddylicious-documentation">
+<h1>Welcome to eddylicious documentation!<a class="headerlink" href="#welcome-to-eddylicious-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<span class="target" id="module-generators"></span><p>Module containing various methods for generation inflow fields.</p>
+<span class="target" id="module-readers"></span><p>Module containing functions for reading in data from various file formats.</p>
+<dl class="function">
+<dt id="readers.read_points_from_foamfile">
+<code class="descclassname">readers.</code><code class="descname">read_points_from_foamfile</code><span class="sig-paren">(</span><em>readPath</em>, <em>addZeros=True</em>, <em>nPointsY=0</em>, <em>delta=1</em><span class="sig-paren">)</span><a class="headerlink" href="#readers.read_points_from_foamfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the coordinates of the points from a foamFile-format file.</p>
+<p>Reads in the locations of the face centers, stored
+in foamFile format by OpenFOAM, and transforms them
+into 2d numpy arrays.</p>
+<p>The points are sorted so that the axes of the arrays
+correspond to the wall-normal and spanwise directions.
+The points are first sorted along y, then reshaped
+into a 2d array and then sorted along z for each value
+of z.</p>
+<p>The function supports considering only a number of
+points in the wall-normal direction and exchanging
+the last wall-normal position with the value of the
+half-width of the channel. 
+Also, adding a row of zeros as the first wall-normal
+position is possible.</p>
+<p>This is convenient when rescaling from channel flow
+is performed using Lund et al&#8217;s method, which requires
+a liner interpolant across the domain half-width.
+Adding the value at the center of the channel and at
+the wall, which are otherwise absent on a finite volume
+grid, insures that the interpolant will cover the whole
+interval [0, delta].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>readPath</strong> : str</p>
+<blockquote>
+<div><p>The path to the file containing the points</p>
+</div></blockquote>
+<p><strong>addZeros</strong> : bool, optional,</p>
+<blockquote>
+<div><p>Whether to add coordinates for y=0 (default 1).</p>
+</div></blockquote>
+<p><strong>nPointsY</strong> : int, optional</p>
+<blockquote>
+<div><p>How many points to keep in the y direction. Zero
+means all points are kept (default 0).</p>
+<p>If nPointsY is provided, the last value in the wall-
+normal direction is exchanged to value of delta,
+see below.</p>
+</div></blockquote>
+<p><strong>delta</strong> : bool, optional</p>
+<blockquote>
+<div><p>The value of the channel-half width. (default 1).
+Must be provided if nPoints is provided.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of ndarrays</p>
+<blockquote class="last">
+<div><p>The list contains 4 items
+pointsY :</p>
+<blockquote>
+<div><p>A 2d ndarray containing the y coordinates of the
+points.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>pointsZ :</dt>
+<dd><p class="first last">A 2d ndarray containing the z coordinates of the
+points.</p>
+</dd>
+<dt>indY :</dt>
+<dd><p class="first last">The sorting indices from the sorting performed.</p>
+</dd>
+<dt>indZ :</dt>
+<dd><p class="first last">The sorting indices from the sorting performed.</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="readers.read_u_from_foamfile">
+<code class="descclassname">readers.</code><code class="descname">read_u_from_foamfile</code><span class="sig-paren">(</span><em>readPath</em>, <em>nPointsY</em>, <em>nPointsZ</em>, <em>yInd</em>, <em>zInd</em><span class="sig-paren">)</span><a class="headerlink" href="#readers.read_u_from_foamfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the values of the velocity field from a foamFile-format file.</p>
+<p>Reads in the values of the velocity components stored
+as in foamFile file-format.
+The velocity field is read and the transformed into a
+2d numpy array, where the array&#8217;s axes correspond to
+wall-normal and spanwise directions.
+To achieve this, the sorting indices obtained when
+reordering the mesh points are used.</p>
+<dl class="docutils">
+<dt>readPath <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>The path to the file containing the velocity field.</dd>
+<dt>nPointsY <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>The number of points in the wall-normal direction to
+consider. For a single TBL it is enough to only
+consider half of the channel, for instance.</dd>
+<dt>nPointsZ <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>The amount of points in the mesh in the spanwise
+direction.</dd>
+<dt>yInd <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>The sorting indices for sorting in the wall-normal
+direction.</dd>
+<dt>zInd <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
+<dd>The sorting indices for sorting in the spanwise
+direction.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">List of ndarrays</p>
+<blockquote class="last">
+<div><p>The list contains three items, each a 2d array,
+corresponding to the three components of the
+velocity field, the order of the components in the
+list is x, y and the z.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="module-writers"></span><p>Module containing functions for writing out the inflow field in various
+file formats.</p>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to eddylicious documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Timofey Mukha.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/index.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
