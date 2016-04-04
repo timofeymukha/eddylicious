@@ -1,8 +1,9 @@
+"""Functions for reading fields stored in the foamFile format
+
+"""
 import numpy as np
 
 __all__ = ["read_points_from_foamfile", "read_u_from_foamfile"]
-
-"""Functions for reading fields stored in the foamFile format"""
 
 
 def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
@@ -34,7 +35,6 @@ def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
     grid, insures that the interpolant will cover the whole
     interval [0, delta].
 
-
     Parameters
     ----------
     readPath : str
@@ -51,7 +51,6 @@ def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
     delta : bool, optional
         The value of the channel-half width. (default 1).
         Must be provided if nPoints is provided.
-
 
     Returns
     -------
@@ -134,9 +133,8 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
     To achieve this, the sorting indices obtained when
     reordering the mesh points are used.
 
-
     Parameters
-    ---------
+    ----------
     readPath : str
         The path to the file containing the velocity field.
     nPointsY : int
@@ -152,7 +150,6 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
     zInd : ndarray
         The sorting indices for sorting in the spanwise
         direction.
-
 
     Returns
     -------

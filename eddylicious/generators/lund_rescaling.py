@@ -7,9 +7,9 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from .helper_functions import blending_function
 from .helper_functions import chunks_and_offsets
-from ..readers.foamfile_readers import read_u_from_foamfile
-from ..writers.tvmfv_writers import write_u_to_tvmfv
-from ..writers.hdf5_writers import write_u_to_hdf5
+from eddylicious.readers.foamfile_readers import read_u_from_foamfile
+from eddylicious.writers.tvmfv_writers import write_u_to_tvmfv
+from eddylicious.writers.hdf5_writers import write_u_to_hdf5
 
 __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
            "lund_generate"]
