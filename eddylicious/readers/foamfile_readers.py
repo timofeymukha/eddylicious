@@ -57,17 +57,20 @@ def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
     List of ndarrays
         The list contains 4 items
         pointsY :
-            A 2d ndarray containing the y coordinates of the
-            points.
-        pointsZ :
-            A 2d ndarray containing the z coordinates of the
-            points.
-        indY :
-            The sorting indices from the sorting performed.
-        indZ :
-            The sorting indices from the sorting performed.
-    """
+        A 2d ndarray containing the y coordinates of the
+        points.
 
+        pointsZ :
+        A 2d ndarray containing the z coordinates of the
+        points.
+
+        indY :
+        The sorting indices from the sorting performed.
+
+        indZ :
+        The sorting indices from the sorting performed.
+
+    """
     with file(readPath) as pointsFile:
         points = [line.rstrip(')\n') for line in pointsFile]
 
