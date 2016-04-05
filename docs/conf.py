@@ -34,7 +34,7 @@ sys.path.insert(0, os.path.abspath('../eddylicious'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'numpydoc'
+    'sphinx.ext.napoleon'
     #'sphinx.ext.intersphinx',
     #'sphinx.ext.coverage',
     #'sphinx.ext.mathjax',
@@ -107,9 +107,6 @@ pygments_style = 'sphinx'
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 #keep_warnings = False
-
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = False
 
 
 # -- Options for HTML output ----------------------------------------------
