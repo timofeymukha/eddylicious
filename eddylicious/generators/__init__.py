@@ -1,4 +1,4 @@
-"""Module containing various methods for generation inflow fields.
+"""Module containing functions for the generation of inflow fields.
 
 """
 from . import helper_functions
