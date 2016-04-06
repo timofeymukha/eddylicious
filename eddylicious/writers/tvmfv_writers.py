@@ -5,7 +5,7 @@ timeVaryingMappedFixedValue boundary in OpenFOAM.
 import os
 import numpy as np
 
-__all__ = ["write_points_to_tvmfv", "write_u_to_tvmfv"]
+__all__ = ["write_points_to_tvmfv", "write_velocity_to_tvmfv"]
 
 
 
@@ -37,10 +37,10 @@ def write_points_to_tvmfv(writePath, pointsY, pointsZ, xVal):
                             axis=1)
     np.savetxt(writePath, points,
                header=pointsHeader+str(points.shape[0])+"\n(", footer=")\n",
-               comments="", fmt='(%.8f %.8f %.8f)')
+               comments="", fmt='(%e %e %e)')
 
 
-def write_u_to_tvmfv(writePath, t, u):
+def write_velocity_to_tvmfv(writePath, t, uX, uY, uZ):
     """Write the velocity field in a format used by OpenFOAM's
     timeVaryingMappedFixedValue boundary condition.
 
@@ -51,8 +51,16 @@ def write_u_to_tvmfv(writePath, t, u):
         files. Commonly constant/boundaryData/nameOfInletPatch.
     t : float
         The value of time associated with the written velocity field.
-    u : ndarray
-        Array containing the velocity field.
+    uX : ndarray
+        A 2d ndarray containing the streamwise component of the velocity
+        field.
+    uY : ndarray
+        A 2d ndarray containing the wall-normal component of the
+        velocity
+        field.
+    uZ : ndarray
+        A 2d ndarray containing the spanwise component of the velocity
+        field.
 
     """
     vectorHeader = \
@@ -62,6 +70,12 @@ def write_u_to_tvmfv(writePath, t, u):
     if not os.path.exists(os.path.join(writePath, str(t))):
         os.mkdir(os.path.join(writePath, str(t)))
 
+    uX = np.reshape(uX, (uX.size, -1), order='F')
+    uY = np.reshape(uY, (uY.size, -1), order='F')
+    uZ = np.reshape(uZ, (uZ.size, -1), order='F')
+
+    u = np.concatenate((uX, uY, uZ), axis=1)
+
     np.savetxt(os.path.join(writePath, str(t), "U"), u,
                header=vectorHeader+str(u.shape[0])+"\n(", footer=")\n",
-               comments="", fmt='(%f %f %f)')
+               comments="", fmt='(%e %e %e)')
