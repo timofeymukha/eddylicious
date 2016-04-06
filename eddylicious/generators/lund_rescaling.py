@@ -8,7 +8,7 @@ from scipy.interpolate import interp2d
 from .helper_functions import blending_function
 from .helper_functions import chunks_and_offsets
 from eddylicious.readers.foamfile_readers import read_u_from_foamfile
-from eddylicious.writers.tvmfv_writers import write_u_to_tvmfv
+from eddylicious.writers.tvmfv_writers import write_velocity_to_tvmfv
 from eddylicious.writers.hdf5_writers import write_u_to_hdf5
 
 __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
@@ -29,55 +29,50 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
                                Ue, U0, gamma):
     """Rescale the mean velocity profile using Lunds rescaling.
 
-    This function rescales the mean velocity profile taken from
-    the precursor simulation using Lund et al's rescaling.
-
+    This function rescales the mean velocity profile taken from the
+    precursor simulation using Lund et al's rescaling.
 
     Parameters
     ----------
     etaPrec : 1d ndarray
-        The values of eta for the corresponding values
-        of the mean velocity from the precursor.
+        The values of eta for the corresponding values of the mean
+        velocity from the precursor.
     yPlusPrec : ndarray
-        The values of y+ for the corresponding values
-        of the mean velocity from the precursor.
+        The values of y+ for the corresponding values of the mean
+        velocity from the precursor.
     uMeanPrec : 1d ndarray
         The values of the mean velocity from the precursor.
     nInfl : int
-        The amount of points in the wall-normal direction
-        that contain the boundary layer at the inflow
-        boundary. That is, for points beyound nInfl, Ue will
+        The amount of points in the wall-normal direction that contain
+        the boundary layer at the inflow boundary. That is, for points
+        beyound nInfl, Ue will
         be prescribed.
     nInner : int
-        The amount of points where inner rescaling should be
-        considered. For points beyound nInner, the outer
-        rescaling only we be computed. The relaxes the demand
-        on Re_tau for the precursor.
+        The amount of points where inner rescaling should be considered.
+        For points beyound nInner, the outer rescaling only we be
+        computed. The relaxes the demand on Re_tau for the precursor.
     etaInfl : 1d ndarray
-        The values of eta for the mesh points at the inflow
-        boundary.
+        The values of eta for the mesh points at the inflow boundary.
     yPlusInfl : 1d ndarray
-        The values of y+ for the meshpoints at the inflow
-        boundary.
+        The values of y+ for the meshpoints at the inflow boundary.
     nPointsZInfl : int
-        The amount of points in the spanwise direction for
-        the inflow boundary.
+        The amount of points in the spanwise direction for the inflow
+        boundary.
     Ue : float
         The freestream velocity.
     U0 : float
         The centerline velocity for the precursor.
     gamma : float
-        The ration of the friction velocities in the inflow
-        boundary layer and the precursor.
-
+        The ration of the friction velocities in the inflow boundary
+        layer and the precursor.
 
     Returns
     -------
     ndarray
-        A 2d ndarray with the values of the mean velocity.
-        As expected, the values only vary in the y direction.
-    """
+        A 2d ndarray with the values of the mean velocity. As expected,
+        the values only vary in the y direction.
 
+    """
     assert nInfl > 0
     assert nInner > 0
     assert nPointsZInfl > 0
@@ -117,63 +112,56 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
     """Rescale the fluctuations of velocity using Lund et al's
     rescaling.
 
-    This function rescales the fluctuations of the three
-    components of the velocity field taken from the precursor
-    simulation using Lund et al's rescaling.
-
+    This function rescales the fluctuations of the three components of
+    the velocity field taken from the precursor simulation using Lund et
+    al's rescaling.
 
     Parameters
     ----------
     etaPrec : ndarray
-        The values of eta for the corresponding values
-        of the mean velocity from the precursor.
+        The values of eta for the corresponding values of the mean
+        velocity from the precursor.
     yPlusPrec : ndarray
-        The values of y+ for the corresponding values
-        of the mean velocity from the precursor.
+        The values of y+ for the corresponding values of the mean
+        velocity from the precursor.
     pointsZ : ndarray
-        A 2d array containing the values of z for the points
-        of the precuror mesh.
+        A 2d array containing the values of z for the points of the
+        precuror mesh.
     uPrimeX : ndarray
-        A 2d array containing the values of the fluctuations
-        of the x component of velocity.
+        A 2d array containing the values of the fluctuations of the x
+        component of velocity.
     uPrimeY : ndarray
-        A 2d array containing the values of the fluctuations
-        of the y component of velocity.
+        A 2d array containing the values of the fluctuations of the y
+        component of velocity.
     uPrimeZ : ndarray
-        A 2d array containing the values of the fluctuations
-        of the z component of velocity.
+        A 2d array containing the values of the fluctuations of the z
+        component of velocity.
     gamma : float
-        The ration of the friction velocities in the inflow
-        boundary layer and the precursor.
+        The ration of the friction velocities in the inflow boundary
+        layer and the precursor.
     etaInfl : 1d ndarray
-        The values of eta for the mesh points at the inflow
-        boundary.
+        The values of eta for the mesh points at the inflow boundary.
     yPlusInfl : 1d ndarray
-        The values of y+ for the meshpoints at the inflow
-        boundary.
+        The values of y+ for the meshpoints at the inflow boundary.
     pointsZInfl : int
-        A 2d array containing the values of z for the points
-        of the inflow boundary.
+        A 2d array containing the values of z for the points of the
+        inflow boundary.
     nInfl : int
-        The amount of points in the wall-normal direction
-        that contain the boundary layer at the inflow
-        boundary. That is, for points beyound nInfl, 0 will
-        be prescribed.
+        The amount of points in the wall-normal direction that contain
+        the boundary layer at the inflow boundary. That is, for points
+        beyound nInfl, 0 will be prescribed.
     nInner : int
-        The amount of points where inner rescaling should be
-        considered. For points beyound nInner, the outer
-        rescaling only we be computed. The relaxes the demand
-        on Re_tau for the precursor.
-
+        The amount of points where inner rescaling should be considered.
+        For points beyound nInner, the outer rescaling only we be
+        computed. The relaxes the demand on Re_tau for the precursor.
 
     Returns
     -------
     List of ndarrays
-        The list contains three items, each a 2d ndarray.
-        The first array contains the rescaled fluctuations of
-        the x component of veloicty. The second -- of the y
-        component of velocity. The third -- of the z component
-        of velocity.
+        The list contains three items, each a 2d ndarray. The first
+        array contains the rescaled fluctuations of the x component of
+        veloicty. The second -- of the y component of velocity. The
+        third -- of the z component of velocity.
     """
 
     assert np.all(etaPrec >= 0)
@@ -239,34 +227,33 @@ def lund_generate(reader, readPath,
                   nInfl, nInner, gamma,
                   yInd, zInd,
                   surfaceName="None", times="None"):
-    """Generate the files with the inflow velocity using Lund's rescaling,
-    in parallel.
+    """Generate the files with the inflow velocity using Lund's
+    rescaling, in parallel.
 
-    This function will use Lund et al's rescaling in order to
-    generate velocity fields for the inflow boundary.
-    The rescaling for the mean profile should be done before-
-    hand and is one of the input parameters for this funcion.
-
+    This function will use Lund et al's rescaling in order to generate
+    velocity fields for the inflow boundary. The rescaling for the mean
+    profile should be done before- hand and is one of the input
+    parameters for this function.
 
     Parameters
     ----------
     reader : str
-        The name of the reader which will be used to read the
-        velocity field from the precursor simulation.
+        The name of the reader which will be used to read the velocity
+        field from the precursor simulation.
     readPath : str
         The path for the reader.
     writer: str
-        The writer that will be used to save the values of the
-        velocity field.
+        The writer that will be used to save the values of the velocity
+        field.
     writePath : str
         The path for the writer.
     dt : float
-        The time-step to be used in the simulation. This will be
-        used to associate a time-value with the produced velocity
+        The time-step to be used in the simulation. This will be used to
+        associate a time-value with the produced velocity
         fields.
     t0 : float
-        The starting time to be used in the simulation. This will
-        be used to associate a time-value with the produced velocity.
+        The starting time to be used in the simulation. This will be
+        used to associate a time-value with the produced velocity.
     timePrecision : int
         Number of points after the decimal to keep for the time value.
     tEnd : float
@@ -277,50 +264,45 @@ def lund_generate(reader, readPath,
         The values of the mean velocity for the inflow boundary
         layer.
     etaPrec : ndarray
-        The values of eta for the corresponding values
-        of the mean velocity from the precursor.
+        The values of eta for the corresponding values of the mean
+        velocity from the precursor.
     yPlusPrec : ndarray
-        The values of y+ for the corresponding values
-        of the mean velocity from the precursor.
+        The values of y+ for the corresponding values of the mean
+        velocity from the precursor.
     pointsZ : ndarray
-        A 2d array containing the values of z for the points
-        of the precuror mesh.
+        A 2d array containing the values of z for the points of the
+        precuror mesh.
     etaInfl : 1d ndarray
-        The values of eta for the mesh points at the inflow
-        boundary.
+        The values of eta for the mesh points at the inflow boundary.
     yPlusInfl : 1d ndarray
-        The values of y+ for the meshpoints at the inflow
-        boundary.
+        The values of y+ for the meshpoints at the inflow boundary.
     pointsZInfl : int
-        A 2d array containing the values of z for the points
-        of the inflow boundary.
+        A 2d array containing the values of z for the points of the
+        inflow boundary.
     nInfl : int
-        The amount of points in the wall-normal direction
-        that contain the boundary layer at the inflow
-        boundary. That is, for points beyound nInfl, 0 will
-        be prescribed.
+        The amount of points in the wall-normal direction that contain
+        the boundary layer at the inflow boundary. That is, for points
+        beyound nInfl, 0 will be prescribed.
     nInner : int
-        The amount of points where inner rescaling should be
-        considered. For points beyound nInner, the outer
-        rescaling only we be computed. The relaxes the demand
-        on Re_tau for the precursor.
+        The amount of points where inner rescaling should be considered.
+        For points beyond nInner, the outer rescaling only we be
+        computed. The relaxes the demand on Re_tau for the precursor.
     gamma : float
-        The ration of the friction velocities in the inflow
-        boundary layer and the precursor.
+        The ration of the friction velocities in the inflow boundary
+        layer and the precursor.
     yInd : ndarray
-        The sort indices for sorting the read velocity field.
-        This is needed when some sorting is performed when the
-        mesh points are read and turned into ordered 2d arrays.
-        Them the exact same sorting should be applyed to the
-        velocity fields.
+        The sort indices for sorting the read velocity field. This is
+        needed when some sorting is performed when the mesh points are
+        read and turned into ordered 2d arrays. Them the exact same
+        sorting should be applyed to the velocity fields.
     zInd : ndarray
         Same as yInd, but for the sorting of the z values.
     surfaceName : str, optional
         For the foamFile reader, the name of the surface used for
         sampling the velocity values.
     times : list of floats, optional
-        For the foamFile reader, the times for which the velocity
-        field was sampled in the precursor simulation.
+        For the foamFile reader, the times for which the velocity field
+        was sampled in the precursor simulation.
     """
 
     # Grab info regarding parallelization
@@ -388,7 +370,7 @@ def lund_generate(reader, readPath,
 
         # Write
         if (writer == "tvmfv"):
-            write_u_to_tvmfv(writePath, t, UInfl)
+            write_velocity_to_tvmfv(writePath, t, UInfl)
         elif (writer == "hdf5"):
             write_u_to_hdf5(writePath, t, UInfl, position, size)
         else:
@@ -527,7 +509,7 @@ def lund_generate(reader, readPath,
 #        UInfl = np.concatenate((UInfl_X, UInfl_Y, UInfl_Z), axis=1)
 #
 #        if (writer == "tvmfv"):
-#            write_u_to_tvmfv(writePath, t, UInfl)
+#            write_velocity_to_tvmfv(writePath, t, UInfl)
 #        elif (writer == "hdf5"):
 #            write_u_to_hdf5(writePath, t, UInfl, writeTimeI, size)
 #        else:
