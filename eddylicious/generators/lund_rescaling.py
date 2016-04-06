@@ -1,3 +1,11 @@
+"""Function for generating inflow velocity fields using
+Lund et al's rescaling, see
+
+Lund T.S., Wu X., Squires K.D. Generation of turbulent inflow
+data for spatially-developing boundary layer simulations.
+J. Comp. Phys. 1998; 140:233-58.
+
+"""
 import os
 import numpy as np
 from sys import exit
@@ -13,14 +21,6 @@ from eddylicious.writers.hdf5_writers import write_u_to_hdf5
 
 __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
            "lund_generate"]
-
-"""Function for generating inflow velocity fields using
-Lund et al's rescaling, see
-
-Lund T.S., Wu X., Squires K.D. Generation of turbulent inflow
-data for spatially-developing boundary layer simulations.
-J. Comp. Phys. 1998; 140:233-58.
-"""
 
 
 def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
@@ -313,7 +313,7 @@ def lund_generate(reader, readPath,
     # Get the total amount of rescalings to be done
     size = int((tEnd-t0)/dt+1)
     
-    # Calculate the amount of rescaligns each processor is responsible for
+    # Calculate the amount of rescalings each processor is responsible for
     [chunks, offsets] = chunks_and_offsets(nProcs, size)
 
     # Perform the rescaling
@@ -322,60 +322,42 @@ def lund_generate(reader, readPath,
         t = float(("{0:."+str(timePrecision)+"f}").format(t))
         position = int(offsets[rank]) + i
 
-        if (rank == 0):
+        if rank == 0:
             print "     Rescaled about", i/float(chunks[rank])*100, "%" 
 
         # Read U data
-        flag = False 
-        if (reader == "foamFile"):
+        if reader == "foamFile":
             assert position < len(times)
-            readPosition = position
-            #if (position < len(times)):
-            #    readPosition = position
-            #else:
-            #    if (not flag):
-            #        print "Warning: precursor database smaller than required \
-            #        number of time-steps"
-            #        flag = True
-            #    readPosition = position - np.floor(position/len(times))*len(times)
-                
-            [U_X, U_Y, U_Z] = read_u_from_foamfile(
-                os.path.join(readPath, times[readPosition], surfaceName,
-                            "vectorField", "U"),
+
+            [uPrimeX, uPrimeY, uPrimeZ] = read_u_from_foamfile(
+                os.path.join(readPath, times[position], surfaceName,
+                             "vectorField", "U"),
                 pointsZ.shape[0], pointsZ.shape[1],
                 yInd, zInd)
         else:
-            print "ERROR. Unknown reader", reader
-            exit()
+            raise ValueError("Unknown reader")
 
-        # Claculate UPrime
-        uPrimeX = U_X - uMeanPrec[:, np.newaxis]
-        uPrimeY = U_Y
-        uPrimeZ = U_Z
+        # Subtract mean
+        uPrimeX -= uMeanPrec[:, np.newaxis]
 
-        [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl] = \
+        [uXInfl, uYInfl, uZInfl] = \
             lund_rescale_fluctuations(
                 etaPrec, yPlusPrec, pointsZ,
                 uPrimeX, uPrimeY, uPrimeZ, gamma,
                 etaInfl, yPlusInfl, pointsZInfl,
                 nInfl, nInner)
 
-        # Combine and flatten
-        UInfl_X = np.reshape(uPrimeXInfl+uMeanInfl, (uPrimeXInfl.size, -1),
-                            order='F')
-        UInfl_Y = np.reshape(uPrimeYInfl, (uPrimeXInfl.size, -1), order='F')
-        UInfl_Z = np.reshape(uPrimeZInfl, (uPrimeXInfl.size, -1), order='F')
-
-        UInfl = np.concatenate((UInfl_X, UInfl_Y, UInfl_Z), axis=1)
+        # Add mean
+        uXInfl += uMeanInfl
 
         # Write
-        if (writer == "tvmfv"):
-            write_velocity_to_tvmfv(writePath, t, UInfl)
-        elif (writer == "hdf5"):
-            write_u_to_hdf5(writePath, t, UInfl, position, size)
+        if writer == "tvmfv":
+            write_velocity_to_tvmfv(writePath, t, uXInfl, uYInfl, uZInfl)
+        elif writer == "hdf5":
+            write_u_to_hdf5(writePath, t, uXInfl, uYInfl, uZInfl, position,
+                            size)
         else:
-            print "ERROR in lund_generate(). Unknown writer ", writer
-            exit()
+            raise ValueError("Unknown writer")
 
 #def lund_generate_legacy(reader, readPath,
 #                         writer, writePath,
