@@ -11,23 +11,21 @@ __all__ = ["write_points_to_tvmfv", "write_u_to_tvmfv"]
 
 def write_points_to_tvmfv(writePath, pointsY, pointsZ, xVal):
     """Write the points in a format used by OpenFOAM's
-    timeVaryingMappedFixedValue boundary conidition.
+    timeVaryingMappedFixedValue boundary condition.
 
     Parameters
     ----------
     writePath : str
-        The path where to write the points file. Should
-        commonly be constant/boundaryData/nameOfInletPatch.
+        The path where to write the points file. Should commonly be
+        constant/boundaryData/nameOfInletPatch.
     pointsY : ndarray
-        A 2d array containing the values of y for the face
-        centres.
+        A 2d array containing the values of y for the face centres.
     pointsZ : ndarray
-        A 2d array containing the values of z for the face
-        centres.
+        A 2d array containing the values of z for the face centres.
     xVal : float
         The x-location of the inflow plane.
-    """
 
+    """
     pointsHeader = \
         "FoamFile\n{\nversion 2.0;\nformat ascii;\n\
         class vectorField;\nobject values;\n}\n"
@@ -39,26 +37,24 @@ def write_points_to_tvmfv(writePath, pointsY, pointsZ, xVal):
                             axis=1)
     np.savetxt(writePath, points,
                header=pointsHeader+str(points.shape[0])+"\n(", footer=")\n",
-               comments="", fmt='(%f %f %f)')
+               comments="", fmt='(%.8f %.8f %.8f)')
 
 
 def write_u_to_tvmfv(writePath, t, u):
     """Write the velocity field in a format used by OpenFOAM's
-    timeVaryingMappedFixedValue boundary conidition.
+    timeVaryingMappedFixedValue boundary condition.
 
     Parameters
-    ---------
+    ----------
     writePath : str
-        The path where to write the time directories
-        containing the U files. Should commonly be
-        constant/boundaryData/nameOfInletPatch.
+        The path where to write the time directories containing the U
+        files. Commonly constant/boundaryData/nameOfInletPatch.
     t : float
-        The value of time associated with the written
-        velocity field.
+        The value of time associated with the written velocity field.
     u : ndarray
-        Array containing the velocity field
-    """
+        Array containing the velocity field.
 
+    """
     vectorHeader = \
         "FoamFile\n{\nversion 2.0;\nformat ascii;\n\
         class vectorAverageField;\nobject points;\n}\n\n(0 0 0)\n"
