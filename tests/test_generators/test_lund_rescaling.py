@@ -39,6 +39,7 @@ def test_lund_rescale_mean_velocity_different_grid():
     for i in xrange(len(uTest)):
         assert_almost_equal(uTest[i], uRescaled[i], decimal=3)
 
+
 # Test recaling dns data onto itself, using a different grid with eta > 1
 def test_lund_rescale_mean_velocity_eta_greater_one():
     file = path.join(eddylicious.__path__[0], "..", "tests", "datasets",

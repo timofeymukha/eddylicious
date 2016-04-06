@@ -1,23 +1,19 @@
-"""Functions for writing to the native format of the
-timeVaryingMappedFixedValue boundary in OpenFOAM.
+"""Functions for writing to the and hdf5 file.
 
 """
-
 import numpy as np
 import h5py as h5py
 
 
-__all__ = ["write_points_to_hdf5", "write_u_to_hdf5"]
-
+__all__ = ["write_points_to_hdf5", "write_velocity_to_hdf5"]
 
 
 def write_points_to_hdf5(writePath, pointsY, pointsZ, xVal):
     """Write the points into a HDF5 file.
 
-    This function will save the points into a HDF5 file.
-    The points will be transformed into 1d arrays.
-    The resulting dataset is called points and lies in the
-    root of the file.
+    This function will save the points into a HDF5 file. The points will
+    be transformed into 1d arrays. The resulting dataset is called
+    points and lies in the root of the file.
 
     Parameters
     ----------
@@ -31,8 +27,8 @@ def write_points_to_hdf5(writePath, pointsY, pointsZ, xVal):
         centres.
     xVal : float
         The x-location of the inflow plane.
-    """
 
+    """
     dbFile = h5py.File(writePath, 'a')
 
     points = np.zeros((pointsY.size, 2))
@@ -48,7 +44,7 @@ def write_points_to_hdf5(writePath, pointsY, pointsZ, xVal):
     dbFile.close()
 
 
-def write_u_to_hdf5(file, t, u, iter, size):
+def write_velocity_to_hdf5(file, t, uX, uY, uZ, iteration):
     """Write the velocity field into an HDF5 file.
 
     Will add datasets "time" and "velocity"
@@ -60,19 +56,31 @@ def write_u_to_hdf5(file, t, u, iter, size):
     t : float
         The value of time associated with the written
         velocity field.
-    u : ndarray
-        Array containing the velocity field.
-    iter: int
+    uX : ndarray
+        A 2d ndarray containing the streamwise component of the velocity
+        field.
+    uY : ndarray
+        A 2d ndarray containing the wall-normal component of the
+        velocity
+        field.
+    uZ : ndarray
+        A 2d ndarray containing the spanwise component of the velocity
+        field.
+    iteration: int
         The position of along the time axis.
-    size: int
-        The total size of the time axis.
     """
 
-    if (iter > size-1):
-        print "WARNING in write_u_to_hdf5. Write position larger \
-              than total database size. Not writing."
-        return
+    uX = np.reshape(uX, (uX.size, -1), order='F')
+    uY = np.reshape(uY, (uY.size, -1), order='F')
+    uZ = np.reshape(uZ, (uZ.size, -1), order='F')
 
-    file["time"][iter] = t
-    file["velocity"][iter, :, :] = u
+    u = np.concatenate((uX, uY, uZ), axis=1)
+
+    size = file["time"].size
+
+    if iteration >= size:
+        raise ValueError("Write position larger than total database size.")
+
+    file["time"][iteration] = t
+    file["velocity"][iteration, :, :] = u
 

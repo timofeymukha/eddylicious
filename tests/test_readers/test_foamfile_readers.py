@@ -24,6 +24,7 @@ def test_read_points_no_add_zeros_all_points():
     assert np.all(yInd == yI)
     assert np.all(zInd == zI)
 
+
 # Do not add zeros on top and bottom, take part of points along y
 def test_read_points_no_add_zeros_some_points():
     n = 10
@@ -45,6 +46,7 @@ def test_read_points_no_add_zeros_some_points():
     assert np.all(pointsZ == pZ)
     assert np.all(yInd == yI)
     assert np.all(zInd == zI)
+
 
 # Add zeros on top and bottom, take all points along y
 def test_read_points_add_zeros_all_points():
@@ -70,6 +72,7 @@ def test_read_points_add_zeros_all_points():
     assert np.all(pointsZ == pZ)
     assert np.all(yInd == yI)
     assert np.all(zInd == zI)
+
 
 # Add zeros at the bottom, take part of the along y
 def test_read_points_add_zeros_some_points():

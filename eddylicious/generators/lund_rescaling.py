@@ -17,7 +17,7 @@ from .helper_functions import blending_function
 from .helper_functions import chunks_and_offsets
 from eddylicious.readers.foamfile_readers import read_u_from_foamfile
 from eddylicious.writers.tvmfv_writers import write_velocity_to_tvmfv
-from eddylicious.writers.hdf5_writers import write_u_to_hdf5
+from eddylicious.writers.hdf5_writers import write_velocity_to_hdf5
 
 __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
            "lund_generate"]
@@ -354,8 +354,8 @@ def lund_generate(reader, readPath,
         if writer == "tvmfv":
             write_velocity_to_tvmfv(writePath, t, uXInfl, uYInfl, uZInfl)
         elif writer == "hdf5":
-            write_u_to_hdf5(writePath, t, uXInfl, uYInfl, uZInfl, position,
-                            size)
+            write_velocity_to_hdf5(writePath, t, uXInfl, uYInfl, uZInfl,
+                                   position)
         else:
             raise ValueError("Unknown writer")
 
@@ -493,7 +493,7 @@ def lund_generate(reader, readPath,
 #        if (writer == "tvmfv"):
 #            write_velocity_to_tvmfv(writePath, t, UInfl)
 #        elif (writer == "hdf5"):
-#            write_u_to_hdf5(writePath, t, UInfl, writeTimeI, size)
+#            write_velocity_to_hdf5(writePath, t, UInfl, writeTimeI, size)
 #        else:
 #            print "ERROR in lund_generate(). Unknown writer ", writer
 #            exit()

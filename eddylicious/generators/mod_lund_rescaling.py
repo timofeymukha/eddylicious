@@ -8,8 +8,8 @@ from .helper_functions import chauhan_U_composite
 from .helper_functions import epsilon_ReT
 from .lund_rescaling import lund_rescale_fluctuations
 from eddylicious.readers.foamfile_readers import read_u_from_foamfile
-from eddylicious.writers.tvmfv_writers import write_u_to_tvmfv
-from eddylicious.writers.hdf5_writers import write_u_to_hdf5
+from eddylicious.writers.tvmfv_writers import write_velocity_to_tvmfv
+from eddylicious.writers.hdf5_writers import write_velocity_to_hdf5
 
 __all__ = ["mod_lund_rescale_mean_velocity", "mod_lund_generate"]
 
@@ -261,9 +261,9 @@ def mod_lund_generate(reader, readPath,
 
         # Write
         if (writer == "tvmfv"):
-            write_u_to_tvmfv(writePath, t, UInfl)
+            write_velocity_to_tvmfv(writePath, t, UInfl)
         elif (writer == "hdf5"):
-            write_u_to_hdf5(writePath, t, UInfl, position, size)
+            write_velocity_to_hdf5(writePath, t, UInfl, position, size)
         else:
             print "ERROR in mod_lund_generate(). Unknown writer ", writer
             exit()

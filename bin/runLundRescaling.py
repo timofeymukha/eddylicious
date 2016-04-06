@@ -212,10 +212,11 @@ elif writer == "hdf5":
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
     # Prepare the hdf5 file by adding relevant datasets
-    # We change the writePath to be the hdf5 file itsel
+    # We change the writePath to be the hdf5 file itself
     writePath = h5py.File(writePath, 'a', driver='mpio', comm=MPI.COMM_WORLD)
     writePath.create_dataset("time", data=t0*np.ones((size, 1)))
-    writePath.create_dataset("velocity", (size, pointsZInfl.size, 3))
+    writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
+                             dtype=np.float)
 
 
 else:
