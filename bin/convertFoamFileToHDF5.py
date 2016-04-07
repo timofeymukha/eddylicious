@@ -65,14 +65,14 @@ times = np.sort(times)
 # Get the mean profile
 uMean = np.append(np.zeros((1, 1)), np.genfromtxt(uMeanFile)[:, 1])
 
-nPointsY = uMean.size
-
 # Read in the points
 [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
     os.path.join(dataDir, times[0], surfaceName, "faceCentres"),
-    nPointsY=nPointsY)
+    addZeros=False)
 
 [nPointsY, nPointsZ] = pointsY.shape
+
+assert nPointsY == uMean.size
 
 # Allocate arrays for the fluctuations
 if rank == 0:

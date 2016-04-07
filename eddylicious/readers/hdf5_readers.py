@@ -10,23 +10,19 @@ def read_points_from_hdf5(readPath, addZeros=0, nPointsY=0, delta=1):
     """Read the coordinates of the points from a hdf5 file.
 
 
-    Reads in the locations of the face centers, stored
-    in  a hdf5 file.
+    Reads in the locations of the face centers, stored in  a hdf5 file.
 
-    The function supports considering only a number of
-    points in the wall-normal direction and exchanging
-    the last wall-normal position with the value of the
-    half-width of the channel. 
-    Also, adding a row of zeros as the first wall-normal
-    position is possible.
+    The function supports considering only a number of points in the
+    wall-normal direction and exchanging the last wall-normal position
+    with the value of the half-width of the channel. Also, adding a row
+    of zeros as the first wall-normal position is possible.
 
-    This is convenient when rescaling from channel flow
-    is performed using Lund et al's method, which requires
-    a liner interpolant across the domain half-width.
-    Adding the value at the center of the channel and at
-    the wall, which are otherwise absent on a finite volume
-    grid, insures that the interpolant will cover the whole
-    interval [0, delta].
+    This is convenient when rescaling from channel flow is performed
+    using Lund et al's method, which requires a liner interpolant across
+    the domain half-width. Adding the value at the center of the channel
+    and at the wall, which are otherwise absent on a finite volume grid,
+    insures that the interpolant will cover the whole interval [0,
+    delta].
 
 
     Parameters
@@ -36,15 +32,14 @@ def read_points_from_hdf5(readPath, addZeros=0, nPointsY=0, delta=1):
     addZeros : bool, optional,
         Whether to add coordinates for y=0 (default is 1)
     nPointsY : int, optional
-        How many points to keep in the y direction. Zero
-        means all points are kept (default 0).
-        
-        If nPointsY is provided, the last value in the wall-
-        normal direction is exchanged to value of delta,
-        see below.
+        How many points to keep in the y direction. Zero means all
+        points are kept (default 0).
+
+        If nPointsY is provided, the last value in the wall- normal
+        direction is exchanged to value of delta, see below.
     delta : bool, optional
-        The value of the channel-half width. (default 1).
-        Must be provided if nPoints is provided.
+        The value of the channel-half width. (default 1). Must be
+        provided if nPoints is provided.
 
 
     Returns
@@ -52,13 +47,11 @@ def read_points_from_hdf5(readPath, addZeros=0, nPointsY=0, delta=1):
     List of ndarrays
         The list contains 4 items
         pointsY :
-            A 2d ndarray containing the y coordinates of the
-            points.
+            A 2d ndarray containing the y coordinates of the points.
         pointsZ :
-            A 2d ndarray containing the z coordinates of the
-            points.
-    """
+            A 2d ndarray containing the z coordinates of the points.
 
+    """
     dbFile = h5py.File(readPath, 'a')
 
     pointsY = dbFile["points"]["pointsY"]
@@ -87,10 +80,11 @@ def read_points_from_hdf5(readPath, addZeros=0, nPointsY=0, delta=1):
 
 
 def read_u_from_hdf5(readPath, timeIndex):
-    """ Read the values of the velocity field from a foamFile-format file.
+    """ Read the values of the velocity field from a foamFile-format
+    file.
 
-    Reads in the values of the velocity components stored
-    as in hdf5 file format.
+    Reads in the values of the velocity components stored as in hdf5
+    file format.
 
     Parameters
     ---------
@@ -104,30 +98,15 @@ def read_u_from_hdf5(readPath, timeIndex):
     Returns
     -------
     List of ndarrays
-        The list contains three items, each a 2d array,
-        corresponding to the three components of the
-        velocity field, the order of the components in the
-        list is x, y and the z.
+        The list contains three items, each a 2d array, corresponding to
+        the three components of the velocity field, the order of the
+        components in the list is x, y and the z.
+
     """
-    dbFile = h5py.File(readPath, 'a')
+    dbFile = h5py.File(readPath, 'r')
 
     uX = dbFile["velocity"]["uX"][timeIndex, :, :]
     uY = dbFile["velocity"]["uY"][timeIndex, :, :]
     uZ = dbFile["velocity"]["uZ"][timeIndex, :, :]
-
-    # Prepend with zeros
-    #uX = np.append(np.zeros((1, nPointsZ)), uX, axis=0)
-    #uY = np.append(np.zeros((1, nPointsZ)), uY, axis=0)
-    #uZ = np.append(np.zeros((1, nPointsZ)), uZ, axis=0)
-
-    # Interpolate to get data at y=delta
-    #uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
-    #uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
-    #uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
-
-    # Remove data above y=delta
-    #uX = uX[:nPointsY, :]
-    #uY = uY[:nPointsY, :]
-    #uZ = uZ[:nPointsY, :]
 
     return [uX, uY, uZ]

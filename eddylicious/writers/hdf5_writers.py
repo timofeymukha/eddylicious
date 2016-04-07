@@ -1,4 +1,4 @@
-"""Functions for writing to the and hdf5 file.
+"""Functions for writing to an hdf5 file.
 
 """
 import numpy as np
@@ -83,4 +83,3 @@ def write_velocity_to_hdf5(file, t, uX, uY, uZ, iteration):
 
     file["time"][iteration] = t
     file["velocity"][iteration, :, :] = u
-
