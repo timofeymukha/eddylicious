@@ -72,7 +72,8 @@ uMean = np.append(np.zeros((1, 1)), np.genfromtxt(uMeanFile)[:, 1])
 
 [nPointsY, nPointsZ] = pointsY.shape
 
-assert nPointsY == uMean.size
+# Add 2 to account for the zeros
+assert nPointsY == uMean.size+2
 
 # Allocate arrays for the fluctuations
 if rank == 0:
