@@ -62,8 +62,9 @@ dataDir = os.path.join(precursorCaseDir, "postProcessing", "sampledSurface")
 times = os.listdir(dataDir)
 times = np.sort(times)
 
-# Get the mean profile
+# Get the mean profile and append zeros
 uMean = np.append(np.zeros((1, 1)), np.genfromtxt(uMeanFile)[:, 1])
+uMean = np.append(uMean, np.zeros((1, 1)))
 
 # Read in the points
 [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
@@ -72,8 +73,7 @@ uMean = np.append(np.zeros((1, 1)), np.genfromtxt(uMeanFile)[:, 1])
 
 [nPointsY, nPointsZ] = pointsY.shape
 
-# Add 2 to account for the zeros
-assert nPointsY == uMean.size+2
+assert nPointsY == uMean.size
 
 # Allocate arrays for the fluctuations
 if rank == 0:
