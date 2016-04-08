@@ -17,7 +17,8 @@ setup(name='eddylicious',
                     'numpy',
                     'scipy',
                     'mpi4py',
-                    'matplotlib'
+                    'matplotlib',
+                    'h5py'
                        ],
       license="GNU GPL 3",
       classifiers=[
