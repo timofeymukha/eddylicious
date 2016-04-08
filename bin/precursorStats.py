@@ -39,9 +39,6 @@ dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
 
 pointsY = dbFile["points"]["pointsY"]
 pointsZ = dbFile["points"]["pointsZ"]
-uX = dbFile["velocity"]["uX"]
-uY = dbFile["velocity"]["uY"]
-uZ = dbFile["velocity"]["uZ"]
 
 size = len(uX[:,0])
 nPointsY = pointsY.shape[0]
@@ -61,12 +58,12 @@ for i in xrange(chunks[rank]):
 
     position = offsets[rank] + i
 
-    uMean[:, :, 0] += uX[position, :, :]
-    uMean[:, :, 1] += uY[position, :, :]
-    uMean[:, :, 2] += uZ[position, :, :]
-    uSquaredMean[:, :, 0] += uX[position, :, :]**2
-    uSquaredMean[:, :, 1] += uY[position, :, :]**2
-    uSquaredMean[:, :, 2] += uZ[position, :, :]**2
+    uMean[:, :, 0] += dbFile["velocity"]["uX"][position, :, :]
+    uMean[:, :, 1] += dbFile["velocity"]["uY"][position, :, :]
+    uMean[:, :, 2] += dbFile["velocity"]["uZ"][position, :, :]
+    uSquaredMean[:, :, 0] += dbFile["velocity"]["uX"][position, :, :]**2
+    uSquaredMean[:, :, 1] += dbFile["velocity"]["uY"][position, :, :]**2
+    uSquaredMean[:, :, 2] += dbFile["velocity"]["uZ"][position, :, :]**2
 
 uMean = comm.gather(uMean, root=0)
 uSquaredMean = comm.gather(uSquaredMean, root=0)
