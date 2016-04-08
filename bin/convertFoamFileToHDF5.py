@@ -68,7 +68,7 @@ uMean = np.append(np.zeros((1, 1)), np.genfromtxt(uMeanFile)[:, 1])
 # Read in the points
 [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
     os.path.join(dataDir, times[0], surfaceName, "faceCentres"),
-    addZerosBot=True, addZerosTop=True, midValue=0)
+    addZerosBot=True, addZerosTop=True)
 
 [nPointsY, nPointsZ] = pointsY.shape
 
