@@ -34,7 +34,6 @@ dbFile = h5py.File(readPath, 'r')
 times = dbFile['time'][()]
 points = dbFile['points'][()]
 points = points[:, 1:]
-velocity = dbFile['velocity']
 
 size = len(times)
 
@@ -44,8 +43,8 @@ uSquaredMean = np.zeros((points.shape[0], 3))
 print "Calculating the statistics"
 
 for i in xrange(size):
-    uMean += velocity[i, :, :]
-    uSquaredMean += velocity[i, :, :]**2
+    uMean += dbFile['velocity'][i, :, :]
+    uSquaredMean += dbFile['velocity'][i, :, :]**2
 
 
 uMean /= size
