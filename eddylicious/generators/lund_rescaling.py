@@ -331,9 +331,8 @@ def lund_generate(reader, readPath,
 
             [uPrimeX, uPrimeY, uPrimeZ] = read_u_from_foamfile(
                 os.path.join(readPath, times[position], surfaceName,
-                             "vectorField", "U"),
-                pointsZ.shape[0], pointsZ.shape[1],
-                yInd, zInd)
+                             "vectorField", "U"), pointsZ.shape[0],
+                pointsZ.shape[1], yInd, zInd, interpolate=1)
         else:
             raise ValueError("Unknown reader")
 

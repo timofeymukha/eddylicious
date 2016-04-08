@@ -6,7 +6,8 @@ import numpy as np
 __all__ = ["read_points_from_foamfile", "read_u_from_foamfile"]
 
 
-def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
+def read_points_from_foamfile(readPath, addZerosBot, addZerosTop,
+                              nPointsY=0, midValue=0):
     """Read the coordinates of the points from a foamFile-format file.
 
 
@@ -34,17 +35,15 @@ def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
     ----------
     readPath : str
         The path to the file containing the points.
-    addZeros : bool, optional,
-        Whether to add coordinates for y=0 (default 1).
+    addZerosBot : bool
+        Whether to append a row of zeros from below.
+    addZerosTop : bool
+        Whether to append a row of zeros from above.
     nPointsY : int, optional
         How many points to keep in the y direction. Zero means all
         points are kept (default 0).
-
-        If nPointsY is provided, the last value in the wall- normal
-        direction is exchanged to value of delta, see below.
-    delta : bool, optional
-        The value of the channel-half width. (default 1). Must be
-        provided if nPoints is provided.
+    midValue : float, optional
+        The value of the channel-half width. (default 0).
 
     Returns
     -------
@@ -97,14 +96,14 @@ def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
 
 
 # Add points at y = 0 and y = max(y)
-    if addZeros:
+    if addZerosBot:
         pointsY = np.append(np.zeros((1, nPointsZ)), pointsY, axis=0)
         pointsZ = np.append(np.array([pointsZ[0, :]]), pointsZ, axis=0)
-        if nPointsY == 0:
-            pointsY = np.append(pointsY, np.zeros((1, nPointsZ)), axis=0)
-            pointsZ = np.append(pointsZ, np.array([pointsZ[0, :]]),  axis=0)
+    if addZerosTop:
+        pointsY = np.append(pointsY, np.zeros((1, nPointsZ)), axis=0)
+        pointsZ = np.append(pointsZ, np.array([pointsZ[0, :]]),  axis=0)
 
-# Cap the points, to include ony one half of the channel
+# Cap the points, according to nPointsY
 # Makes y=delta the last point
 # NOTE! nPoints includes the added zeros
     if nPointsY:
@@ -112,12 +111,15 @@ def read_points_from_foamfile(readPath, addZeros=True, nPointsY=0, delta=1):
 
         pointsY = pointsY[:nPointsY, :]
         pointsZ = pointsZ[:nPointsY, :]
-        pointsY[-1, :] = delta
+
+    if midValue:
+        pointsY[-1, :] = midValue
 
     return [pointsY, pointsZ, yInd, zInd]
 
 
-def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
+def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd,
+                         addZerosBot, addZerosTop, interpolate=0):
     """ Read the values of the velocity field from a foamFile-format
      file.
 
@@ -129,6 +131,7 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
 
     Parameters
     ----------
+    interpolate
     readPath : str
         The path to the file containing the velocity field.
     nPointsY : int
@@ -141,7 +144,14 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
         The sorting indices for sorting in the wall-normal direction.
     zInd : ndarray
         The sorting indices for sorting in the spanwise direction.
-
+    addZerosBot : bool
+        Whether to append a row of zeros from below.
+    addZerosTop : bool
+        Whether to append a row of zeros from above.
+    interpolate : bool, optional
+        Whether to interpolate the last value in the wall-normal
+        direction using two points. Useful to get the center-value of
+        the velocity from the channel flow.
     Returns
     -------
     List of ndarrays
@@ -175,19 +185,27 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd):
         uY[i, :] = uY[i, zInd[i, :]]
         uZ[i, :] = uZ[i, zInd[i, :]]
 
-    # Prepend with zeros
-    uX = np.append(np.zeros((1, nPointsZ)), uX, axis=0)
-    uY = np.append(np.zeros((1, nPointsZ)), uY, axis=0)
-    uZ = np.append(np.zeros((1, nPointsZ)), uZ, axis=0)
+    if addZerosBot:
+        uX = np.append(np.zeros((1, nPointsZ)), uX, axis=0)
+        uY = np.append(np.zeros((1, nPointsZ)), uY, axis=0)
+        uZ = np.append(np.zeros((1, nPointsZ)), uZ, axis=0)
+
+    if addZerosTop:
+        uX = np.append(uX, np.zeros((1, nPointsZ)), axis=0)
+        uY = np.append(uY, np.zeros((1, nPointsZ)), axis=0)
+        uZ = np.append(uZ, np.zeros((1, nPointsZ)), axis=0)
+
+
 
     # To interpolate the velocities in the center, the we need an extra value
     # (above the center-line)
     assert uX.shape[0] > nPointsY
 
-    # Interpolate to get data at y=delta
-    uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
-    uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
-    uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
+    # Interpolate for the last point in the wall-normal direction
+    if interpolate:
+        uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
+        uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
+        uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
 
     # Remove data above y=delta
     uX = uX[:nPointsY, :]

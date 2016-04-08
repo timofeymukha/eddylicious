@@ -12,7 +12,7 @@ setup(name='eddylicious',
                'bin/inflowStats.py',
                'bin/precursorStats.py',
                'bin/runLundRescaling.py',
-               'bin/runModLundRescaling.py',],
+               ],
       install_requires=[
                     'numpy',
                     'scipy',
