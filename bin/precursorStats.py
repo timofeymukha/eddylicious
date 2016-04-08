@@ -40,7 +40,7 @@ dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
 pointsY = dbFile["points"]["pointsY"]
 pointsZ = dbFile["points"]["pointsZ"]
 
-size = len(uX[:,0])
+size = len(dbFile["velocity"]["uX"].shape[0])
 nPointsY = pointsY.shape[0]
 nPointsZ = pointsY.shape[1]
 
