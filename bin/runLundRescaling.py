@@ -79,9 +79,9 @@ if rank == 0:
     print "Reading from database with ", len(times), " time-steps."
 
 # Get the mean profile
-uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
-                                     "collapsedFields"))
 if reader == "foamFile":
+    uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
+                                         "collapsedFields"))
     uMean = np.append(np.zeros((1, 1)),
                       np.genfromtxt(os.path.join(readPath, "postProcessing",
                                                  "collapsedFields",
