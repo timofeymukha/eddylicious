@@ -91,6 +91,7 @@ pointsGroup.create_dataset("pointsZ", data=pointsZ)
 
 velocityGroup.create_dataset("uMean", data=uMean)
 
+velocityGroup.create_dataset("times", data=float(times))
 
 uX = velocityGroup.create_dataset("uX", (len(times),
                                          pointsY.shape[0],
