@@ -86,7 +86,6 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     assert np.all(uMeanPrec >= 0)
     assert nInner <= nInfl
 
-
     uMeanInterp = interp1d(etaPrec, uMeanPrec)
     uMeanInterpPlus = interp1d(yPlusPrec, uMeanPrec)
 

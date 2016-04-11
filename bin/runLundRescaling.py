@@ -180,7 +180,7 @@ for i in xrange(etaInfl.size):
         nInner += 1
 
 
-# Simple sanity checks
+# Simple sanity check
 if deltaInfl > yInfl[-1]:
     print "ERROR in runLundRescaling.py. Desired delta_99 is \
           larger then maximum y."
@@ -193,7 +193,7 @@ size = int((tEnd-t0)/dt+1)
 
 if rank == 0:
     print "Producing database with", size, "time-steps."
-# Write points and modify writePath appropriatly
+# Write points and modify writePath appropriately
 if writer == "tvmfv":
     if rank == 0:
         write_points_to_tvmfv(os.path.join(writePath, "constant",

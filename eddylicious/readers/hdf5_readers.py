@@ -8,7 +8,8 @@ __all__ = ["read_points_from_hdf5", "read_u_from_hdf5"]
 
 
 def read_points_from_hdf5(readPath, addValBot=float('nan'),
-                          addValTop=float('nan'), nPointsY=0, midValue=0):
+                          addValTop=float('nan'), excludeBot=0,
+                          excludeTop=0, midValue=0):
     """Read the coordinates of the points from a hdf5 file.
 
 
@@ -35,9 +36,12 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
         Whether to append a row of zeros from below.
     addValTop : float, optional
         Whether to append a row of zeros from above.
-    nPointsY : int, optional
-        How many points to keep in the y direction. Zero means all
-        points are kept (default 0).
+    excludeBot : int, optional
+        How many points to remove from the bottom in the y direction.
+        (default 0).
+    excludeTop: int, optional
+        How many points to remove from the top in the y direction.
+        (default 0).
     midValue : float, optional
         The value of the channel-half width. (default 1). Must be
         provided if nPoints is provided.
@@ -68,11 +72,16 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
         pointsY = np.append(pointsY, addValTop*np.ones((1, nPointsZ)), axis=0)
         pointsZ = np.append(pointsZ, np.array([pointsZ[0, :]]),  axis=0)
 
-# Cap the points, according to nPointsY
-# Makes y=delta the last point
-    if nPointsY:
-        pointsY = pointsY[:nPointsY, :]
-        pointsZ = pointsZ[:nPointsY, :]
+    # Cap the points
+
+    nPointsY = pointsY.shape[0]
+    if excludeTop:
+        pointsY = pointsY[:(nPointsY-excludeTop), :]
+        pointsZ = pointsZ[:(nPointsY-excludeTop), :]
+
+    if excludeBot:
+        pointsY = pointsY[excludeBot:, :]
+        pointsZ = pointsZ[excludeBot:, :]
 
     if midValue:
         pointsY[-1, :] = midValue

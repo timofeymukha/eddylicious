@@ -7,7 +7,8 @@ __all__ = ["read_points_from_foamfile", "read_u_from_foamfile"]
 
 
 def read_points_from_foamfile(readPath, addValBot=float('nan'),
-                              addValTop=float('nan'), nPointsY=0, midValue=0):
+                              addValTop=float('nan'), excludeBot=0,
+                              excludeTop=0, midValue=0):
     """Read the coordinates of the points from a foamFile-format file.
 
 
@@ -39,9 +40,12 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
         Append a row of values from below, nothing added by default.
     addValTop : float, optional
         Append a row of values from above, nothing added by default.
-    nPointsY : int, optional
-        How many points to keep in the y direction. Zero means all
-        points are kept (default 0).
+    excludeBot : int, optional
+        How many points to remove from the bottom in the y direction.
+        (default 0).
+    excludeTop: int, optional
+        How many points to remove from the top in the y direction.
+        (default 0).
     midValue : float, optional
         The value of the channel-half width. (default 0).
 
@@ -101,16 +105,18 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
         pointsZ = np.append(np.array([pointsZ[0, :]]), pointsZ, axis=0)
     if not np.isnan(addValTop):
         pointsY = np.append(pointsY, addValTop*np.ones((1, nPointsZ)), axis=0)
-        pointsZ = np.append(pointsZ, np.array([pointsZ[0, :]]),  axis=0)
+        pointsZ = np.append(pointsZ, np.array([pointsZ[-1, :]]),  axis=0)
 
-# Cap the points, according to nPointsY
-# Makes y=delta the last point
-# NOTE! nPoints includes the added zeros
-    if nPointsY:
-        assert pointsY.shape[0] >= nPointsY
+    nPointsY = pointsY.shape[0]
 
-        pointsY = pointsY[:nPointsY, :]
-        pointsZ = pointsZ[:nPointsY, :]
+# Cap the points
+    if excludeTop:
+        pointsY = pointsY[:(nPointsY-excludeTop), :]
+        pointsZ = pointsZ[:(nPointsY-excludeTop), :]
+
+    if excludeBot:
+        pointsY = pointsY[excludeBot:, :]
+        pointsZ = pointsZ[excludeBot:, :]
 
     if midValue:
         pointsY[-1, :] = midValue

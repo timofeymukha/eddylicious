@@ -5,4 +5,3 @@ from . import foamfile_readers
 from . import hdf5_readers
 
 __all__ = ["foamfile_readers", "hdf5_readers"]
-#__all__.extend(foamfile_readers.__all__)

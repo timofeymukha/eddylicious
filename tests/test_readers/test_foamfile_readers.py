@@ -2,104 +2,93 @@ import eddylicious
 from eddylicious.readers.foamfile_readers import *
 import numpy as np
 from os import path
+import pytest
 
 
-# Do not add zeros on top and bottom, take all points along y
-def test_read_points_no_add_zeros_all_points():
+@pytest.fixture
+def load_points(scope="module"):
     prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
-                     "channel_flow_180")
+                       "channel_flow_180")
     pointsY = np.load(path.join(prefix, "dsv_output", "pointsY.npy"))
     pointsZ = np.load(path.join(prefix, "dsv_output", "pointsZ.npy"))
     yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
     zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
+    return [prefix, pointsY, pointsZ, yInd, zInd]
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(prefix,
+
+# Do not add zeros on top and bottom, take all points along y
+def test_read_points_no_add_zeros_all_points(load_points):
+
+    [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(load_points[0],
                                                            "foam_file_output",
                                                            "1000.01",
                                                            "faceCentres"))
 
-
-
-    assert np.all(pointsY == pY)
-    assert np.all(pointsZ == pZ)
-    assert np.all(yInd == yI)
-    assert np.all(zInd == zI)
+    assert np.all(load_points[1] == pY)
+    assert np.all(load_points[2] == pZ)
+    assert np.all(load_points[3] == yI)
+    assert np.all(load_points[4] == zI)
 
 
 # Do not add zeros on top and bottom, take part of points along y
-def test_read_points_no_add_zeros_some_points():
+def test_read_points_no_add_values_exclude_top_points(load_points):
     n = 10
-    prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
-                       "channel_flow_180")
-    pointsY = np.load(path.join(prefix, "dsv_output", "pointsY.npy"))[:n, :]
-    pointsZ = np.load(path.join(prefix, "dsv_output", "pointsZ.npy"))[:n, :]
-    yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
-    zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(prefix,
-                                                           "foam_file_output",
-                                                           "1000.01",
-                                                           "faceCentres"),
-                                                 nPointsY=n)
+    nPointsY = load_points[1].shape[0]
+    readPath = path.join(load_points[0], "foam_file_output", "1000.01",
+                         "faceCentres")
 
-    assert np.all(pointsY == pY)
-    assert np.all(pointsZ == pZ)
-    assert np.all(yInd == yI)
-    assert np.all(zInd == zI)
+    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath,
+                                                 excludeTop=nPointsY-n)
+
+    assert np.all(load_points[1][:n, :] == pY)
+    assert np.all(load_points[2][:n, :] == pZ)
+    assert np.all(load_points[3] == yI)
+    assert np.all(load_points[4] == zI)
 
 
 # Add zeros on top and bottom, take all points along y
-def test_read_points_add_zeros_bot_all_points():
-    prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
-                       "channel_flow_180")
-    pointsY = np.load(path.join(prefix, "dsv_output", "pointsY.npy"))
-    pointsZ = np.load(path.join(prefix, "dsv_output", "pointsZ.npy"))
-    yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
-    zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
+def test_read_points_add_zeros_bot_all_points(load_points):
 
-    pointsY = np.append(np.zeros((1, 72)), pointsY, axis=0)
-    pointsZ = np.append(np.array([pointsZ[0, :]]), pointsZ, axis=0)
+    pointsY = np.append(np.zeros((1, 72)), load_points[1], axis=0)
+    pointsZ = np.append(np.array([load_points[2][0, :]]), load_points[2],
+                        axis=0)
     pointsY = np.append(pointsY, np.zeros((1, 72)), axis=0)
     pointsZ = np.append(pointsZ, np.array([pointsZ[0, :]]),  axis=0)
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(prefix,
-                                                           "foam_file_output",
-                                                           "1000.01",
-                                                           "faceCentres"),
-                                                 addValBot=0, addValTop=0)
+    readPath = path.join(load_points[0], "foam_file_output", "1000.01",
+                         "faceCentres")
+
+    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath, addValBot=0,
+                                                 addValTop=0)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
-    assert np.all(yInd == yI)
-    assert np.all(zInd == zI)
+    assert np.all(load_points[3] == yI)
+    assert np.all(load_points[4] == zI)
 
 
 # Add zeros at the bottom, take part of the along y
-def test_read_points_add_zeros_bot_some_points_midalue():
+def test_read_points_add_zeros_bot_exclude_top_midalue(load_points):
     n = 10
-    prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
-                       "channel_flow_180")
-    pointsY = np.load(path.join(prefix, "dsv_output", "pointsY.npy"))
-    pointsZ = np.load(path.join(prefix, "dsv_output", "pointsZ.npy"))
-    yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
-    zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
 
-    pointsY = np.append(np.zeros((1, 72)), pointsY, axis=0)[:n, :]
-    pointsZ = np.append(np.array([pointsZ[0, :]]), pointsZ, axis=0)[:n, :]
+    pointsY = np.append(np.zeros((1, 72)), load_points[1], axis=0)[:n, :]
+    pointsZ = np.append(np.array([load_points[2][0, :]]), load_points[2], axis=0)[:n, :]
     pointsY[-1, :] = 1.0
 
+    readPath = path.join(load_points[0], "foam_file_output", "1000.01",
+                         "faceCentres")
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(prefix,
-                                                           "foam_file_output",
-                                                           "1000.01",
-                                                           "faceCentres"),
-                                                 addValBot=0,
-                                                 nPointsY=n, midValue=1)
+    nPointsY = load_points[1].shape[0]+1
+
+    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath, addValBot=0,
+                                                 excludeTop=nPointsY-n,
+                                                 midValue=1)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
-    assert np.all(yInd == yI)
-    assert np.all(zInd == zI)
+    assert np.all(load_points[3] == yI)
+    assert np.all(load_points[4] == zI)
 
 
 def test_read_velocity_add_zeros_bot_some_points_interpolate():

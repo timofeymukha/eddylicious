@@ -1,5 +1,5 @@
 import eddylicious
-from eddylicious.readers.foamfile_readers import *
+from eddylicious.readers.hdf5_readers import *
 import numpy as np
 from os import path
 
@@ -19,15 +19,13 @@ def test_read_points_no_add_zeros_all_points():
                                                            "faceCentres"),
                                                  )
 
-
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
     assert np.all(yInd == yI)
     assert np.all(zInd == zI)
 
 
-# Do not add zeros on top and bottom, take part of points along y
-def test_read_points_no_add_zeros_some_points():
+def test_read_points_no_add_zeros_exclude_top():
     n = 10
     prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
                        "channel_flow_180")
