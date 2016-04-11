@@ -56,6 +56,8 @@ hdf5FileName = configDict["hdf5FileName"]
 
 if reader == "foamFile":
     dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
+elif reader == "hdf5":
+    pass
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
@@ -65,6 +67,10 @@ else:
 if reader == "foamFile":
     times = os.listdir(dataDir)
     times = np.sort(times)
+elif reader == "hdf5":
+    dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
+    times = dbFile["velocity"]["times"]
+
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
@@ -83,12 +89,13 @@ if reader == "foamFile":
                                                  "UMean_X.xy"))[:, 1])
     uMean = np.append(uMean, np.zeros((1, 1)))
 elif reader == "hdf5":
-    dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
     uMean = dbFile["velocity"]["uMean"]
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
 
+totalPointsY = uMean.size
+uMean = uMean[:int(totalPointsY*0.5)]
 nPointsY = uMean.size
 
 # Read grid for the recycling plane
@@ -96,8 +103,8 @@ if reader == "foamFile":
     pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
                                   "faceCentres")
     [pointsY, pointsZ, yInd, zInd] = \
-        read_points_from_foamfile(pointsReadPath, addValBot=0,
-                                  excludeTop=nPointsY, midValue=1.0)
+        read_points_from_foamfile(pointsReadPath, addValBot=0, addValTop=0,
+                                  excludeTop=totalPointsY-nPointsY, midValue=1.0)
 elif reader == "hdf5":
     [pointsY, pointsZ] = \
         read_points_from_hdf5(readPath, addValBot=0, excludeTop=nPointsY,

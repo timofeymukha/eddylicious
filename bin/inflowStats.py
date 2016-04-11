@@ -28,9 +28,9 @@ writeDir = args.writePath
 
 #  Open the hdf5 database
 
+
 print "Opening the database"
 dbFile = h5py.File(readPath, 'r')
-
 times = dbFile['time'][()]
 points = dbFile['points'][()]
 points = points[:, 1:]
