@@ -1,12 +1,14 @@
+"""Functions for reading fields stored in the hdf5 format.
+
+"""
 import numpy as np
 import h5py as h5py
 
 __all__ = ["read_points_from_hdf5", "read_u_from_hdf5"]
 
-"""Functions for reading fields stored in the hdf5 format"""
 
-
-def read_points_from_hdf5(readPath, addZerosBot, addZerosTop, nPointsY=0, midValue=0):
+def read_points_from_hdf5(readPath, addValBot=float('nan'),
+                          addValTop=float('nan'), nPointsY=0, midValue=0):
     """Read the coordinates of the points from a hdf5 file.
 
 
@@ -29,9 +31,9 @@ def read_points_from_hdf5(readPath, addZerosBot, addZerosTop, nPointsY=0, midVal
     ----------
     readPath : str
         The path to the file containing the points
-    addZerosBot : bool
+    addValBot : float, optional
         Whether to append a row of zeros from below.
-    addZerosTop : bool
+    addValTop : float, optional
         Whether to append a row of zeros from above.
     nPointsY : int, optional
         How many points to keep in the y direction. Zero means all
@@ -44,7 +46,7 @@ def read_points_from_hdf5(readPath, addZerosBot, addZerosTop, nPointsY=0, midVal
     Returns
     -------
     List of ndarrays
-        The list contains 4 items
+        The list contains 2 items
         pointsY :
             A 2d ndarray containing the y coordinates of the points.
         pointsZ :
@@ -58,13 +60,12 @@ def read_points_from_hdf5(readPath, addZerosBot, addZerosTop, nPointsY=0, midVal
 
     nPointsZ = pointsY.shape[1]
 
-# Add points at y = 0 and y = max(y)
-    if addZerosBot:
-        pointsY = np.append(np.zeros((1, nPointsZ)), pointsY, axis=0)
+    # Add points at y = 0 and y = max(y)
+    if not np.isnan(addValBot):
+        pointsY = np.append(addValBot*np.ones((1, nPointsZ)), pointsY, axis=0)
         pointsZ = np.append(np.array([pointsZ[0, :]]), pointsZ, axis=0)
-
-    if addZerosTop:
-        pointsY = np.append(pointsY, np.zeros((1, nPointsZ)), axis=0)
+    if not np.isnan(addValTop):
+        pointsY = np.append(pointsY, addValTop*np.ones((1, nPointsZ)), axis=0)
         pointsZ = np.append(pointsZ, np.array([pointsZ[0, :]]),  axis=0)
 
 # Cap the points, according to nPointsY
@@ -79,8 +80,8 @@ def read_points_from_hdf5(readPath, addZerosBot, addZerosTop, nPointsY=0, midVal
     return [pointsY, pointsZ]
 
 
-def read_u_from_hdf5(readPath, timeIndex, nPointsY, addZerosBot, addZerosTop,
-                     interpolate=0):
+def read_u_from_hdf5(readPath, timeIndex, nPointsY, addValBot=float('nan'),
+                     addValTop=float('nan'), interpolate=0):
     """ Read the values of the velocity field from a foamFile-format
     file.
 
@@ -96,10 +97,10 @@ def read_u_from_hdf5(readPath, timeIndex, nPointsY, addZerosBot, addZerosTop,
         first dimension of the hdf5 file.
     nPointsY: int
         The amount of points to read in the wall-normal direction.
-    addZerosBot : bool
-        Whether to append a row of zeros from below.
-    addZerosTop : bool
-        Whether to append a row of zeros from above.
+    addValBot : float, optional
+        Append a row of values from below.
+    addValTop : float, optional
+        Append a row of values from above.
     interpolate : bool, optional
         Whether to interpolate the last value in the wall-normal
         direction using two points. Useful to get the center-value of
@@ -120,20 +121,20 @@ def read_u_from_hdf5(readPath, timeIndex, nPointsY, addZerosBot, addZerosTop,
     uY = dbFile["velocity"]["uY"][timeIndex, :nPointsY, :]
     uZ = dbFile["velocity"]["uZ"][timeIndex, :nPointsY, :]
 
-    if addZerosBot:
-        uX = np.append(np.zeros((1, nPointsZ)), uX, axis=0)
-        uY = np.append(np.zeros((1, nPointsZ)), uY, axis=0)
-        uZ = np.append(np.zeros((1, nPointsZ)), uZ, axis=0)
+    nPointsZ = uX.shape[1]
 
-    if addZerosTop:
-        uX = np.append(uX, np.zeros((1, nPointsZ)), axis=0)
-        uY = np.append(uY, np.zeros((1, nPointsZ)), axis=0)
-        uZ = np.append(uZ, np.zeros((1, nPointsZ)), axis=0)
+    if not np.isnan(addValBot):
+        uX = np.append(addValBot*np.ones((1, nPointsZ)), uX, axis=0)
+        uY = np.append(addValBot*np.ones((1, nPointsZ)), uY, axis=0)
+        uZ = np.append(addValBot*np.ones((1, nPointsZ)), uZ, axis=0)
 
+    if not np.isnan(addValTop):
+        uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
+        uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
+        uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
 
-
-    # To interpolate the velocities in the center, the we need an extra value
-    # (above the center-line)
+    # To interpolate the velocities in the center, the we need an extra
+    # value (above the center-line)
     assert uX.shape[0] > nPointsY
 
     # Interpolate for the last point in the wall-normal direction

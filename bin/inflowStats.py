@@ -79,12 +79,12 @@ pointsZ = np.copy(np.reshape(points[:, 1], (-1, nPointsZ)))
 uMeanX = np.copy(np.reshape(uMean[:, 0], (-1, nPointsZ)))
 uMeanY = np.copy(np.reshape(uMean[:, 1], (-1, nPointsZ)))
 uMeanZ = np.copy(np.reshape(uMean[:, 2], (-1, nPointsZ)))
-uPrime2MeanX = np.copy(np.reshape(uPrime2Mean[:, 0],
-                                  (-1, nPointsZ)))
-uPrime2MeanY = np.copy(np.reshape(uPrime2Mean[:, 1],
-                                  (-1, nPointsZ)))
-uPrime2MeanZ = np.copy(np.reshape(uPrime2Mean[:, 2],
-                                  (-1, nPointsZ)))
+uPrime2MeanXX = np.copy(np.reshape(uPrime2Mean[:, 0],
+                                   (-1, nPointsZ)))
+uPrime2MeanYY = np.copy(np.reshape(uPrime2Mean[:, 1],
+                                   (-1, nPointsZ)))
+uPrime2MeanZZ = np.copy(np.reshape(uPrime2Mean[:, 2],
+                                   (-1, nPointsZ)))
 
 # For each y order the points in z
 
@@ -96,9 +96,9 @@ for i in xrange(pointsZ.shape[0]):
     uMeanX[i, :] = uMeanX[i, zInd[i, :]]
     uMeanY[i, :] = uMeanY[i, zInd[i, :]]
     uMeanZ[i, :] = uMeanZ[i, zInd[i, :]]
-    uPrime2MeanX[i, :] = uPrime2MeanX[i, zInd[i, :]]
-    uPrime2MeanY[i, :] = uPrime2MeanY[i, zInd[i, :]]
-    uPrime2MeanZ[i, :] = uPrime2MeanZ[i, zInd[i, :]]
+    uPrime2MeanXX[i, :] = uPrime2MeanXX[i, zInd[i, :]]
+    uPrime2MeanYY[i, :] = uPrime2MeanYY[i, zInd[i, :]]
+    uPrime2MeanZZ[i, :] = uPrime2MeanZZ[i, zInd[i, :]]
 
 y = pointsY[:, 0]
 
@@ -107,9 +107,9 @@ uMeanX = np.mean(uMeanX, axis=1)
 uMeanY = np.mean(uMeanY, axis=1)
 uMeanZ = np.mean(uMeanZ, axis=1)
 
-uPrime2MeanX = np.mean(uPrime2MeanX, axis=1)
-uPrime2MeanY = np.mean(uPrime2MeanY, axis=1)
-uPrime2MeanZ = np.mean(uPrime2MeanZ, axis=1)
+uPrime2MeanXX = np.mean(uPrime2MeanXX, axis=1)
+uPrime2MeanYY = np.mean(uPrime2MeanYY, axis=1)
+uPrime2MeanZZ = np.mean(uPrime2MeanZZ, axis=1)
 
 print "Outputting figures and data"
 
@@ -120,7 +120,7 @@ np.savetxt(os.path.join(writeDir, "y"), y)
 np.savetxt(os.path.join(writeDir, "uMeanX"), uMeanX)
 np.savetxt(os.path.join(writeDir, "uMeanY"), uMeanY)
 np.savetxt(os.path.join(writeDir, "uMeanZ"), uMeanZ)
-np.savetxt(os.path.join(writeDir, "uPrime2MeanX"), uPrime2MeanX)
-np.savetxt(os.path.join(writeDir, "uPrime2MeanY"), uPrime2MeanY)
-np.savetxt(os.path.join(writeDir, "uPrime2MeanZ"), uPrime2MeanZ)
+np.savetxt(os.path.join(writeDir, "uPrime2MeanXX"), uPrime2MeanXX)
+np.savetxt(os.path.join(writeDir, "uPrime2MeanYY"), uPrime2MeanYY)
+np.savetxt(os.path.join(writeDir, "uPrime2MeanZZ"), uPrime2MeanZZ)
 np.savetxt(os.path.join(writeDir, "y"), y)

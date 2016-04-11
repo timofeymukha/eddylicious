@@ -6,8 +6,8 @@ import numpy as np
 __all__ = ["read_points_from_foamfile", "read_u_from_foamfile"]
 
 
-def read_points_from_foamfile(readPath, addZerosBot, addZerosTop,
-                              nPointsY=0, midValue=0):
+def read_points_from_foamfile(readPath, addValBot=float('nan'),
+                              addValTop=float('nan'), nPointsY=0, midValue=0):
     """Read the coordinates of the points from a foamFile-format file.
 
 
@@ -35,10 +35,10 @@ def read_points_from_foamfile(readPath, addZerosBot, addZerosTop,
     ----------
     readPath : str
         The path to the file containing the points.
-    addZerosBot : bool
-        Whether to append a row of zeros from below.
-    addZerosTop : bool
-        Whether to append a row of zeros from above.
+    addValBot : float, optional
+        Append a row of values from below, nothing added by default.
+    addValTop : float, optional
+        Append a row of values from above, nothing added by default.
     nPointsY : int, optional
         How many points to keep in the y direction. Zero means all
         points are kept (default 0).
@@ -96,11 +96,11 @@ def read_points_from_foamfile(readPath, addZerosBot, addZerosTop,
 
 
 # Add points at y = 0 and y = max(y)
-    if addZerosBot:
-        pointsY = np.append(np.zeros((1, nPointsZ)), pointsY, axis=0)
+    if not np.isnan(addValBot):
+        pointsY = np.append(addValBot*np.ones((1, nPointsZ)), pointsY, axis=0)
         pointsZ = np.append(np.array([pointsZ[0, :]]), pointsZ, axis=0)
-    if addZerosTop:
-        pointsY = np.append(pointsY, np.zeros((1, nPointsZ)), axis=0)
+    if not np.isnan(addValTop):
+        pointsY = np.append(pointsY, addValTop*np.ones((1, nPointsZ)), axis=0)
         pointsZ = np.append(pointsZ, np.array([pointsZ[0, :]]),  axis=0)
 
 # Cap the points, according to nPointsY
@@ -119,7 +119,8 @@ def read_points_from_foamfile(readPath, addZerosBot, addZerosTop,
 
 
 def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd,
-                         addZerosBot, addZerosTop, interpolate=0):
+                         addValBot=float('nan'), addValTop=float('nan'),
+                         interpolate=False):
     """ Read the values of the velocity field from a foamFile-format
      file.
 
@@ -144,10 +145,10 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd,
         The sorting indices for sorting in the wall-normal direction.
     zInd : ndarray
         The sorting indices for sorting in the spanwise direction.
-    addZerosBot : bool
-        Whether to append a row of zeros from below.
-    addZerosTop : bool
-        Whether to append a row of zeros from above.
+    addValBot : float, optional
+        Append a row of values from below, nothing added by default.
+    addValTop : float, optional
+        Append a row of values from above, nothing added by default.
     interpolate : bool, optional
         Whether to interpolate the last value in the wall-normal
         direction using two points. Useful to get the center-value of
@@ -185,15 +186,15 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd,
         uY[i, :] = uY[i, zInd[i, :]]
         uZ[i, :] = uZ[i, zInd[i, :]]
 
-    if addZerosBot:
-        uX = np.append(np.zeros((1, nPointsZ)), uX, axis=0)
-        uY = np.append(np.zeros((1, nPointsZ)), uY, axis=0)
-        uZ = np.append(np.zeros((1, nPointsZ)), uZ, axis=0)
+    if not np.isnan(addValBot):
+        uX = np.append(addValBot*np.ones((1, nPointsZ)), uX, axis=0)
+        uY = np.append(addValBot*np.ones((1, nPointsZ)), uY, axis=0)
+        uZ = np.append(addValBot*np.ones((1, nPointsZ)), uZ, axis=0)
 
-    if addZerosTop:
-        uX = np.append(uX, np.zeros((1, nPointsZ)), axis=0)
-        uY = np.append(uY, np.zeros((1, nPointsZ)), axis=0)
-        uZ = np.append(uZ, np.zeros((1, nPointsZ)), axis=0)
+    if not np.isnan(addValTop):
+        uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
+        uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
+        uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
 
     # Interpolate for the last point in the wall-normal direction
     if interpolate:

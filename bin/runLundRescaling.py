@@ -90,7 +90,7 @@ nPointsY = uMean.size
 if reader == "foamFile":
     [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
         os.path.join(dataDir, times[0], sampleSurfaceName, "faceCentres"),
-        nPointsY=nPointsY)
+        addValBot=0, nPointsY=nPointsY, midValue=1.0)
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
@@ -100,8 +100,8 @@ else:
 # Read grid for the inflow plane
 if inflowReader == "foamFile":
     [pointsYInfl, pointsZInfl, yIndInfl, zIndInfl] = read_points_from_foamfile(
-        os.path.join(inflowReadPath, inletPatchName, "faceCentres"),
-        addZeros=False)
+        os.path.join(inflowReadPath, inletPatchName, "faceCentres"))
+
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", \
           configDict["inflowReader"]

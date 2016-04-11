@@ -69,7 +69,7 @@ uMean = np.append(uMean, np.zeros((1, 1)))
 # Read in the points
 [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
     os.path.join(dataDir, times[0], surfaceName, "faceCentres"),
-    addZerosBot=True, addZerosTop=True)
+    addValBot=0, addValTop=2)
 
 [nPointsY, nPointsZ] = pointsY.shape
 
@@ -121,8 +121,8 @@ for i in xrange(chunks[rank]):
                                                               "vectorField",
                                                               "U"), nPointsY,
                                                  nPointsZ, yInd, zInd,
-                                                 addZerosBot=True,
-                                                 addZerosTop=True,
+                                                 addValBot=0,
+                                                 addValTop=0,
                                                  interpolate=False)
 
     uX[position, :, :] = uXVal
