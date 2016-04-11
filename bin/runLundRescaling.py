@@ -9,6 +9,7 @@ from eddylicious.generators.helper_functions import delta_99
 from eddylicious.generators.helper_functions import theta
 from eddylicious.generators.helper_functions import delta_star
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
+from eddylicious.readers.hdf5_readers import read_points_from_hdf5
 from eddylicious.writers.tvmfv_writers import write_points_to_tvmfv
 from eddylicious.writers.hdf5_writers import write_points_to_hdf5
 from eddylicious.generators.lund_rescaling import lund_generate
@@ -80,6 +81,10 @@ if reader == "foamFile":
                                                  "collapsedFields",
                                                  uMeanTimes[-1],
                                                  "UMean_X.xy"))[:, 1])
+    uMean = np.append(uMean, np.zeros((1, 1)))
+elif reader == "hdf5":
+    dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
+    uMean = dbFile["velocity"]["uMean"]
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
@@ -88,9 +93,15 @@ nPointsY = uMean.size
 
 # Read grid for the recycling plane
 if reader == "foamFile":
-    [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
-        os.path.join(dataDir, times[0], sampleSurfaceName, "faceCentres"),
-        addValBot=0, nPointsY=nPointsY, midValue=1.0)
+    pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
+                                  "faceCentres")
+    [pointsY, pointsZ, yInd, zInd] = \
+        read_points_from_foamfile(pointsReadPath, addValBot=0,
+                                  excludeTop=nPointsY, midValue=1.0)
+elif reader == "hdf5":
+    [pointsY, pointsZ] = \
+        read_points_from_hdf5(readPath, addValBot=0, excludeTop=nPointsY,
+                              midValue=1.0)
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()

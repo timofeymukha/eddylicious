@@ -16,13 +16,11 @@ def load_points(scope="module"):
     return [prefix, pointsY, pointsZ, yInd, zInd]
 
 
-# Do not add zeros on top and bottom, take all points along y
-def test_read_points_no_add_zeros_all_points(load_points):
+def test_read_points_all_points(load_points):
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(path.join(load_points[0],
-                                                           "foam_file_output",
-                                                           "1000.01",
-                                                           "faceCentres"))
+    readPath = path.join(load_points[0], "foam_file_output", "1000.01",
+                         "faceCentres")
+    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath)
 
     assert np.all(load_points[1] == pY)
     assert np.all(load_points[2] == pZ)
@@ -30,8 +28,7 @@ def test_read_points_no_add_zeros_all_points(load_points):
     assert np.all(load_points[4] == zI)
 
 
-# Do not add zeros on top and bottom, take part of points along y
-def test_read_points_no_add_values_exclude_top_points(load_points):
+def test_read_points_exclude_top(load_points):
     n = 10
 
     nPointsY = load_points[1].shape[0]
@@ -46,9 +43,23 @@ def test_read_points_no_add_values_exclude_top_points(load_points):
     assert np.all(load_points[3] == yI)
     assert np.all(load_points[4] == zI)
 
+def test_read_points_exclude_bot(load_points):
+    n = 10
 
-# Add zeros on top and bottom, take all points along y
-def test_read_points_add_zeros_bot_all_points(load_points):
+    nPointsY = load_points[1].shape[0]
+    readPath = path.join(load_points[0], "foam_file_output", "1000.01",
+                         "faceCentres")
+
+    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath,
+                                                 excludeBot=n)
+
+    assert np.all(load_points[1][n:, :] == pY)
+    assert np.all(load_points[2][n:, :] == pZ)
+    assert np.all(load_points[3] == yI)
+    assert np.all(load_points[4] == zI)
+
+
+def test_read_points_add_zeros_bot_top(load_points):
 
     pointsY = np.append(np.zeros((1, 72)), load_points[1], axis=0)
     pointsZ = np.append(np.array([load_points[2][0, :]]), load_points[2],
@@ -68,8 +79,7 @@ def test_read_points_add_zeros_bot_all_points(load_points):
     assert np.all(load_points[4] == zI)
 
 
-# Add zeros at the bottom, take part of the along y
-def test_read_points_add_zeros_bot_exclude_top_midalue(load_points):
+def test_read_points_add_zeros_bot_exclude_top_midvalue(load_points):
     n = 10
 
     pointsY = np.append(np.zeros((1, 72)), load_points[1], axis=0)[:n, :]

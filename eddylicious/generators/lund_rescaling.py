@@ -16,6 +16,7 @@ from scipy.interpolate import interp2d
 from .helper_functions import blending_function
 from .helper_functions import chunks_and_offsets
 from eddylicious.readers.foamfile_readers import read_u_from_foamfile
+from eddylicious.readers.hdf5_readers import read_u_from_hdf5
 from eddylicious.writers.tvmfv_writers import write_velocity_to_tvmfv
 from eddylicious.writers.hdf5_writers import write_velocity_to_hdf5
 
@@ -215,8 +216,6 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
     return [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl]
 
 
-
-
 def lund_generate(reader, readPath,
                   writer, writePath,
                   dt, t0, tEnd, timePrecision,
@@ -302,8 +301,8 @@ def lund_generate(reader, readPath,
     times : list of floats, optional
         For the foamFile reader, the times for which the velocity field
         was sampled in the precursor simulation.
-    """
 
+    """
     # Grab info regarding parallelization
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -314,6 +313,9 @@ def lund_generate(reader, readPath,
     
     # Calculate the amount of rescalings each processor is responsible for
     [chunks, offsets] = chunks_and_offsets(nProcs, size)
+
+    nPointsY = pointsZ.shape[0]
+    nPointsZ = pointsZ.shape[1]
 
     # Perform the rescaling
     for i in xrange(chunks[rank]):
@@ -327,23 +329,38 @@ def lund_generate(reader, readPath,
         # Read U data
         if reader == "foamFile":
             assert position < len(times)
-
-            [uPrimeX, uPrimeY, uPrimeZ] = read_u_from_foamfile(
-                os.path.join(readPath, times[position], surfaceName,
-                             "vectorField", "U"), pointsZ.shape[0],
-                pointsZ.shape[1], yInd, zInd, interpolate=True)
+            readUPath = os.path.join(readPath, times[position], surfaceName,
+                                     "vectorField", "U")
+            [uPrimeX, uPrimeY, uPrimeZ] = read_u_from_foamfile(readUPath,
+                                                               nPointsY,
+                                                               nPointsZ,
+                                                               yInd,
+                                                               zInd,
+                                                               interpolate=True)
+        elif reader == "hdf5":
+            assert position < len(times)
+            [uPrimeX, uPrimeY, uPrimeZ] = read_u_from_hdf5(readPath,
+                                                           position,
+                                                           pointsZ.shape[0],
+                                                           interpolate=True)
         else:
             raise ValueError("Unknown reader")
 
         # Subtract mean
         uPrimeX -= uMeanPrec[:, np.newaxis]
 
-        [uXInfl, uYInfl, uZInfl] = \
-            lund_rescale_fluctuations(
-                etaPrec, yPlusPrec, pointsZ,
-                uPrimeX, uPrimeY, uPrimeZ, gamma,
-                etaInfl, yPlusInfl, pointsZInfl,
-                nInfl, nInner)
+        [uXInfl, uYInfl, uZInfl] = lund_rescale_fluctuations(etaPrec,
+                                                             yPlusPrec,
+                                                             pointsZ,
+                                                             uPrimeX,
+                                                             uPrimeY,
+                                                             uPrimeZ,
+                                                             gamma,
+                                                             etaInfl,
+                                                             yPlusInfl,
+                                                             pointsZInfl,
+                                                             nInfl,
+                                                             nInner)
 
         # Add mean
         uXInfl += uMeanInfl

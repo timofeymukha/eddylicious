@@ -143,8 +143,6 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd,
         The path to the file containing the velocity field.
     nPointsY : int
         The number of points in the wall-normal direction to consider.
-        For a single TBL it is enough to only consider half of the
-        channel, for instance.
     nPointsZ : int
         The amount of points in the mesh in the spanwise direction.
     yInd : ndarray
