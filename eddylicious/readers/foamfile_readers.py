@@ -160,14 +160,27 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsY, nPointsZ, y
         the velocity from the channel flow.
     Returns
     -------
-    List of ndarrays
-        The list contains three items, each a 2d array,
-        corresponding to the three components of the
-        velocity field, the order of the components in the
-        list is x, y and the z.
+        A function of one variable (the time-value) that will actually
+        perform the reading.
 
     """
     def read(time):
+        """
+        A function that will actually perform the reading.
+
+        Parameters
+        ----------
+        time, float or string
+            The value of the time, will be converted to a string.
+
+        Returns
+        -------
+        List of 2d arrays.
+        The list contains three items, corresponding
+        to the three components of the velocity field, the order of the
+        components in the list is x, y and the z.
+
+        """
         readUPath = os.path.join(baseReadPath, str(time), surfaceName,
                                  "vectorField", "U")
         with file(os.path.join(baseReadPath, readUPath)) as UFile:

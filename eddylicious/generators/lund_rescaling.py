@@ -223,7 +223,7 @@ def lund_generate(reader, readFunc,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   nInfl, nInner, gamma,
-                  times="None"):
+                  times):
     """Generate the files with the inflow velocity using Lund's
     rescaling, in parallel.
 
@@ -287,9 +287,9 @@ def lund_generate(reader, readFunc,
     gamma : float
         The ration of the friction velocities in the inflow boundary
         layer and the precursor.
-    times : list of floats, optional
-        For the foamFile reader, the times for which the velocity field
-        was sampled in the precursor simulation.
+    times : list of floats or strings
+        The times for which the velocity field was sampled in the
+        precursor simulation.
 
     """
     # Grab info regarding parallelization
@@ -302,9 +302,6 @@ def lund_generate(reader, readFunc,
     
     # Calculate the amount of rescalings each processor is responsible for
     [chunks, offsets] = chunks_and_offsets(nProcs, size)
-
-    nPointsY = pointsZ.shape[0]
-    nPointsZ = pointsZ.shape[1]
 
     # Perform the rescaling
     for i in xrange(chunks[rank]):
