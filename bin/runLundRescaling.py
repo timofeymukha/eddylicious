@@ -244,6 +244,7 @@ else:
     print "ERROR in runLundRescaling.py. Unknown writer ", configDict["writer"]
     exit()
 
+
 # Create the reader functions
 if reader == "foamFile":
     readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
@@ -255,7 +256,6 @@ elif reader == "hdf5":
     readerFunc = read_velocity_from_hdf5(readPath, nPointsY, interpolate=True)
 else:
     raise ValueError("Unknown reader")
-
 
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
                                        nInfl, nInner,

@@ -214,8 +214,6 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
         uY = np.copy(np.reshape(u[:, 1], (-1, nPointsZ)))
         uZ = np.copy(np.reshape(u[:, 2], (-1, nPointsZ)))
 
-        nPointsY = uX.shape[0]
-        topmostPoint = nPointsY-excludeTop
 
         # Sort along z
         for i in xrange(uX.shape[0]):
@@ -232,6 +230,9 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
             uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
             uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
             uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
+
+        nPointsY = uX.shape[0]
+        topmostPoint = nPointsY-excludeTop
 
         # Interpolate for the last point in the wall-normal direction
         if interpValTop and excludeTop:
