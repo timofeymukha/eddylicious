@@ -2,8 +2,9 @@
 
 """
 import numpy as np
+import os
 
-__all__ = ["read_points_from_foamfile", "read_u_from_foamfile"]
+__all__ = ["read_points_from_foamfile", "read_velocity_from_foamfile"]
 
 
 def read_points_from_foamfile(readPath, addValBot=float('nan'),
@@ -124,9 +125,9 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
     return [pointsY, pointsZ, yInd, zInd]
 
 
-def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd,
-                         addValBot=float('nan'), addValTop=float('nan'),
-                         interpolate=False):
+def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsY, nPointsZ, yInd, zInd,
+                                addValBot=float('nan'), addValTop=float('nan'),
+                                interpolate=False):
     """ Read the values of the velocity field from a foamFile-format
      file.
 
@@ -138,9 +139,9 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd,
 
     Parameters
     ----------
-    interpolate
-    readPath : str
-        The path to the file containing the velocity field.
+    baseReadPath : str
+        The path where the time-directories with the velocity values are
+        located.
     nPointsY : int
         The number of points in the wall-normal direction to consider.
     nPointsZ : int
@@ -166,50 +167,54 @@ def read_u_from_foamfile(readPath, nPointsY, nPointsZ, yInd, zInd,
         list is x, y and the z.
 
     """
-    with file(readPath) as UFile:
-        u = [line.rstrip(')\n') for line in UFile]
+    def read(time):
+        readUPath = os.path.join(baseReadPath, str(time), surfaceName,
+                                 "vectorField", "U")
+        with file(os.path.join(baseReadPath, readUPath)) as UFile:
+            u = [line.rstrip(')\n') for line in UFile]
 
-    u = [line.lstrip('(') for line in u]
-    u = u[3:-1]
-    u = np.genfromtxt(u)
+        u = [line.lstrip('(') for line in u]
+        u = u[3:-1]
+        u = np.genfromtxt(u)
 
-    # Sort along y
-    u[:, 0] = u[yInd, 0]
-    u[:, 1] = u[yInd, 1]
-    u[:, 2] = u[yInd, 2]
+        # Sort along y
+        u[:, 0] = u[yInd, 0]
+        u[:, 1] = u[yInd, 1]
+        u[:, 2] = u[yInd, 2]
 
-    # Reshape to 2d
-    uX = np.copy(np.reshape(u[:, 0], (-1, nPointsZ)))
-    uY = np.copy(np.reshape(u[:, 1], (-1, nPointsZ)))
-    uZ = np.copy(np.reshape(u[:, 2], (-1, nPointsZ)))
+        # Reshape to 2d
+        uX = np.copy(np.reshape(u[:, 0], (-1, nPointsZ)))
+        uY = np.copy(np.reshape(u[:, 1], (-1, nPointsZ)))
+        uZ = np.copy(np.reshape(u[:, 2], (-1, nPointsZ)))
 
 
-    # Sort along z
-    for i in xrange(uX.shape[0]):
-        uX[i, :] = uX[i, zInd[i, :]]
-        uY[i, :] = uY[i, zInd[i, :]]
-        uZ[i, :] = uZ[i, zInd[i, :]]
+        # Sort along z
+        for i in xrange(uX.shape[0]):
+            uX[i, :] = uX[i, zInd[i, :]]
+            uY[i, :] = uY[i, zInd[i, :]]
+            uZ[i, :] = uZ[i, zInd[i, :]]
 
-    if not np.isnan(addValBot):
-        uX = np.append(addValBot*np.ones((1, nPointsZ)), uX, axis=0)
-        uY = np.append(addValBot*np.ones((1, nPointsZ)), uY, axis=0)
-        uZ = np.append(addValBot*np.ones((1, nPointsZ)), uZ, axis=0)
+        if not np.isnan(addValBot):
+            uX = np.append(addValBot*np.ones((1, nPointsZ)), uX, axis=0)
+            uY = np.append(addValBot*np.ones((1, nPointsZ)), uY, axis=0)
+            uZ = np.append(addValBot*np.ones((1, nPointsZ)), uZ, axis=0)
 
-    if not np.isnan(addValTop):
-        uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
-        uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
-        uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
+        if not np.isnan(addValTop):
+            uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
+            uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
+            uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
 
-    # Interpolate for the last point in the wall-normal direction
-    if interpolate:
-        assert uX.shape[0] > nPointsY
-        uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
-        uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
-        uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
+        # Interpolate for the last point in the wall-normal direction
+        if interpolate:
+            assert uX.shape[0] > nPointsY
+            uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
+            uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
+            uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
 
-    # Remove data above y=delta
-    uX = uX[:nPointsY, :]
-    uY = uY[:nPointsY, :]
-    uZ = uZ[:nPointsY, :]
+        # Remove data above y=delta
+        uX = uX[:nPointsY, :]
+        uY = uY[:nPointsY, :]
+        uZ = uZ[:nPointsY, :]
 
-    return [uX, uY, uZ]
+        return [uX, uY, uZ]
+    return read

@@ -101,12 +101,13 @@ def test_read_points_add_zeros_bot_exclude_top_midvalue(load_points):
     assert np.all(load_points[4] == zI)
 
 
+# Tests for the velocity reader
 def test_read_velocity_add_zeros_bot_some_points_interpolate():
     prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
                        "channel_flow_180")
-    uX = np.load(path.join(prefix, "dsv_output", "1000.01", "uX.npy"))
-    uY = np.load(path.join(prefix, "dsv_output", "1000.01", "uY.npy"))
-    uZ = np.load(path.join(prefix, "dsv_output", "1000.01", "uZ.npy"))
+    uX = np.load(path.join(prefix, "dsv_output", "1000.03", "uX.npy"))
+    uY = np.load(path.join(prefix, "dsv_output", "1000.03", "uY.npy"))
+    uZ = np.load(path.join(prefix, "dsv_output", "1000.03", "uZ.npy"))
     yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
     zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
 
@@ -120,11 +121,12 @@ def test_read_velocity_add_zeros_bot_some_points_interpolate():
     uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
     uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
 
-    [uXR, uYR, uZR] = read_u_from_foamfile(path.join(prefix,
-                                                     "foam_file_output",
-                                                     "1000.01", "U"), nPointsY,
+    readFunc = read_velocity_from_foamfile(path.join(prefix,
+                                                     "foam_file_output"), "",
+                                           nPointsY,
                                            72, yInd, zInd, addValBot=0,
                                            interpolate=1)
+    [uXR, uYR, uZR] = readFunc(1000.03)
 
     assert np.all(uX[:nPointsY, :] == uXR[:nPointsY, :])
     assert np.all(uY[:nPointsY, :] == uYR[:nPointsY, :])
@@ -146,11 +148,12 @@ def test_read_velocity_add_zeros_bot_some_points_no_interpolate():
     uY = np.append(np.zeros((1, 72)), uY, axis=0)
     uZ = np.append(np.zeros((1, 72)), uZ, axis=0)
 
-    [uXR, uYR, uZR] = read_u_from_foamfile(path.join(prefix,
-                                                     "foam_file_output",
-                                                     "1000.01", "U"), nPointsY,
-                                           72, yInd, zInd, addValBot=0,
+    readFunc = read_velocity_from_foamfile(path.join(prefix,
+                                                     "foam_file_output"), "",
+                                           nPointsY, 72, yInd, zInd, addValBot=0,
                                            interpolate=0)
+
+    [uXR, uYR, uZR] = readFunc(1000.01)
 
     assert np.all(uX[:nPointsY, :] == uXR[:nPointsY, :])
     assert np.all(uY[:nPointsY, :] == uYR[:nPointsY, :])
@@ -177,11 +180,14 @@ def test_read_velocity_add_zeros_bot_top_all_points_no_interpolate():
 
     nPointsY = uX.shape[0]
 
-    [uXR, uYR, uZR] = read_u_from_foamfile(path.join(prefix,
-                                                     "foam_file_output",
-                                                     "1000.01", "U"), nPointsY,
-                                           72, yInd, zInd, addValBot=0,
+    readFunc = read_velocity_from_foamfile(path.join(prefix,
+                                                     "foam_file_output"), "",
+                                           nPointsY, 72, yInd, zInd, addValBot=0,
                                            addValTop=0, interpolate=0)
+
+    [uXR, uYR, uZR] = readFunc(1000.01)
+
+
 
     assert np.all(uX[:, :] == uXR[:, :])
     assert np.all(uY[:, :] == uYR[:, :])

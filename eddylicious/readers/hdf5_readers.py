@@ -4,7 +4,7 @@
 import numpy as np
 import h5py as h5py
 
-__all__ = ["read_points_from_hdf5", "read_u_from_hdf5"]
+__all__ = ["read_points_from_hdf5", "read_velocity_from_hdf5"]
 
 
 def read_points_from_hdf5(readPath, addValBot=float('nan'),
@@ -89,8 +89,8 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
     return [pointsY, pointsZ]
 
 
-def read_u_from_hdf5(readPath, timeIndex, nPointsY, addValBot=float('nan'),
-                     addValTop=float('nan'), interpolate=0):
+def read_velocity_from_hdf5(readPath, nPointsY, addValBot=float('nan'),
+                            addValTop=float('nan'), interpolate=0):
     """ Read the values of the velocity field from a foamFile-format
     file.
 
@@ -124,37 +124,40 @@ def read_u_from_hdf5(readPath, timeIndex, nPointsY, addValBot=float('nan'),
         components in the list is x, y and the z.
 
     """
-    dbFile = h5py.File(readPath, 'r')
 
-    uX = dbFile["velocity"]["uX"][timeIndex, :nPointsY, :]
-    uY = dbFile["velocity"]["uY"][timeIndex, :nPointsY, :]
-    uZ = dbFile["velocity"]["uZ"][timeIndex, :nPointsY, :]
+    def read(timeIndex):
+        dbFile = h5py.File(readPath, 'r')
 
-    nPointsZ = uX.shape[1]
+        uX = dbFile["velocity"]["uX"][timeIndex, :nPointsY, :]
+        uY = dbFile["velocity"]["uY"][timeIndex, :nPointsY, :]
+        uZ = dbFile["velocity"]["uZ"][timeIndex, :nPointsY, :]
 
-    if not np.isnan(addValBot):
-        uX = np.append(addValBot*np.ones((1, nPointsZ)), uX, axis=0)
-        uY = np.append(addValBot*np.ones((1, nPointsZ)), uY, axis=0)
-        uZ = np.append(addValBot*np.ones((1, nPointsZ)), uZ, axis=0)
+        nPointsZ = uX.shape[1]
 
-    if not np.isnan(addValTop):
-        uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
-        uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
-        uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
+        if not np.isnan(addValBot):
+            uX = np.append(addValBot*np.ones((1, nPointsZ)), uX, axis=0)
+            uY = np.append(addValBot*np.ones((1, nPointsZ)), uY, axis=0)
+            uZ = np.append(addValBot*np.ones((1, nPointsZ)), uZ, axis=0)
 
-    # To interpolate the velocities in the center, the we need an extra
-    # value (above the center-line)
-    assert uX.shape[0] > nPointsY
+        if not np.isnan(addValTop):
+            uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
+            uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
+            uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
 
-    # Interpolate for the last point in the wall-normal direction
-    if interpolate:
-        uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
-        uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
-        uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
+        # To interpolate the velocities in the center, the we need an extra
+        # value (above the center-line)
+        assert uX.shape[0] > nPointsY
 
-    # Remove data above y=delta
-    uX = uX[:nPointsY, :]
-    uY = uY[:nPointsY, :]
-    uZ = uZ[:nPointsY, :]
+        # Interpolate for the last point in the wall-normal direction
+        if interpolate:
+            uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
+            uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
+            uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
 
-    return [uX, uY, uZ]
+        # Remove data above y=delta
+        uX = uX[:nPointsY, :]
+        uY = uY[:nPointsY, :]
+        uZ = uZ[:nPointsY, :]
+
+        return [uX, uY, uZ]
+    return read

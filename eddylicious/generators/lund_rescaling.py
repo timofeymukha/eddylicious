@@ -15,8 +15,8 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from .helper_functions import blending_function
 from .helper_functions import chunks_and_offsets
-from eddylicious.readers.foamfile_readers import read_u_from_foamfile
-from eddylicious.readers.hdf5_readers import read_u_from_hdf5
+from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile
+from eddylicious.readers.hdf5_readers import read_velocity_from_hdf5
 from eddylicious.writers.tvmfv_writers import write_velocity_to_tvmfv
 from eddylicious.writers.hdf5_writers import write_velocity_to_hdf5
 
@@ -216,15 +216,14 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
     return [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl]
 
 
-def lund_generate(reader, readPath,
+def lund_generate(reader, readFunc,
                   writer, writePath,
                   dt, t0, tEnd, timePrecision,
                   uMeanPrec, uMeanInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   nInfl, nInner, gamma,
-                  yInd, zInd,
-                  surfaceName="None", times="None"):
+                  times="None"):
     """Generate the files with the inflow velocity using Lund's
     rescaling, in parallel.
 
@@ -288,16 +287,6 @@ def lund_generate(reader, readPath,
     gamma : float
         The ration of the friction velocities in the inflow boundary
         layer and the precursor.
-    yInd : ndarray
-        The sort indices for sorting the read velocity field. This is
-        needed when some sorting is performed when the mesh points are
-        read and turned into ordered 2d arrays. Them the exact same
-        sorting should be applyed to the velocity fields.
-    zInd : ndarray
-        Same as yInd, but for the sorting of the z values.
-    surfaceName : str, optional
-        For the foamFile reader, the name of the surface used for
-        sampling the velocity values.
     times : list of floats, optional
         For the foamFile reader, the times for which the velocity field
         was sampled in the precursor simulation.
@@ -329,20 +318,10 @@ def lund_generate(reader, readPath,
         # Read U data
         if reader == "foamFile":
             assert position < len(times)
-            readUPath = os.path.join(readPath, times[position], surfaceName,
-                                     "vectorField", "U")
-            [uPrimeX, uPrimeY, uPrimeZ] = read_u_from_foamfile(readUPath,
-                                                               nPointsY,
-                                                               nPointsZ,
-                                                               yInd,
-                                                               zInd,
-                                                               interpolate=True)
+            [uPrimeX, uPrimeY, uPrimeZ] = readFunc(times[position])
         elif reader == "hdf5":
             assert position < len(times)
-            [uPrimeX, uPrimeY, uPrimeZ] = read_u_from_hdf5(readPath,
-                                                           position,
-                                                           pointsZ.shape[0],
-                                                           interpolate=True)
+            [uPrimeX, uPrimeY, uPrimeZ] = readFunc(position)
         else:
             raise ValueError("Unknown reader")
 

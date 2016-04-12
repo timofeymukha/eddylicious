@@ -9,7 +9,9 @@ from eddylicious.generators.helper_functions import delta_99
 from eddylicious.generators.helper_functions import theta
 from eddylicious.generators.helper_functions import delta_star
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
+from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile
 from eddylicious.readers.hdf5_readers import read_points_from_hdf5
+from eddylicious.readers.hdf5_readers import read_velocity_from_hdf5
 from eddylicious.writers.tvmfv_writers import write_points_to_tvmfv
 from eddylicious.writers.hdf5_writers import write_points_to_hdf5
 from eddylicious.generators.lund_rescaling import lund_generate
@@ -211,6 +213,7 @@ size = int((tEnd-t0)/dt+1)
 
 if rank == 0:
     print "Producing database with", size, "time-steps."
+
 # Write points and modify writePath appropriately
 if writer == "tvmfv":
     if rank == 0:
@@ -241,6 +244,14 @@ else:
     print "ERROR in runLundRescaling.py. Unknown writer ", configDict["writer"]
     exit()
 
+# Create the reader functions
+if reader == "foamFile":
+    readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
+                                           nPointsY, nPointsZ, yInd, zInd,
+                                           addValBot=0, interpolate=True)
+elif reader == "hdf5":
+    readerFunc = read_velocity_from_hdf5(readPath, interpolate=True)
+
 
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
                                        nInfl, nInner,
@@ -254,14 +265,13 @@ ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 if rank == 0:
     print "Generating the inflow fields."
 
-lund_generate(reader, dataDir,
+lund_generate(reader, readerFunc,
               writer, writePath,
               dt, t0, tEnd, timePrecision,
               uMean, uMeanInfl,
               etaPrec, yPlusPrec, pointsZ,
               etaInfl, yPlusInfl, pointsZInfl,
               nInfl, nInner, gamma,
-              yInd, zInd,
-              surfaceName=sampleSurfaceName, times=times)
+              times=times)
 if rank == 0:
     print "Done."

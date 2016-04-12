@@ -3,7 +3,7 @@ import numpy as np
 import h5py as h5py
 from mpi4py import MPI
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
-from eddylicious.readers.foamfile_readers import read_u_from_foamfile
+from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile
 from eddylicious.generators.helper_functions import chunks_and_offsets
 import argparse
 
@@ -110,6 +110,10 @@ dbFile.attrs["nPoints"] = pointsY.size
 
 [chunks, offsets] = chunks_and_offsets(nProcs, len(times))
 
+readFunc = read_velocity_from_foamfile(dataDir, surfaceName, nPointsY, nPointsZ,
+                                       yInd, zInd, addValBot=0, addValTop=0,
+                                       interpolate=False)
+
 # Read in the fluctuations
 for i in xrange(chunks[rank]):
     if rank == 0:
@@ -117,15 +121,7 @@ for i in xrange(chunks[rank]):
 
     position = offsets[rank] + i
     # Read in U
-    [uXVal, uYVal, uZVal] = read_u_from_foamfile(os.path.join(dataDir,
-                                                              times[position],
-                                                              surfaceName,
-                                                              "vectorField",
-                                                              "U"), nPointsY,
-                                                 nPointsZ, yInd, zInd,
-                                                 addValBot=0,
-                                                 addValTop=0,
-                                                 interpolate=False)
+    [uXVal, uYVal, uZVal] = readFunc(times[position])
 
     uX[position, :, :] = uXVal
     uY[position, :, :] = uYVal
