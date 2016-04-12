@@ -266,7 +266,7 @@ ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
 if rank == 0:
     print "Generating the inflow fields."
 
-lund_generate(reader, readerFunc,
+lund_generate(readerFunc,
               writer, writePath,
               dt, t0, tEnd, timePrecision,
               uMean, uMeanInfl,

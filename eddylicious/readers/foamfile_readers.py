@@ -230,4 +230,6 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsY, nPointsZ, y
         uZ = uZ[:nPointsY, :]
 
         return [uX, uY, uZ]
+
+    read.reader = "foamFile"
     return read

@@ -158,4 +158,6 @@ def read_velocity_from_hdf5(readPath, nPointsY, addValBot=float('nan'),
         uZ = uZ[:nPointsY, :]
 
         return [uX, uY, uZ]
+
+    read.reader = "hdf5"
     return read
