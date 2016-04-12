@@ -110,9 +110,9 @@ dbFile.attrs["nPoints"] = pointsY.size
 
 [chunks, offsets] = chunks_and_offsets(nProcs, len(times))
 
-readFunc = read_velocity_from_foamfile(dataDir, surfaceName, nPointsY, nPointsZ,
+readFunc = read_velocity_from_foamfile(dataDir, surfaceName,  nPointsZ,
                                        yInd, zInd, addValBot=0, addValTop=0,
-                                       interpolate=False)
+                                       interpValTop=True)
 
 # Read in the fluctuations
 for i in xrange(chunks[rank]):

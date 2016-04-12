@@ -106,7 +106,8 @@ if reader == "foamFile":
                                   "faceCentres")
     [pointsY, pointsZ, yInd, zInd] = \
         read_points_from_foamfile(pointsReadPath, addValBot=0, addValTop=0,
-                                  excludeTop=totalPointsY-nPointsY, midValue=1.0)
+                                  excludeTop=totalPointsY-nPointsY,
+                                  exchangeValTop=1.0)
 elif reader == "hdf5":
     [pointsY, pointsZ] = \
         read_points_from_hdf5(readPath,  excludeTop=totalPointsY-nPointsY,

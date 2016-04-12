@@ -9,7 +9,8 @@ __all__ = ["read_points_from_foamfile", "read_velocity_from_foamfile"]
 
 def read_points_from_foamfile(readPath, addValBot=float('nan'),
                               addValTop=float('nan'), excludeBot=0,
-                              excludeTop=0, midValue=0):
+                              excludeTop=0, exchangeValBot=float('nan'),
+                              exchangeValTop=float('nan')):
     """Read the coordinates of the points from a foamFile-format file.
 
 
@@ -47,8 +48,10 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
     excludeTop: int, optional
         How many points to remove from the top in the y direction.
         (default 0).
-    midValue : float, optional
-        The value of the channel-half width. (default 0).
+    exchangeValBot : float, optional
+        Exchange the value of y at the bottom.
+    exchangeValTop : float, optional
+        Exchange the value of y at the top.
 
     Returns
     -------
@@ -119,16 +122,21 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
         pointsY = pointsY[excludeBot:, :]
         pointsZ = pointsZ[excludeBot:, :]
 
-    if midValue:
-        pointsY[-1, :] = midValue
+    if not np.isnan(exchangeValBot):
+        pointsY[0, :] = exchangeValBot
+
+    if not np.isnan(exchangeValTop):
+        pointsY[-1, :] = exchangeValTop
 
     return [pointsY, pointsZ, yInd, zInd]
 
 
-def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsY, nPointsZ, yInd, zInd,
+def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
+                                yInd, zInd,
                                 addValBot=float('nan'), addValTop=float('nan'),
-                                interpolate=False):
-    """ Read the values of the velocity field from a foamFile-format
+                                excludeBot=0, excludeTop=0,
+                                interpValBot=False, interpValTop=False):
+    """Read the values of the velocity field from a foamFile-format
      file.
 
     Reads in the values of the velocity components stored as in foamFile
@@ -142,8 +150,6 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsY, nPointsZ, y
     baseReadPath : str
         The path where the time-directories with the velocity values are
         located.
-    nPointsY : int
-        The number of points in the wall-normal direction to consider.
     nPointsZ : int
         The amount of points in the mesh in the spanwise direction.
     yInd : ndarray
@@ -154,10 +160,18 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsY, nPointsZ, y
         Append a row of values from below, nothing added by default.
     addValTop : float, optional
         Append a row of values from above, nothing added by default.
-    interpolate : bool, optional
+    excludeBot : int, optional
+        How many points to remove from the bottom in the y direction.
+        (default 0).
+    excludeTop: int, optional
+        How many points to remove from the top in the y direction.
+        (default 0).
+    interpValBot : bool, optional
+        Whether to interpolate the first value in the wall-normal
+        direction using two points. (default False)
+    interpValTop : bool, optional
         Whether to interpolate the last value in the wall-normal
-        direction using two points. Useful to get the center-value of
-        the velocity from the channel flow.
+        direction using two points. (default False)
     Returns
     -------
         A function of one variable (the time-value) that will actually
@@ -200,6 +214,8 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsY, nPointsZ, y
         uY = np.copy(np.reshape(u[:, 1], (-1, nPointsZ)))
         uZ = np.copy(np.reshape(u[:, 2], (-1, nPointsZ)))
 
+        nPointsY = uX.shape[0]
+        topmostPoint = nPointsY-excludeTop
 
         # Sort along z
         for i in xrange(uX.shape[0]):
@@ -218,16 +234,33 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsY, nPointsZ, y
             uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
 
         # Interpolate for the last point in the wall-normal direction
-        if interpolate:
-            assert uX.shape[0] > nPointsY
-            uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
-            uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
-            uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
+        if interpValTop and excludeTop:
+            uX[topmostPoint-1, :] = 0.5*(uX[topmostPoint-1, :] +
+                                         uX[topmostPoint, :])
+            uY[topmostPoint-1, :] = 0.5*(uY[topmostPoint-1, :] +
+                                         uY[topmostPoint, :])
+            uZ[topmostPoint-1, :] = 0.5*(uZ[topmostPoint-1, :] +
+                                         uZ[topmostPoint, :])
 
-        # Remove data above y=delta
-        uX = uX[:nPointsY, :]
-        uY = uY[:nPointsY, :]
-        uZ = uZ[:nPointsY, :]
+        # Interpolate for the first point in the wall-normal direction
+        if interpValBot and excludeBot:
+            uX[excludeBot, :] = 0.5*(uX[excludeBot-1, :] +
+                                         uX[excludeBot, :])
+            uY[excludeBot, :] = 0.5*(uY[excludeBot-1, :] +
+                                         uY[excludeBot, :])
+            uZ[excludeBot, :] = 0.5*(uZ[excludeBot-1, :] +
+                                         uZ[excludeBot, :])
+
+        # Cap the points
+        if excludeTop:
+            uX = uX[:topmostPoint, :]
+            uY = uY[:topmostPoint, :]
+            uZ = uZ[:topmostPoint, :]
+
+        if excludeBot:
+            uX = uX[excludeBot:, :]
+            uY = uY[excludeBot:, :]
+            uZ = uZ[excludeBot:, :]
 
         return [uX, uY, uZ]
 

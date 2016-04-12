@@ -79,7 +79,7 @@ def test_read_points_add_zeros_bot_top(load_points):
     assert np.all(load_points[4] == zI)
 
 
-def test_read_points_add_zeros_bot_exclude_top_midvalue(load_points):
+def test_read_points_add_zeros_bot_exclude_top_interp_top(load_points):
     n = 10
 
     pointsY = np.append(np.zeros((1, 72)), load_points[1], axis=0)[:n, :]
@@ -93,7 +93,29 @@ def test_read_points_add_zeros_bot_exclude_top_midvalue(load_points):
 
     [pY, pZ, yI, zI] = read_points_from_foamfile(readPath, addValBot=0,
                                                  excludeTop=nPointsY-n,
-                                                 midValue=1)
+                                                 exchangeValTop=1)
+
+    assert np.all(pointsY == pY)
+    assert np.all(pointsZ == pZ)
+    assert np.all(load_points[3] == yI)
+    assert np.all(load_points[4] == zI)
+
+
+def test_read_points_add_zeros_top_exclude_bot_interp_bot(load_points):
+    n = 10
+
+    pointsY = np.append(load_points[1], np.zeros((1, 72)), axis=0)[n:, :]
+    pointsZ = np.append(load_points[2],
+                        np.array([load_points[2][0, :]]),
+                        axis=0)[n:, :]
+    pointsY[0, :] = 1.0
+
+    readPath = path.join(load_points[0], "foam_file_output", "1000.01",
+                         "faceCentres")
+
+    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath, addValTop=0,
+                                                 excludeBot=n,
+                                                 exchangeValBot=1)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
@@ -102,38 +124,8 @@ def test_read_points_add_zeros_bot_exclude_top_midvalue(load_points):
 
 
 # Tests for the velocity reader
-def test_read_velocity_add_zeros_bot_some_points_interpolate():
-    prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
-                       "channel_flow_180")
-    uX = np.load(path.join(prefix, "dsv_output", "1000.03", "uX.npy"))
-    uY = np.load(path.join(prefix, "dsv_output", "1000.03", "uY.npy"))
-    uZ = np.load(path.join(prefix, "dsv_output", "1000.03", "uZ.npy"))
-    yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
-    zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
-
-    nPointsY = 15
-
-    uX = np.append(np.zeros((1, 72)), uX, axis=0)
-    uY = np.append(np.zeros((1, 72)), uY, axis=0)
-    uZ = np.append(np.zeros((1, 72)), uZ, axis=0)
-
-    uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
-    uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
-    uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
-
-    readFunc = read_velocity_from_foamfile(path.join(prefix,
-                                                     "foam_file_output"), "",
-                                           nPointsY,
-                                           72, yInd, zInd, addValBot=0,
-                                           interpolate=1)
-    [uXR, uYR, uZR] = readFunc(1000.03)
-
-    assert np.all(uX[:nPointsY, :] == uXR[:nPointsY, :])
-    assert np.all(uY[:nPointsY, :] == uYR[:nPointsY, :])
-    assert np.all(uZ[:nPointsY, :] == uZR[:nPointsY, :])
-
-
-def test_read_velocity_add_zeros_bot_some_points_no_interpolate():
+@pytest.fixture
+def load_vel(scope="module"):
     prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
                        "channel_flow_180")
     uX = np.load(path.join(prefix, "dsv_output", "1000.01", "uX.npy"))
@@ -141,58 +133,72 @@ def test_read_velocity_add_zeros_bot_some_points_no_interpolate():
     uZ = np.load(path.join(prefix, "dsv_output", "1000.01", "uZ.npy"))
     yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
     zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
+    return [prefix, uX, uY, uZ, yInd, zInd]
+
+def test_read_velocity(load_vel):
+
+    readFunc = read_velocity_from_foamfile(path.join(load_vel[0],
+                                                     "foam_file_output"), "",
+                                           72, load_vel[4], load_vel[5])
+    [uXR, uYR, uZR] = readFunc(1000.01)
+
+    assert np.all(load_vel[1] == uXR)
+    assert np.all(load_vel[2] == uYR)
+    assert np.all(load_vel[3] == uZR)
+
+def test_read_velocity_add_zeros_bot_exclude_top_interp_top(load_vel):
 
     nPointsY = 15
 
-    uX = np.append(np.zeros((1, 72)), uX, axis=0)
-    uY = np.append(np.zeros((1, 72)), uY, axis=0)
-    uZ = np.append(np.zeros((1, 72)), uZ, axis=0)
+    uX = np.append(np.zeros((1, 72)), load_vel[1], axis=0)
+    uY = np.append(np.zeros((1, 72)), load_vel[2], axis=0)
+    uZ = np.append(np.zeros((1, 72)), load_vel[3], axis=0)
 
-    readFunc = read_velocity_from_foamfile(path.join(prefix,
+    uX[nPointsY-1, :] = 0.5*(uX[nPointsY-1, :] + uX[nPointsY, :])
+    uY[nPointsY-1, :] = 0.5*(uY[nPointsY-1, :] + uY[nPointsY, :])
+    uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-1, :] + uZ[nPointsY, :])
+
+    uX = uX[:nPointsY, :]
+    uY = uY[:nPointsY, :]
+    uZ = uZ[:nPointsY, :]
+
+    readFunc = read_velocity_from_foamfile(path.join(load_vel[0],
                                                      "foam_file_output"), "",
-                                           nPointsY, 72, yInd, zInd, addValBot=0,
-                                           interpolate=0)
-
+                                           72, load_vel[4], load_vel[5],
+                                           addValBot=0, excludeTop=load_vel[1].shape[0]-nPointsY,
+                                           interpValTop=1)
     [uXR, uYR, uZR] = readFunc(1000.01)
 
-    assert np.all(uX[:nPointsY, :] == uXR[:nPointsY, :])
-    assert np.all(uY[:nPointsY, :] == uYR[:nPointsY, :])
-    assert np.all(uZ[:nPointsY, :] == uZR[:nPointsY, :])
+    assert np.all(uX == uXR)
+    assert np.all(uY == uYR)
+    assert np.all(uZ == uZR)
 
 
-def test_read_velocity_add_zeros_bot_top_all_points_no_interpolate():
-    prefix = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
-                       "channel_flow_180")
-    uX = np.load(path.join(prefix, "dsv_output", "1000.01", "uX.npy"))
-    uY = np.load(path.join(prefix, "dsv_output", "1000.01", "uY.npy"))
-    uZ = np.load(path.join(prefix, "dsv_output", "1000.01", "uZ.npy"))
-    yInd = np.load(path.join(prefix, "dsv_output", "yInd.npy"))
-    zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
+def test_read_velocity_add_zeros_top_exclude_bot_interp_bot(load_vel):
 
+    nPointsY = 15
 
-    uX = np.append(np.zeros((1, 72)), uX, axis=0)
-    uY = np.append(np.zeros((1, 72)), uY, axis=0)
-    uZ = np.append(np.zeros((1, 72)), uZ, axis=0)
+    uX = np.append(load_vel[1], np.zeros((1, 72)), axis=0)
+    uY = np.append(load_vel[2], np.zeros((1, 72)), axis=0)
+    uZ = np.append(load_vel[3], np.zeros((1, 72)), axis=0)
 
-    uX = np.append(uX, np.zeros((1, 72)), axis=0)
-    uY = np.append(uY, np.zeros((1, 72)), axis=0)
-    uZ = np.append(uZ, np.zeros((1, 72)), axis=0)
+    uX[nPointsY, :] = 0.5*(uX[nPointsY-1, :] + uX[nPointsY, :])
+    uY[nPointsY, :] = 0.5*(uY[nPointsY-1, :] + uY[nPointsY, :])
+    uZ[nPointsY, :] = 0.5*(uZ[nPointsY-1, :] + uZ[nPointsY, :])
 
-    nPointsY = uX.shape[0]
+    uX = uX[nPointsY:, :]
+    uY = uY[nPointsY:, :]
+    uZ = uZ[nPointsY:, :]
 
-    readFunc = read_velocity_from_foamfile(path.join(prefix,
+    readFunc = read_velocity_from_foamfile(path.join(load_vel[0],
                                                      "foam_file_output"), "",
-                                           nPointsY, 72, yInd, zInd, addValBot=0,
-                                           addValTop=0, interpolate=0)
-
+                                           72, load_vel[4], load_vel[5],
+                                           addValTop=0, excludeBot=nPointsY,
+                                           interpValBot=1)
     [uXR, uYR, uZR] = readFunc(1000.01)
-
-
 
     assert np.all(uX[:, :] == uXR[:, :])
     assert np.all(uY[:, :] == uYR[:, :])
     assert np.all(uZ[:, :] == uZR[:, :])
-
-
 
 
