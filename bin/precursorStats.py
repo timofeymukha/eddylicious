@@ -1,6 +1,5 @@
 import numpy as np
 import os as os
-import matplotlib.pyplot as plt
 import h5py as h5py
 import argparse
 from mpi4py import MPI
@@ -12,7 +11,7 @@ nProcs = comm.Get_size()
 
 # Define the command-line arguments
 parser = argparse.ArgumentParser(
-            description="A script for plotting statistics \
+            description="A script for calculating the statistics \
                     of a precursor database.")
 
 parser.add_argument('--readPath',
