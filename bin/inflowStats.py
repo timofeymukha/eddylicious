@@ -65,8 +65,12 @@ uMean = comm.gather(uMean, root=0)
 uSquaredMean = comm.gather(uSquaredMean, root=0)
 
 if rank == 0:
-    uMean /= size
-    uSquaredMean /= size
+    for i in xrange(nProcs-1):
+        uMean[0] += uMean[i+1]
+        uSquaredMean[0] += uSquaredMean[i+1]
+
+    uMean = uMean[0]/size
+    uSquaredMean = uSquaredMean[0]/size
 
     uPrime2Mean = uSquaredMean - uMean**2
 
