@@ -57,7 +57,7 @@ hdf5FileName = configDict["hdf5FileName"]
 if reader == "foamFile":
     dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
 elif reader == "hdf5":
-    pass
+    dataDir = readPath
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
     exit()
@@ -107,7 +107,7 @@ if reader == "foamFile":
                                   excludeTop=totalPointsY-nPointsY, midValue=1.0)
 elif reader == "hdf5":
     [pointsY, pointsZ] = \
-        read_points_from_hdf5(readPath, addValBot=0, excludeTop=nPointsY,
+        read_points_from_hdf5(readPath,  excludeTop=totalPointsY-nPointsY,
                               midValue=1.0)
 else:
     print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
@@ -240,6 +240,7 @@ elif writer == "hdf5":
 else:
     print "ERROR in runLundRescaling.py. Unknown writer ", configDict["writer"]
     exit()
+
 
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
                                        nInfl, nInner,
