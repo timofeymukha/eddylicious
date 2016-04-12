@@ -250,7 +250,9 @@ if reader == "foamFile":
                                            nPointsY, nPointsZ, yInd, zInd,
                                            addValBot=0, interpolate=True)
 elif reader == "hdf5":
-    readerFunc = read_velocity_from_hdf5(readPath, interpolate=True)
+    readerFunc = read_velocity_from_hdf5(readPath, nPointsY, interpolate=True)
+else:
+    raise ValueError("Unknown reader")
 
 
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
