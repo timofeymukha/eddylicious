@@ -128,9 +128,9 @@ def read_velocity_from_hdf5(readPath, nPointsY, addValBot=float('nan'),
     def read(timeIndex):
         dbFile = h5py.File(readPath, 'r')
 
-        uX = dbFile["velocity"]["uX"][timeIndex, :nPointsY, :]
-        uY = dbFile["velocity"]["uY"][timeIndex, :nPointsY, :]
-        uZ = dbFile["velocity"]["uZ"][timeIndex, :nPointsY, :]
+        uX = dbFile["velocity"]["uX"][timeIndex, :, :]
+        uY = dbFile["velocity"]["uY"][timeIndex, :, :]
+        uZ = dbFile["velocity"]["uZ"][timeIndex, :, :]
 
         nPointsZ = uX.shape[1]
 
@@ -144,12 +144,10 @@ def read_velocity_from_hdf5(readPath, nPointsY, addValBot=float('nan'),
             uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
             uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
 
-        # To interpolate the velocities in the center, the we need an extra
-        # value (above the center-line)
-        assert uX.shape[0] > nPointsY
 
         # Interpolate for the last point in the wall-normal direction
         if interpolate:
+            assert uX.shape[0] > nPointsY
             uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
             uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
             uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
