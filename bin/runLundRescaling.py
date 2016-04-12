@@ -248,7 +248,7 @@ else:
 if reader == "foamFile":
     readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
                                             nPointsZ, yInd, zInd,
-                                            addValBot=0,
+                                            addValBot=0, addValTop=0,
                                             excludeTop=totalPointsY-nPointsY,
                                             interpValTop=True)
 elif reader == "hdf5":
