@@ -61,8 +61,7 @@ if reader == "foamFile":
 elif reader == "hdf5":
     dataDir = readPath
 else:
-    print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
-    exit()
+    raise ValueError("Unknown reader: "+reader)
 
 
 # Grab the existing times and sort them
@@ -74,8 +73,7 @@ elif reader == "hdf5":
     times = dbFile["velocity"]["times"]
 
 else:
-    print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
-    exit()
+    raise ValueError("Unknown reader: "+reader)
 
 if rank == 0:
     print "Reading from database with ", len(times), " time-steps."
@@ -93,8 +91,7 @@ if reader == "foamFile":
 elif reader == "hdf5":
     uMean = dbFile["velocity"]["uMean"]
 else:
-    print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
-    exit()
+    raise ValueError("Unknown reader: "+reader)
 
 totalPointsY = uMean.size
 uMean = uMean[:int(totalPointsY*0.5)]
@@ -113,8 +110,8 @@ elif reader == "hdf5":
         read_points_from_hdf5(readPath,  excludeTop=totalPointsY-nPointsY,
                               midValue=1.0)
 else:
-    print "ERROR in runLundRescaling.py: unknown reader ", configDict["reader"]
-    exit()
+    raise ValueError("Unknown reader: "+reader)
+
 
 [nPointsY, nPointsZ] = pointsY.shape
 
@@ -124,9 +121,7 @@ if inflowReader == "foamFile":
         os.path.join(inflowReadPath, inletPatchName, "faceCentres"))
 
 else:
-    print "ERROR in runLundRescaling.py: unknown reader ", \
-          configDict["inflowReader"]
-    exit()
+    raise ValueError("Unknown inflow reader: "+inflowReader)
 
 [nPointsYInfl, nPointsZInfl] = pointsYInfl.shape
 
@@ -203,9 +198,7 @@ for i in xrange(etaInfl.size):
 
 # Simple sanity check
 if deltaInfl > yInfl[-1]:
-    print "ERROR in runLundRescaling.py. Desired delta_99 is \
-          larger then maximum y."
-    exit()
+    raise ValueError("Desired delta_99 is larger then maximum y.")
 
 if ReTauInfl > ReTauPrec:
     print "WARNING: Re_tau in the precursor is lower than in the desired TBL"
@@ -238,12 +231,8 @@ elif writer == "hdf5":
     writePath.create_dataset("time", data=t0*np.ones((size, 1)))
     writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
                              dtype=np.float)
-
-
 else:
-    print "ERROR in runLundRescaling.py. Unknown writer ", configDict["writer"]
-    exit()
-
+    raise ValueError("Unknown writer: "+writer)
 
 # Create the reader functions
 if reader == "foamFile":
@@ -255,7 +244,7 @@ if reader == "foamFile":
 elif reader == "hdf5":
     readerFunc = read_velocity_from_hdf5(readPath, nPointsY, interpolate=True)
 else:
-    raise ValueError("Unknown reader")
+    raise ValueError("Unknown reader: "+reader)
 
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
                                        nInfl, nInner,
@@ -278,4 +267,4 @@ lund_generate(readerFunc,
               nInfl, nInner, gamma,
               times)
 if rank == 0:
-    print "Done."
+    print "Process 0 done, waiting for the others..."
