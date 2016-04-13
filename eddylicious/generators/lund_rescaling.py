@@ -82,6 +82,13 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     assert np.all(uMeanPrec >= 0)
     assert nInner <= nInfl
 
+    # Check if the wall is at the top, if so flip
+    flip = False
+    if etaInfl[0] > etaInfl[1]:
+        etaInfl = np.flipud(etaInfl)
+        yPlusInfl = np.flipud(yPlusInfl)
+        flip = True
+        
     uMeanInterp = interp1d(etaPrec, uMeanPrec)
     uMeanInterpPlus = interp1d(yPlusPrec, uMeanPrec)
 
@@ -97,7 +104,10 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
 
     assert np.all(uMeanInfl >= 0)
 
-    return uMeanInfl
+    if flip: 
+        return np.flipud(uMeanInfl)
+    else:
+        return uMeanInfl
 
 
 def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
@@ -166,6 +176,13 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
     assert nInfl > 0
     assert gamma > 0
 
+    # Check if the wall is at the top, if so flip
+    flip = False
+    if etaInfl[0] > etaInfl[1]:
+        etaInfl = np.flipud(etaInfl)
+        yPlusInfl = np.flipud(yPlusInfl)
+        flip = True
+
     uPrimeXInfl = np.zeros(pointsZInfl.shape)
     uPrimeYInfl = np.zeros(pointsZInfl.shape)
     uPrimeZInfl = np.zeros(pointsZInfl.shape)
@@ -183,32 +200,34 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
 
     uPrimeXInner = \
         gamma*uPrimeXPlusInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                yPlusInfl[0:nInfl])
+                                yPlusInfl[:nInfl])
     uPrimeYInner = \
         gamma*uPrimeYPlusInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                yPlusInfl[0:nInfl])
+                                yPlusInfl[:nInfl])
     uPrimeZInner = \
         gamma*uPrimeZPlusInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                yPlusInfl[0:nInfl])
+                                yPlusInfl[:nInfl])
 
     uPrimeXOuter = gamma*uPrimeXInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                       etaInfl[0:nInfl])
+                                       etaInfl[:nInfl])
     uPrimeYOuter = gamma*uPrimeYInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                       etaInfl[0:nInfl])
+                                       etaInfl[:nInfl])
     uPrimeZOuter = gamma*uPrimeZInterp(pointsZInfl[0, :]/pointsZInfl[0, -1],
-                                       etaInfl[0:nInfl])
+                                       etaInfl[:nInfl])
 
-    uPrimeXInfl[0:nInfl] = \
+    uPrimeXInfl[:nInfl] = \
         uPrimeXInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
         uPrimeXOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
-    uPrimeYInfl[0:nInfl] = \
+    uPrimeYInfl[:nInfl] = \
         uPrimeYInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
         uPrimeYOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
-    uPrimeZInfl[0:nInfl] = \
+    uPrimeZInfl[:nInfl] = \
         uPrimeZInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
         uPrimeZOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
-
-    return [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl]
+    if flip:
+        return map(np.flipud, [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl])
+    else:
+        return [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl]
 
 
 def lund_generate(readerFunction,

@@ -21,7 +21,7 @@ from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
-# Define the command-line arguments
+# Parse the command-line arguments
 parser = argparse.ArgumentParser(
             description="A script for generating inflow \
                          velocity fields using Lund et al's rescaling.")
@@ -43,6 +43,7 @@ for line in configFile:
         continue
     configDict[line.split()[0]] = line.split()[1]
 
+# Read the readers and writers
 readPath = configDict["readPath"]
 inflowReadPath = configDict["inflowReadPath"]
 writePath = configDict["writePath"]
@@ -56,13 +57,20 @@ writer = configDict["writer"]
 
 hdf5FileName = configDict["hdf5FileName"]
 
+# Determine which half of the channel flow will be used
+if configDict["half"] == "top":
+    flip = True
+elif configDict["half"] == "bottom":
+    flip = False
+else:
+    raise ValueError("half should be either 'top' of 'bottom'")
+
 if reader == "foamFile":
     dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
 elif reader == "hdf5":
     dataDir = readPath
 else:
     raise ValueError("Unknown reader: "+reader)
-
 
 # Grab the existing times and sort them
 if reader == "foamFile":
@@ -82,11 +90,11 @@ if rank == 0:
 if reader == "foamFile":
     uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
                                          "collapsedFields"))
-    uMean = np.append(np.zeros((1, 1)),
-                      np.genfromtxt(os.path.join(readPath, "postProcessing",
-                                                 "collapsedFields",
-                                                 uMeanTimes[-1],
-                                                 "UMean_X.xy"))[:, 1])
+    uMean =  np.genfromtxt(os.path.join(readPath, "postProcessing",
+                                        "collapsedFields",
+                                        uMeanTimes[-1],
+                                        "UMean_X.xy"))[:, 1]
+    uMean = np.append(np.zeros((1, 1)), uMean)
     uMean = np.append(uMean, np.zeros((1, 1)))
 elif reader == "hdf5":
     uMean = dbFile["velocity"]["uMean"]
@@ -94,17 +102,30 @@ else:
     raise ValueError("Unknown reader: "+reader)
 
 totalPointsY = uMean.size
-uMean = uMean[:int(totalPointsY*0.5)]
+
+if flip == False:
+    uMean = uMean[:int(totalPointsY*0.5)]
+else:
+    uMean = uMean[int(totalPointsY*0.5)+1:]
+
 nPointsY = uMean.size
 
 # Read grid for the recycling plane
 if reader == "foamFile":
     pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
                                   "faceCentres")
-    [pointsY, pointsZ, yInd, zInd] = \
-        read_points_from_foamfile(pointsReadPath, addValBot=0, addValTop=0,
-                                  excludeTop=totalPointsY-nPointsY,
-                                  exchangeValTop=1.0)
+
+    if flip == False:
+        [pointsY, pointsZ, yInd, zInd] = \
+            read_points_from_foamfile(pointsReadPath, addValBot=0, addValTop=2,
+                                    excludeTop=totalPointsY-nPointsY,
+                                    exchangeValTop=1.0)
+    else:
+        [pointsY, pointsZ, yInd, zInd] = \
+            read_points_from_foamfile(pointsReadPath, addValBot=0, addValTop=2,
+                                    excludeBot=totalPointsY-nPointsY,
+                                    exchangeValBot=1.0)
+
 elif reader == "hdf5":
     [pointsY, pointsZ] = \
         read_points_from_hdf5(readPath,  excludeTop=totalPointsY-nPointsY,
@@ -170,24 +191,33 @@ timePrecision = int(configDict["tPrecision"])
 
 # Get the grid points along y as 1d arrays for convenience
 yPrec = pointsY[:, 0]
-yInfl = pointsYInfl[:, 0] - yOrigin
-
-deltaPrec = delta_99(yPrec, uMean)
-ReTauPrec = uTauPrec*deltaPrec/nuPrec
+yInfl = pointsYInfl[:, 0]
 
 # Outer scale coordinates
-etaPrec = yPrec/deltaPrec
-etaInfl = yInfl/deltaInfl
+if flip == False:
+    yOriginPrec = 0
+    deltaPrec = delta_99(yPrec, uMean)
+else:
+    yOriginPrec = 2
+    deltaPrec = delta_99(np.flipud(np.abs(yPrec-2)), np.flipud(uMean))
+
+ReTauPrec = uTauPrec*deltaPrec/nuPrec
+
+etaPrec = np.abs(yPrec - yOriginPrec)/deltaPrec
+etaInfl = np.abs(yInfl- yOrigin)/deltaInfl
 
 # Inner scale coordinates
-yPlusPrec = yPrec*uTauPrec/nuPrec
-yPlusInfl = yInfl*uTauInfl/nuInfl
+yPlusPrec = np.abs(yPrec - yOriginPrec)*uTauPrec/nuPrec
+yPlusInfl = np.abs(yInfl - yOrigin)*uTauInfl/nuInfl
 
 # Points containing the boundary layer at the inflow plane
 nInfl = 0
-for i in xrange(etaInfl.size):
-    if etaInfl[i] <= etaPrec[-1]:
-        nInfl += 1
+for i in xrange(etaInfl.size):  
+    if etaInfl[0] < etaInfl[-1]:
+        if etaInfl[i] <= np.max(etaPrec):
+            nInfl += 1
+    elif np.flipud(etaInfl)[i] <= np.max(etaPrec):
+            nInfl += 1
 
 # Points where inner scaling will be used
 nInner = 0
@@ -195,12 +225,7 @@ for i in xrange(etaInfl.size):
     if etaInfl[i] <= 0.7:
         nInner += 1
 
-
-# Simple sanity check
-if deltaInfl > yInfl[-1]:
-    raise ValueError("Desired delta_99 is larger then maximum y.")
-
-if ReTauInfl > ReTauPrec:
+if ReTauInfl > ReTauPrec and rank == 0:
     print "WARNING: Re_tau in the precursor is lower than in the desired TBL"
 
 size = int((tEnd-t0)/dt+1)
@@ -236,11 +261,18 @@ else:
 
 # Create the reader functions
 if reader == "foamFile":
-    readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
-                                            nPointsZ, yInd, zInd,
-                                            addValBot=0, addValTop=0,
-                                            excludeTop=totalPointsY-nPointsY,
-                                            interpValTop=True)
+    if flip == False:
+        readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
+                                                nPointsZ, yInd, zInd,
+                                                addValBot=0, addValTop=0,
+                                                excludeTop=totalPointsY-nPointsY,
+                                                interpValTop=True)
+    else:
+        readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
+                                                nPointsZ, yInd, zInd,
+                                                addValBot=0, addValTop=0,
+                                                excludeBot=totalPointsY-nPointsY,
+                                                interpValBot=True)
 elif reader == "hdf5":
     readerFunc = read_velocity_from_hdf5(readPath, nPointsY, interpolate=True)
 else:
