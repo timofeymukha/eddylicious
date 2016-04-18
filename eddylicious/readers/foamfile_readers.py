@@ -199,7 +199,7 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
         """
         readUPath = os.path.join(baseReadPath, str(time), surfaceName,
                                  "vectorField", "U")
-        with file(os.path.join(baseReadPath, readUPath)) as UFile:
+        with file(readUPath) as UFile:
             u = [line.rstrip(')\n') for line in UFile]
 
         u = [line.lstrip('(') for line in u]
