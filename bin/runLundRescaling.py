@@ -90,10 +90,10 @@ if rank == 0:
 if reader == "foamFile":
     uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
                                          "collapsedFields"))
-    uMean =  np.genfromtxt(os.path.join(readPath, "postProcessing",
-                                        "collapsedFields",
-                                        uMeanTimes[-1],
-                                        "UMean_X.xy"))[:, 1]
+    uMean = np.genfromtxt(os.path.join(readPath, "postProcessing",
+                                       "collapsedFields",
+                                       uMeanTimes[-1],
+                                       "UMean_X.xy"))[:, 1]
     uMean = np.append(np.zeros((1, 1)), uMean)
     uMean = np.append(uMean, np.zeros((1, 1)))
 elif reader == "hdf5":
@@ -103,7 +103,7 @@ else:
 
 totalPointsY = uMean.size
 
-if flip == False:
+if not flip:
     uMean = uMean[:int(totalPointsY*0.5)]
 else:
     uMean = uMean[int(totalPointsY*0.5)+1:]
