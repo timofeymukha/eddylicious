@@ -172,8 +172,10 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
     interpValTop : bool, optional
         Whether to interpolate the last value in the wall-normal
         direction using two points. (default False)
+
     Returns
     -------
+    function
         A function of one variable (the time-value) that will actually
         perform the reading.
 

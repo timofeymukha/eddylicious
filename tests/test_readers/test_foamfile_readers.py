@@ -162,11 +162,13 @@ def test_read_velocity_add_zeros_bot_exclude_top_interp_top(load_vel):
     uY = uY[:nPointsY, :]
     uZ = uZ[:nPointsY, :]
 
-    readFunc = read_velocity_from_foamfile(path.join(load_vel[0],
-                                                     "foam_file_output"), "",
-                                           72, load_vel[4], load_vel[5],
-                                           addValBot=0, excludeTop=load_vel[1].shape[0]-nPointsY,
-                                           interpValTop=1)
+    readFunc = \
+        read_velocity_from_foamfile(path.join(load_vel[0],
+                                              "foam_file_output"), "",
+                                    72, load_vel[4], load_vel[5],
+                                    addValBot=0,
+                                    excludeTop=load_vel[1].shape[0]-nPointsY+1,
+                                    interpValTop=1)
     [uXR, uYR, uZR] = readFunc(1000.01)
 
     assert np.all(uX == uXR)
@@ -197,8 +199,8 @@ def test_read_velocity_add_zeros_top_exclude_bot_interp_bot(load_vel):
                                            interpValBot=1)
     [uXR, uYR, uZR] = readFunc(1000.01)
 
-    assert np.all(uX[:, :] == uXR[:, :])
-    assert np.all(uY[:, :] == uYR[:, :])
-    assert np.all(uZ[:, :] == uZR[:, :])
+    assert np.all(uX == uXR)
+    assert np.all(uY == uYR)
+    assert np.all(uZ == uZR)
 
 

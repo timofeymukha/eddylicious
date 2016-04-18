@@ -9,7 +9,8 @@ __all__ = ["read_points_from_hdf5", "read_velocity_from_hdf5"]
 
 def read_points_from_hdf5(readPath, addValBot=float('nan'),
                           addValTop=float('nan'), excludeBot=0,
-                          excludeTop=0, midValue=0):
+                          excludeTop=0, exchangeValBot=float('nan'),
+                              exchangeValTop=float('nan')):
     """Read the coordinates of the points from a hdf5 file.
 
 
@@ -42,9 +43,10 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
     excludeTop: int, optional
         How many points to remove from the top in the y direction.
         (default 0).
-    midValue : float, optional
-        The value of the channel-half width. (default 1). Must be
-        provided if nPoints is provided.
+    exchangeValBot : float, optional
+        Exchange the value of y at the bottom.
+    exchangeValTop : float, optional
+        Exchange the value of y at the top.
 
 
     Returns
@@ -83,14 +85,20 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
         pointsY = pointsY[excludeBot:, :]
         pointsZ = pointsZ[excludeBot:, :]
 
-    if midValue:
-        pointsY[-1, :] = midValue
+    if not np.isnan(exchangeValBot):
+        pointsY[0, :] = exchangeValBot
+
+    if not np.isnan(exchangeValTop):
+        pointsY[-1, :] = exchangeValTop
+
 
     return [pointsY, pointsZ]
 
 
-def read_velocity_from_hdf5(readPath, nPointsY, addValBot=float('nan'),
-                            addValTop=float('nan'), interpolate=0):
+def read_velocity_from_hdf5(readPath,  addValBot=float('nan'),
+                            addValTop=float('nan'),
+                            excludeBot=0, excludeTop=0,
+                            interpValBot=False, interpValTop=False):
     """ Read the values of the velocity field from a foamFile-format
     file.
 
@@ -110,22 +118,38 @@ def read_velocity_from_hdf5(readPath, nPointsY, addValBot=float('nan'),
         Append a row of values from below.
     addValTop : float, optional
         Append a row of values from above.
-    interpolate : bool, optional
+    interpValBot : bool, optional
+        Whether to interpolate the first value in the wall-normal
+        direction using two points. (default False)
+    interpValTop : bool, optional
         Whether to interpolate the last value in the wall-normal
-        direction using two points. Useful to get the center-value of
-        the velocity from the channel flow.
-
+        direction using two points. (default False)
 
     Returns
     -------
-    List of ndarrays
-        The list contains three items, each a 2d array, corresponding to
-        the three components of the velocity field, the order of the
-        components in the list is x, y and the z.
-
+    function
+        A function of one variable (the time-index) that will actually
+        perform the reading.
     """
 
     def read(timeIndex):
+        """
+        A function that will actually perform the reading.
+
+        Parameters
+        ----------
+        timeIndex, int
+            The value of the time-index, i.e. the location in the
+            times-array.
+
+        Returns
+        -------
+        List of ndarrays
+            The list contains three items, each a 2d array,
+            corresponding to the three components of the velocity field,
+            the order of the components in the list is x, y and the z.
+
+        """
         dbFile = h5py.File(readPath, 'r')
 
         uX = dbFile["velocity"]["uX"][timeIndex, :, :]
@@ -144,18 +168,37 @@ def read_velocity_from_hdf5(readPath, nPointsY, addValBot=float('nan'),
             uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
             uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
 
+        nPointsY = uX.shape[0]
+        topmostPoint = nPointsY-excludeTop
 
         # Interpolate for the last point in the wall-normal direction
-        if interpolate:
-            assert uX.shape[0] > nPointsY
-            uX[nPointsY-1, :] = 0.5*(uX[nPointsY-2, :] + uX[nPointsY, :])
-            uY[nPointsY-1, :] = 0.5*(uY[nPointsY-2, :] + uY[nPointsY, :])
-            uZ[nPointsY-1, :] = 0.5*(uZ[nPointsY-2, :] + uZ[nPointsY, :])
+        if interpValTop and excludeTop:
+            uX[topmostPoint-1, :] = 0.5*(uX[topmostPoint-1, :] +
+                                         uX[topmostPoint, :])
+            uY[topmostPoint-1, :] = 0.5*(uY[topmostPoint-1, :] +
+                                         uY[topmostPoint, :])
+            uZ[topmostPoint-1, :] = 0.5*(uZ[topmostPoint-1, :] +
+                                         uZ[topmostPoint, :])
 
-        # Remove data above y=delta
-        uX = uX[:nPointsY, :]
-        uY = uY[:nPointsY, :]
-        uZ = uZ[:nPointsY, :]
+        # Interpolate for the first point in the wall-normal direction
+        if interpValBot and excludeBot:
+            uX[excludeBot, :] = 0.5*(uX[excludeBot-1, :] +
+                                     uX[excludeBot, :])
+            uY[excludeBot, :] = 0.5*(uY[excludeBot-1, :] +
+                                     uY[excludeBot, :])
+            uZ[excludeBot, :] = 0.5*(uZ[excludeBot-1, :] +
+                                     uZ[excludeBot, :])
+
+        # Cap the points
+        if excludeTop:
+            uX = uX[:topmostPoint, :]
+            uY = uY[:topmostPoint, :]
+            uZ = uZ[:topmostPoint, :]
+
+        if excludeBot:
+            uX = uX[excludeBot:, :]
+            uY = uY[excludeBot:, :]
+            uZ = uZ[excludeBot:, :]
 
         return [uX, uY, uZ]
 
