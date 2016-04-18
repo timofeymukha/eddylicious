@@ -129,8 +129,8 @@ def test_read_points_add_zeros_top_exclude_bot_interp_bot(load_points,
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
 
-# Tests for the velocity reader
 
+# Tests for the velocity reader
 def test_read_velocity(load_vel, create_hdf5):
 
     readFunc = read_velocity_from_hdf5(create_hdf5)
@@ -141,9 +141,9 @@ def test_read_velocity(load_vel, create_hdf5):
     assert np.all(load_vel[2] == uYR)
     assert np.all(load_vel[3] == uZR)
 
+
 def test_read_velocity_add_zeros_bot_exclude_top_interp_top(load_vel,
                                                             create_hdf5):
-
     nPointsY = 15
 
     uX = np.append(np.zeros((1, 72)), load_vel[1], axis=0)
@@ -171,7 +171,6 @@ def test_read_velocity_add_zeros_bot_exclude_top_interp_top(load_vel,
 
 def test_read_velocity_add_zeros_top_exclude_bot_interp_bot(load_vel,
                                                             create_hdf5):
-
     nPointsY = 15
 
     uX = np.append(load_vel[1], np.zeros((1, 72)), axis=0)

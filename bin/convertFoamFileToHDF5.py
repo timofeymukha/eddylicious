@@ -56,7 +56,7 @@ uMeanFile = args.uMeanFile
 fileName = args.fileName
 
 
-dataDir = os.path.join(precursorCaseDir)
+dataDir = os.path.join(precursorCaseDir, "postProcessing", "sampledSurface")
 
 # Grab the existing times and sort
 times = os.listdir(dataDir)

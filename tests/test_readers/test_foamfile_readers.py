@@ -43,10 +43,10 @@ def test_read_points_exclude_top(load_points):
     assert np.all(load_points[3] == yI)
     assert np.all(load_points[4] == zI)
 
+
 def test_read_points_exclude_bot(load_points):
     n = 10
 
-    nPointsY = load_points[1].shape[0]
     readPath = path.join(load_points[0], "foam_file_output", "1000.01",
                          "faceCentres")
 
@@ -135,6 +135,7 @@ def load_vel(scope="module"):
     zInd = np.load(path.join(prefix, "dsv_output", "zInd.npy"))
     return [prefix, uX, uY, uZ, yInd, zInd]
 
+
 def test_read_velocity(load_vel):
 
     readFunc = read_velocity_from_foamfile(path.join(load_vel[0],
@@ -145,6 +146,7 @@ def test_read_velocity(load_vel):
     assert np.all(load_vel[1] == uXR)
     assert np.all(load_vel[2] == uYR)
     assert np.all(load_vel[3] == uZR)
+
 
 def test_read_velocity_add_zeros_bot_exclude_top_interp_top(load_vel):
 
