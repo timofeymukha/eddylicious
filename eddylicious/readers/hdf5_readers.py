@@ -95,7 +95,7 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
     return [pointsY, pointsZ]
 
 
-def read_velocity_from_hdf5(readPath,  addValBot=float('nan'),
+def read_velocity_from_hdf5(readPath, addValBot=float('nan'),
                             addValTop=float('nan'),
                             excludeBot=0, excludeTop=0,
                             interpValBot=False, interpValTop=False):

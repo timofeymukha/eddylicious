@@ -115,7 +115,7 @@ if reader == "foamFile":
     pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
                                   "faceCentres")
 
-    if flip == False:
+    if not flip:
         [pointsY, pointsZ, yInd, zInd] = \
             read_points_from_foamfile(pointsReadPath, addValBot=0, addValTop=2,
                                     excludeTop=totalPointsY-nPointsY,
@@ -127,9 +127,17 @@ if reader == "foamFile":
                                     exchangeValBot=1.0)
 
 elif reader == "hdf5":
-    [pointsY, pointsZ] = \
-        read_points_from_hdf5(readPath,  excludeTop=totalPointsY-nPointsY,
-                              midValue=1.0)
+
+    if not flip:
+        [pointsY, pointsZ] = \
+            read_points_from_hdf5(readPath,  addValBot=0, addValTop=2,
+                                  excludeTop=totalPointsY-nPointsY,
+                                  exchangeValTop=1.0)
+    else:
+        [pointsY, pointsZ, yInd, zInd] = \
+            read_points_from_foamfile(readPath, addValBot=0, addValTop=2,
+                                      excludeBot=totalPointsY-nPointsY,
+                                      exchangeValBot=1.0)
 else:
     raise ValueError("Unknown reader: "+reader)
 
@@ -261,20 +269,29 @@ else:
 
 # Create the reader functions
 if reader == "foamFile":
-    if flip == False:
+    if not flip:
         readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
-                                                nPointsZ, yInd, zInd,
-                                                addValBot=0, addValTop=0,
-                                                excludeTop=totalPointsY-nPointsY,
-                                                interpValTop=True)
+                                                 nPointsZ, yInd, zInd,
+                                                 addValBot=0, addValTop=0,
+                                                 excludeTop=totalPointsY-nPointsY,
+                                                 interpValTop=True)
     else:
         readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
-                                                nPointsZ, yInd, zInd,
-                                                addValBot=0, addValTop=0,
-                                                excludeBot=totalPointsY-nPointsY,
-                                                interpValBot=True)
+                                                 nPointsZ, yInd, zInd,
+                                                 addValBot=0, addValTop=0,
+                                                 excludeBot=totalPointsY-nPointsY,
+                                                 interpValBot=True)
 elif reader == "hdf5":
-    readerFunc = read_velocity_from_hdf5(readPath, nPointsY, interpolate=True)
+    if not flip:
+        readerFunc = read_velocity_from_hdf5(readPath,
+                                             addValBot=0, addValTop=0,
+                                             excludeTop=totalPointsY-nPointsY,
+                                             interpValTop=True)
+    else:
+        readerFunc = read_velocity_from_hdf5(readPath,
+                                             addValBot=0, addValTop=0,
+                                             excludeBot=totalPointsY-nPointsY,
+                                             interpValBot=True)
 else:
     raise ValueError("Unknown reader: "+reader)
 
