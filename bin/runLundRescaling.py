@@ -118,14 +118,13 @@ if reader == "foamFile":
     if not flip:
         [pointsY, pointsZ, yInd, zInd] = \
             read_points_from_foamfile(pointsReadPath, addValBot=0, addValTop=2,
-                                    excludeTop=totalPointsY-nPointsY,
-                                    exchangeValTop=1.0)
+                                      excludeTop=totalPointsY-nPointsY,
+                                      exchangeValTop=1.0)
     else:
         [pointsY, pointsZ, yInd, zInd] = \
             read_points_from_foamfile(pointsReadPath, addValBot=0, addValTop=2,
-                                    excludeBot=totalPointsY-nPointsY,
-                                    exchangeValBot=1.0)
-
+                                      excludeBot=totalPointsY-nPointsY,
+                                      exchangeValBot=1.0)
 elif reader == "hdf5":
 
     if not flip:
@@ -134,10 +133,10 @@ elif reader == "hdf5":
                                   excludeTop=totalPointsY-nPointsY,
                                   exchangeValTop=1.0)
     else:
-        [pointsY, pointsZ, yInd, zInd] = \
-            read_points_from_foamfile(readPath,
-                                      excludeBot=totalPointsY-nPointsY,
-                                      exchangeValBot=1.0)
+        [pointsY, pointsZ] = \
+            read_points_from_hdf5(readPath,
+                                  excludeBot=totalPointsY-nPointsY,
+                                  exchangeValBot=1.0)
 else:
     raise ValueError("Unknown reader: "+reader)
 
