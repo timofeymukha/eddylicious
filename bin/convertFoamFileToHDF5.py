@@ -96,13 +96,13 @@ velocityGroup.create_dataset("times", data=[float(times[i])
 
 uX = velocityGroup.create_dataset("uX", (len(times),
                                          pointsY.shape[0],
-                                         pointsY.shape[1]))
+                                         pointsY.shape[1]), dtype=np.float64)
 uY = velocityGroup.create_dataset("uY", (len(times),
                                          pointsY.shape[0],
-                                         pointsY.shape[1]))
+                                         pointsY.shape[1]), dtype=np.float64)
 uZ = velocityGroup.create_dataset("uZ", (len(times),
                                          pointsY.shape[0],
-                                         pointsY.shape[1]))
+                                         pointsY.shape[1]), dtype=np.float64)
 
 dbFile.attrs["nPointsY"] = pointsY.shape[0]
 dbFile.attrs["nPointsZ"] = pointsY.shape[1]

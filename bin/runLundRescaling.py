@@ -263,7 +263,7 @@ elif writer == "hdf5":
     writePath = h5py.File(writePath, 'a', driver='mpio', comm=MPI.COMM_WORLD)
     writePath.create_dataset("time", data=t0*np.ones((size, 1)))
     writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
-                             dtype=np.float)
+                             dtype=np.float64)
 else:
     raise ValueError("Unknown writer: "+writer)
 
