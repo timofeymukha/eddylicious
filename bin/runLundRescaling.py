@@ -130,12 +130,12 @@ elif reader == "hdf5":
 
     if not flip:
         [pointsY, pointsZ] = \
-            read_points_from_hdf5(readPath,  addValBot=0, addValTop=2,
+            read_points_from_hdf5(readPath,
                                   excludeTop=totalPointsY-nPointsY,
                                   exchangeValTop=1.0)
     else:
         [pointsY, pointsZ, yInd, zInd] = \
-            read_points_from_foamfile(readPath, addValBot=0, addValTop=2,
+            read_points_from_foamfile(readPath,
                                       excludeBot=totalPointsY-nPointsY,
                                       exchangeValBot=1.0)
 else:
@@ -284,12 +284,10 @@ if reader == "foamFile":
 elif reader == "hdf5":
     if not flip:
         readerFunc = read_velocity_from_hdf5(readPath,
-                                             addValBot=0, addValTop=0,
                                              excludeTop=totalPointsY-nPointsY,
                                              interpValTop=True)
     else:
         readerFunc = read_velocity_from_hdf5(readPath,
-                                             addValBot=0, addValTop=0,
                                              excludeBot=totalPointsY-nPointsY,
                                              interpValBot=True)
 else:
