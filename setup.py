@@ -19,7 +19,8 @@ setup(name='eddylicious',
                     'mpi4py',
                     'matplotlib',
                     'h5py',
-                    'sphinxcontrib-bibtex'
+                    'sphinxcontrib-bibtex',
+                    'mock'
                        ],
       license="GNU GPL 3",
       classifiers=[
