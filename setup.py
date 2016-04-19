@@ -17,7 +17,6 @@ setup(name='eddylicious',
       install_requires=[
                     'numpy',
                     'scipy',
-                    'mpi4py',
                     'matplotlib',
                     'mock',
                     'sphinxcontrib-bibtex',
