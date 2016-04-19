@@ -133,7 +133,7 @@ if rank == 0:
     uPrime2MeanYY = np.mean(uPrime2MeanYY, axis=1)
     uPrime2MeanZZ = np.mean(uPrime2MeanZZ, axis=1)
 
-    print "Outputting figures and data"
+    print "Outputting data"
 
     if not os.path.exists(writeDir):
         os.makedirs(writeDir)

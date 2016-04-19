@@ -2,7 +2,8 @@ from setuptools import setup
 
 setup(name='eddylicious',
       version='0.0.1',
-      description='A package for generating inflow velocity fields for Large Eddy Simulation',
+      description='A package for generating inflow fields for Large Eddy '
+                  'Simulation',
       url='http://bitbucket.org/lesituu/eddylicious',
       download_url='https://bitbucket.org/lesituu/eddylicious/get/0.0.1.tar.gz',
       author='Timofey Mukha',
@@ -18,9 +19,8 @@ setup(name='eddylicious',
                     'scipy',
                     'mpi4py',
                     'matplotlib',
-                    'h5py',
+                    'mock',
                     'sphinxcontrib-bibtex',
-                    'mock'
                        ],
       license="GNU GPL 3",
       classifiers=[
