@@ -18,7 +18,8 @@ setup(name='eddylicious',
                     'scipy',
                     'mpi4py',
                     'matplotlib',
-                    'h5py'
+                    'h5py',
+                    'sphinxcontrib-bibtex'
                        ],
       license="GNU GPL 3",
       classifiers=[
