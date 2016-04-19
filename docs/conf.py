@@ -14,7 +14,7 @@
 
 import sys
 import os
-import mock
+from mock import MagicMock
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.abspath('../eddylicious'))
 
 # -- General configuration ------------------------------------------------
 
+# Mock certain modules to make readthedocs work.
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
