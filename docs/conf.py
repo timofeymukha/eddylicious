@@ -14,7 +14,7 @@
 
 import sys
 import os
-from mock import MagicMock
+import mock
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -28,13 +28,10 @@ sys.path.insert(0, os.path.abspath('../eddylicious'))
 # -- General configuration ------------------------------------------------
 
 # Mock certain modules to make readthedocs work.
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return Mock()
 
-MOCK_MODULES = ['h5py']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+MOCK_MODULES = ['numpy', 'h5py', 'mpi4py']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
 
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -51,6 +48,8 @@ extensions = [
     #'sphinx.ext.coverage',
     #'sphinx.ext.mathjax',
 ]
+
+autodoc_mock_imports = ['mpi4py', "h5py"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
