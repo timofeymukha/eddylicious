@@ -1,4 +1,4 @@
 Contributing
 ============
 
-gege
+The guidelines for contribution to the project.
