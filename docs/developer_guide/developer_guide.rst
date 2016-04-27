@@ -1,0 +1,6 @@
+===============
+Developer guide
+===============
+
+.. toctree::
+   contributing

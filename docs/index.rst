@@ -16,17 +16,6 @@ developers, and source-code documentation.
    :caption: Table of Contents
 
    user_guide/user_guide
-   contributing
+   developer_guide/developer_guide
    zzreferences
-
-#.. automodule:: generators
-#   :members:
-#.. automodule:: readers
-#   :members:
-#.. automodule:: writers
-#   :members:
-
-#* :ref:`genindex`
-#* :ref:`modindex`
-#* :ref:`search`
 
