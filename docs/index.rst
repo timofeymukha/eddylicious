@@ -16,7 +16,7 @@ developers, and source-code documentation.
    :caption: Table of Contents
 
    intro
-   lund_rescaling
+   generation_methods
    contributing
    zzreferences
 
