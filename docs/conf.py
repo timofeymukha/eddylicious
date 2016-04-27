@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.abspath('../eddylicious'))
 
 # Mock certain modules to make readthedocs work.
 
-MOCK_MODULES = ['numpy', 'h5py', 'mpi4py']
+MOCK_MODULES = ['h5py', 'mpi4py']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
@@ -43,10 +43,10 @@ for mod_name in MOCK_MODULES:
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinxcontrib.bibtex'
+    'sphinxcontrib.bibtex',
     #'sphinx.ext.intersphinx',
     #'sphinx.ext.coverage',
-    #'sphinx.ext.mathjax',
+    'sphinx.ext.mathjax',
 ]
 
 autodoc_mock_imports = ['mpi4py', "h5py"]
@@ -302,3 +302,5 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
+
+numfig = True

@@ -1,5 +1,6 @@
 List of references
 ==================
+brekekeks
 
 .. bibliography:: bibl.bib
-    :cited:
+    :all:
