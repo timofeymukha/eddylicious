@@ -31,8 +31,7 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
     using Lund et al's method, which requires a liner interpolant across
     the domain half-width. Adding the value at the center of the channel
     and at the wall, which are otherwise absent on a finite volume grid,
-    insures that the interpolant will cover the whole interval [0,
-    delta].
+    insures that the interpolant will cover the whole interval :math:`[0, \delta]`.
 
     Parameters
     ----------
@@ -57,6 +56,7 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
     -------
     List of ndarrays
         The list contains 4 items
+
         pointsY :
         A 2d ndarray containing the y coordinates of the points.
 
@@ -136,8 +136,7 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
                                 addValBot=float('nan'), addValTop=float('nan'),
                                 excludeBot=0, excludeTop=0,
                                 interpValBot=False, interpValTop=False):
-    """Read the values of the velocity field from a foamFile-format
-     file.
+    """Read the values of the velocity field from a foamFile-format file.
 
     Reads in the values of the velocity components stored as in foamFile
     file-format. The velocity field is read and the transformed into a

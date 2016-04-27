@@ -2,8 +2,7 @@ eddylicious
 ===========
 
 Eddylicious is a python library for generating inflow boundary fields for
-Large Eddy simulation (LES) and Direct Numerical Simulation (DNS) of
-turbulent flows.
+scale-resolving simulations of turbulent flow.
 
 The goal of eddylicious is to serve as a central place-holder for existing
 inflow generation methods and make them easily accessible to the CFD community.
@@ -15,7 +14,12 @@ developers, and source-code documentation.
 .. toctree::
    :caption: Table of Contents
 
-   user_guide/user_guide
-   developer_guide/developer_guide
+   user_guide/index
+   developer_guide/index
+   code_reference/index
    zzreferences
+
+
+:py:mod:`resaders`
+
 

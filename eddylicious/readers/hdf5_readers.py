@@ -25,8 +25,8 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
     using Lund et al's method, which requires a liner interpolant across
     the domain half-width. Adding the value at the center of the channel
     and at the wall, which are otherwise absent on a finite volume grid,
-    insures that the interpolant will cover the whole interval [0,
-    delta].
+    insures that the interpolant will cover the whole interval
+    [0, delta].
 
 
     Parameters
@@ -53,10 +53,12 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
     -------
     List of ndarrays
         The list contains 2 items
+
         pointsY :
-            A 2d ndarray containing the y coordinates of the points.
+        A 2d ndarray containing the y coordinates of the points.
+
         pointsZ :
-            A 2d ndarray containing the z coordinates of the points.
+        A 2d ndarray containing the z coordinates of the points.
 
     """
     dbFile = h5py.File(readPath, 'a')

@@ -1,0 +1,5 @@
+Readers
+=======
+
+.. automodule:: readers
+    :members:
