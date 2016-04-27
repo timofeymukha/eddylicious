@@ -1,26 +1,6 @@
 Available inflow generation methods
 ===================================
 
-Common notation
----------------
-
-Here we define the notation for several important physical quantities.
-
-    * :math:`U_e` --- the edge, or freestream, velocity.
-
-    * Measures of the thickness of a boundary layer.
-        * :math:`\delta_{99}` --- the location where the mean velocity is equal
-          to :math:`0.99U_e`.
-        * :math:`\delta_*` --- the displacement thickness.
-        * :math:`\theta` --- the momentum thickness.
-    * The velocity field.
-        * :math:`u, \: v, \: w` -- the streamwise, wall-normal and spanwise
-          components of the velocity field.
-        * :math:`U, \: V, \: W` -- the mean streamwise, wall-normal, and
-          spanwise components of the velocity field.
-        * :math:`u', \: v', \: w'` -- the streamwise, wall-normal and spanwise
-          components of the fluctuations of the velocity field.
-
 
 Lund's rescaling
 ----------------

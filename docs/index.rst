@@ -15,8 +15,7 @@ developers, and source-code documentation.
 .. toctree::
    :caption: Table of Contents
 
-   intro
-   generation_methods
+   user_guide/user_guide
    contributing
    zzreferences
 
