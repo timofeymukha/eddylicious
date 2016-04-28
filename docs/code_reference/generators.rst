@@ -1,6 +1,5 @@
 Generators
 ==========
 
-
 .. automodule:: generators
     :members:
