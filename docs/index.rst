@@ -20,6 +20,3 @@ developers, and source-code documentation.
    zzreferences
 
 
-:py:mod:`resaders`
-
-

@@ -6,3 +6,5 @@ User guide
     intro
     common_notation
     generation_methods
+    input
+    output
