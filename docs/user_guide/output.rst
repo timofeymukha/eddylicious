@@ -31,7 +31,7 @@ Eddylicious creates the following datasets inside the HDF5 file.
 
     * ``velocity``, :math:`N_t \times N_p \times 3` --- the values of the
       velocity field.
-      The first index is assiciated with time, the second with the available
+      The first index is associated with time, the second with the available
       points and the third one with the components of the velocity field.
       Same order as in ``points`` applies.
 

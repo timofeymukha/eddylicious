@@ -1,6 +1,6 @@
 import numpy as np
 import os as os
-import h5py as h5py
+import h5py
 import argparse
 from mpi4py import MPI
 from eddylicious.generators.helper_functions import chunks_and_offsets
@@ -12,12 +12,12 @@ nProcs = comm.Get_size()
 
 # Define the command-line arguments
 parser = argparse.ArgumentParser(
-            description="A script for calculating statistics \
-                    of a rescaled database in hdf5 format.")
+            description="A utility for calculating statistics \
+                    of a inflow field database stored in hdf5 format.")
 
 parser.add_argument('--readPath',
                     type=str,
-                    help='The HDF5 file with the databse.',
+                    help='The HDF5 file with the database.',
                     required=True)
 parser.add_argument('--writePath',
                     type=str,
@@ -30,9 +30,7 @@ args = parser.parse_args()
 readPath = args.readPath
 writeDir = args.writePath
 
-
 #  Open the hdf5 database
-
 if rank == 0:
     print "Opening the database"
 
@@ -85,7 +83,6 @@ if rank == 0:
     uPrime2Mean[:, 0] = uPrime2Mean[yInd, 0]
     uPrime2Mean[:, 1] = uPrime2Mean[yInd, 1]
     uPrime2Mean[:, 2] = uPrime2Mean[yInd, 2]
-
 
     # Find the number of points along z
     nPointsZ = 0

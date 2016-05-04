@@ -45,14 +45,14 @@ for line in configFile:
 
 # Read the readers and writers
 readPath = configDict["readPath"]
-inflowReadPath = configDict["inflowReadPath"]
+inflowReadPath = configDict["inflowGeometryPath"]
 writePath = configDict["writePath"]
 
 sampleSurfaceName = configDict["sampleSurfaceName"]
 inletPatchName = configDict["inletPatchName"]
 
 reader = configDict["reader"]
-inflowReader = configDict["inflowReader"]
+inflowReader = configDict["inflowGeometryReader"]
 writer = configDict["writer"]
 
 hdf5FileName = configDict["hdf5FileName"]
@@ -146,7 +146,7 @@ else:
 # Read grid for the inflow plane
 if inflowReader == "foamFile":
     [pointsYInfl, pointsZInfl, yIndInfl, zIndInfl] = read_points_from_foamfile(
-        os.path.join(inflowReadPath, inletPatchName, "faceCentres"))
+        os.path.join(inflowReadPath))
 
 else:
     raise ValueError("Unknown inflow reader: "+inflowReader)
