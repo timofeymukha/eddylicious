@@ -4,7 +4,9 @@ Contributing
 Your contributions to the project are most welocome!
 The best way to precede is open an issue on Bitbucket where you can describe
 the contribution you have in mind.
-However, in order to ensure that the overall quality of the library is
+Then it can be discussed with the community.
+
+In order to ensure that the overall quality of the library is
 maintained, the following requirements have to be fulfilled for the
 contribution to be accepted:
 

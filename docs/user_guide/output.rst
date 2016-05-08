@@ -1,9 +1,11 @@
 Supported output formats
 ========================
 
-Eddylicious supports several file formats that for outputting the generated
+Eddylicious supports several file formats for outputting the generated
 inflow fields.
-This allows to use eddylicious with several CFD solvers.
+The choice of the file format is usually dictated by the CFD solver.
+
+.. _hdf5_file_format:
 
 HDF5 file format
 ----------------

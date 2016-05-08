@@ -15,6 +15,7 @@ Basically, whatever solver is used, the following steps have to be performed.
     * In case a precursor database is being built, the velocity field should
       be saved or later converted to a format that eddylicious can read.
 
+.. _workflow_openfoam:
 
 Using eddylicious with OpenFOAM
 -------------------------------
@@ -91,8 +92,80 @@ inflow generation script. ::
 Reading the inflow fields from OpenFOAM
 _______________________________________
 
+OpenFOAM has a special boundary condition that allows reading boundary data
+from a file, it is called ``timeVaryingMappedFixedValue``.
 
+This boundary condition expects a folder called ``boundaryData/\<patchname\>``
+to be located in the ``constant`` directory.
+Inside the folder a file named ``points`` should reside.
+This file provides a list of the points where the boundary data is available.
+The boundary data itself resides in folders named as the time-value associated
+with the data.
+The data for each available field is stored in its own file named identically
+to the internal name of the field in OpenFOAM (for instance ``U`` for the
+velocity field).
+A tutorial, which takes advantage of this boundary condition, is shipped
+with OpenFOAM.
+It can be found under
+``tutorials/incompressible/simpleFoam/pitzDailyExptInlet/``.
 
-Creating a precursor database
-_____________________________
+The boundary condition is quite flexible.
+If needed, interpolation in space will be used to obtain the vales at the face
+centres from the values at the provided points.
+Linear interpolation in time is also supported.
 
+Let ``inlet`` be the name of the patch for which the inflow fields are
+generated.
+Then the following entry should be found in the ``U`` file. ::
+
+    inlet
+    {
+        type            timeVaryingMappedFixedValue;
+        offset          (0 0 0);
+        setAverage      off;
+        perturb         0;
+    }
+
+Setting ``perturb`` to 0 is important, since this option perturbs the location
+of the points.
+
+In order to output the inflow fields in the format required by
+``timeVaryingMappedFixedValue``, the following lines should be present
+in the configuration file for the inflow generation script. ::
+
+    writer          tvmfv
+    writePath       /path/to/OpenFOAM/case
+
+Note, that for a large time-span the amount of files written to disk become
+extremely large.
+To rectify this issue, a modified version of ``timeVaryingMappedFixedValue``
+that reads all the data from a single HDF5 file is available.
+For more information regarding the structure of the file see
+:ref:`hdf5_file_format`.
+
+The modified boundary condition is called ``timeVaryingMappedHDF5FixedValue``
+and can be downloaded at
+https://bitbucket.org/lesituu/timevaryingmappedhdf5fixedvalue
+
+If this boundary condition is used the entry in the ``U`` file should look
+as follows. ::
+
+    inlet
+    {
+        type            timeVaryingMappedHDF5FixedValue;
+        setAverage      false;
+        perturb         0;
+        offset          (0 0 0);
+        hdf5FileName    nameofthehdf5file.hdf5;
+        hdf5PointsDatasetName    points;
+        hdf5SampleTimesDatasetName    time;
+        hdf5FieldValuesDatasetName    velocity;
+
+    }
+
+In order to generate the field the following lines should be present in the
+configuration file. ::
+
+    writer          hdf5
+    writePath       /path/to/OpenFOAM/case
+    hdf5FileName    nameofthehdf5file.hdf5
