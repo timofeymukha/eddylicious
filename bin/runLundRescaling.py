@@ -242,9 +242,9 @@ if rank == 0:
 
 # Write points and modify writePath appropriately
 if writer == "tvmfv":
+    writePath = os.path.join(writePath, "constant", "boundaryData",
+                             inletPatchName)
     if rank == 0:
-        writePath = os.path.join(writePath, "constant", "boundaryData",
-                                 inletPatchName)
         if not os.path.exists(writePath):
             os.makedirs(writePath)
 
