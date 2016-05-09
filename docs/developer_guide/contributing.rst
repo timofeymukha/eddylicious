@@ -16,3 +16,4 @@ contribution to be accepted:
       docstrings and contributions to the relevant parts of the User guide.
     * Ideally, a tutorial showcasing the usage of the new functionality should
       be provided.
+

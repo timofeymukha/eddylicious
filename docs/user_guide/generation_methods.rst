@@ -1,6 +1,7 @@
 Available inflow generation methods
 ===================================
 
+.. _lund_rescaling:
 
 Lund's rescaling
 ----------------
