@@ -243,18 +243,13 @@ if rank == 0:
 # Write points and modify writePath appropriately
 if writer == "tvmfv":
     if rank == 0:
+        writePath = os.path.join(writePath, "constant", "boundaryData",
+                                 inletPatchName)
         if not os.path.exists(writePath):
             os.makedirs(writePath)
 
-        write_points_to_tvmfv(os.path.join(writePath, "constant",
-                                           "boundaryData", inletPatchName,
-                                           "points"),
+        write_points_to_tvmfv(os.path.join(writePath, "points"),
                               pointsYInfl, pointsZInfl, xOrigin)
-    writePath = os.path.join(writePath, "constant", "boundaryData",
-                             inletPatchName)
-
-    if rank == 0 and not os.path.exists(writePath):
-        os.makedirs(writePath)
 
 elif writer == "hdf5":
     writePath = os.path.join(writePath, hdf5FileName)
