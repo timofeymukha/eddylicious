@@ -249,7 +249,8 @@ if writer == "tvmfv":
                               pointsYInfl, pointsZInfl, xOrigin)
     writePath = os.path.join(writePath, "constant", "boundaryData",
                              inletPatchName)
-    if not os.path.exists(writePath):
+
+    if rank == 0 and not os.path.exists(writePath):
         os.makedirs(writePath)
 
 elif writer == "hdf5":
