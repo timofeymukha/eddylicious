@@ -1,3 +1,5 @@
+.. _code_reference:
+
 =====================
 Source code reference
 =====================

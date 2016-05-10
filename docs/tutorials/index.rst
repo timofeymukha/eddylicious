@@ -1,3 +1,5 @@
+.. _tutorials:
+
 =========
 Tutorials
 =========
@@ -5,4 +7,4 @@ Tutorials
 .. toctree::
    :maxdepth: 1
 
-   of_lund_channel_flow.rst
+   of_channel_lund.rst

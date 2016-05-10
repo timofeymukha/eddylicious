@@ -1,3 +1,5 @@
+.. _tut_of_channel_lund:
+
 Channel flow in OpenFOAM using Lund's rescaling
 ===============================================
 

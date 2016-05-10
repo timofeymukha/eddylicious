@@ -1,3 +1,5 @@
+.. _generation_methods:
+
 Available inflow generation methods
 ===================================
 

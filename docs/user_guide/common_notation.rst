@@ -1,3 +1,5 @@
+.. _common_notation:
+
 Common notation
 ===============
 

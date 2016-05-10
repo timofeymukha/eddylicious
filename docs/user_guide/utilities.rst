@@ -1,2 +1,4 @@
+.. _utilities:
+
 Available utilities
 ===================

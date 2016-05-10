@@ -1,3 +1,5 @@
+.. _output_fomats:
+
 Supported output formats
 ========================
 

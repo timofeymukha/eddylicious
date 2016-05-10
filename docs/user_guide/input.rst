@@ -1,3 +1,5 @@
+.. _input_formats:
+
 Supported input formats
 =======================
 

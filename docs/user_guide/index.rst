@@ -1,3 +1,5 @@
+.. _user_guide:
+
 ==========
 User guide
 ==========
@@ -6,6 +8,7 @@ User guide
     legal
     intro
     installation
+    overview
     common_notation
     generation_methods
     input

@@ -1,8 +1,10 @@
+.. _workflow:
+
 ===================
 Workflow guidelines
 ===================
 
-Here the suggested workflows for using eddylicious in conjuction with various
+Here the suggested workflows for using eddylicious in conduction with various
 solvers are presented.
 Basically, whatever solver is used, the following steps have to be performed.
 
@@ -10,10 +12,10 @@ Basically, whatever solver is used, the following steps have to be performed.
 
     * Choosing an output format that is compatible with the used solver.
 
-    * Setting up the solver to read in boundary data from the hard drive.
+    * Generating the inflow fields by running the python script associated
+      with the chosen inflow generation method.
 
-    * In case a precursor database is being built, the velocity field should
-      be saved or later converted to a format that eddylicious can read.
+    * Setting up the solver to read in boundary data from the hard drive.
 
 .. _workflow_openfoam:
 
