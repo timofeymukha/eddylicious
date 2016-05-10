@@ -9,7 +9,7 @@ Lund's rescaling
 Theory
 ______
 
-This method has been presented in a paper by Lund, Wu and Squires
+This method was presented in a paper by Lund, Wu and Squires
 :cite:`Lund1998`.
 The method is suitable for generating an accurate inflow field for a simulation
 which involves a turbulent boundary layer approaching from upstream.
