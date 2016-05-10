@@ -1,4 +1,4 @@
-.. _output_fomats:
+.. _output_formats:
 
 Supported output formats
 ========================
