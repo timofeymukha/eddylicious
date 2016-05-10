@@ -33,9 +33,9 @@ def test_velocity_writer(tmpdir):
     dsvDir = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
                        "channel_flow_180", "dsv_output")
 
-    uX = np.load(path.join(dsvDir, "1000.07", "uX.npy"))
-    uY = np.load(path.join(dsvDir, "1000.07", "uY.npy"))
-    uZ = np.load(path.join(dsvDir, "1000.07", "uZ.npy"))
+    uX = np.load(path.join(dsvDir, "1000.05", "uX.npy"))
+    uY = np.load(path.join(dsvDir, "1000.05", "uY.npy"))
+    uZ = np.load(path.join(dsvDir, "1000.05", "uZ.npy"))
 
     size = 3
     iteration = 1
@@ -60,9 +60,9 @@ def test_velocity_writer_iter_larger_than_total_size(tmpdir):
     dsvDir = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
                        "channel_flow_180", "dsv_output")
 
-    uX = np.load(path.join(dsvDir, "1000.07", "uX.npy"))
-    uY = np.load(path.join(dsvDir, "1000.07", "uY.npy"))
-    uZ = np.load(path.join(dsvDir, "1000.07", "uZ.npy"))
+    uX = np.load(path.join(dsvDir, "1000.05", "uX.npy"))
+    uY = np.load(path.join(dsvDir, "1000.05", "uY.npy"))
+    uZ = np.load(path.join(dsvDir, "1000.05", "uZ.npy"))
 
     size = 3
     iteration = 3

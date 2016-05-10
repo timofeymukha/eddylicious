@@ -3,4 +3,6 @@ Tutorials
 =========
 
 .. toctree::
-    of_lund_channel_flow.rst
+   :maxdepth: 1
+
+   of_lund_channel_flow.rst
