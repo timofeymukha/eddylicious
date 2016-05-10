@@ -1,4 +1,4 @@
-"""Function for generating inflow velocity fields using
+"""Functions for generating inflow velocity fields using
 Lund et al's rescaling, see
 
 Lund T.S., Wu X., Squires K.D. Generation of turbulent inflow
@@ -12,8 +12,8 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from .helper_functions import blending_function
 from .helper_functions import chunks_and_offsets
-from eddylicious.writers.tvmfv_writers import write_velocity_to_tvmfv
-from eddylicious.writers.hdf5_writers import write_velocity_to_hdf5
+from writers.tvmfv_writers import write_velocity_to_tvmfv
+from writers.hdf5_writers import write_velocity_to_hdf5
 
 __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
            "lund_generate"]
