@@ -95,7 +95,7 @@ The first part of the tutorial will deal with setting up a precursor simulation
 that will be later used to generate the inflow fields for the main simulation.
 Please follow the following steps.
 
-   1. Unpack ``channel_flow_lund_rescaling.tar`` found in
+   1. Unpack ``channel_flow_lund_rescaling.tar.gz`` found in
       ``eddylicious/tutorials`` to a location of your preference (commonly
       ``run``).
       Two folders will be unpacked, ``precursor`` and ``main``.
@@ -183,7 +183,7 @@ Please follow the following steps.
          The ``foamFile`` format is chosen, since eddylicious can read in data
          stored in that format.
 
-      4. Run the case.
+      4. Run ``blockMesh``. Run the case.
 
       5. Run ``postChannelFlow``
          (https://bitbucket.org/lesituu/postchannelflow)
@@ -196,7 +196,7 @@ Please follow the following steps.
       7. Compute :math:`u_\tau` and :math:`\delta_99`, see scripts in
          ``postProcessing/collapsedFields``.
 
-      8. Go to the case ``main``.
+      8. Go to the case ``main``. Run ``blockMesh``. Run ``sample``.
 
       9. The inlet is divided into two patches, ``inletBot`` and ``inletTop``.
          Velocity fields are generated for each patch separately.
