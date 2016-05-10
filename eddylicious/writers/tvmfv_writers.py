@@ -8,7 +8,6 @@ import numpy as np
 __all__ = ["write_points_to_tvmfv", "write_velocity_to_tvmfv"]
 
 
-
 def write_points_to_tvmfv(writePath, pointsY, pointsZ, xVal):
     """Write the points in a format used by OpenFOAM's
     timeVaryingMappedFixedValue boundary condition.

@@ -2,7 +2,7 @@
 
 """
 import numpy as np
-import h5py as h5py
+import h5py
 
 __all__ = ["read_points_from_hdf5", "read_velocity_from_hdf5"]
 
