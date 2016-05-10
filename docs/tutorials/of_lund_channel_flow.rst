@@ -193,7 +193,7 @@ Please follow the following steps.
       6. Compare result to DNS, see scripts in
          ``postProcessing/collapsedFields``.
 
-      7. Compute :math:`u_\tau` and :math:`\delta_99`, see scripts in
+      7. Compute :math:`u_\tau` and :math:`\delta_{99}`, see scripts in
          ``postProcessing/collapsedFields``.
 
       8. Go to the case ``main``. Run ``blockMesh``. Run ``sample``.
