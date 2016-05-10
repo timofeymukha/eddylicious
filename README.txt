@@ -8,5 +8,5 @@ The goal of eddylicious is to serve as a central place-holder for existing inflo
 
 Intrested?
 Proceed to
-eddylicious.readthedocs.io
+[eddylicious.readthedocs.io](eddylicious.readthedocs.io)
 for more information, documentation and tutorials!
