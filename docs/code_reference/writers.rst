@@ -1,5 +1,5 @@
 Writers
 =======
 
-.. automodule:: writers
+.. automodule:: eddylicious.writers
     :members:

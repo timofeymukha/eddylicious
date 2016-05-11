@@ -1,5 +1,5 @@
 Generators
 ==========
 
-.. automodule:: generators
+.. automodule:: eddylicious.generators
     :members:

@@ -19,7 +19,6 @@ import mock
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../eddylicious'))
 
 #root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 #if not root_dir in sys.path:

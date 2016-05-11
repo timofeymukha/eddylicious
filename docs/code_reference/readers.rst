@@ -1,5 +1,5 @@
 Readers
 =======
 
-.. automodule:: readers
+.. automodule:: eddylicious.readers
     :members:

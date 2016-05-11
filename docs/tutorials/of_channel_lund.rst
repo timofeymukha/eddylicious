@@ -198,20 +198,23 @@ Please follow the following steps.
       7. Compute :math:`u_\tau` and :math:`\delta_{99}`, see scripts in
          ``postProcessing/collapsedFields``.
 
-      8. Go to the case ``main``. Run ``blockMesh``. Run ``sample``.
+The main simulation
+-------------------
 
-      9. The inlet is divided into two patches, ``inletBot`` and ``inletTop``.
+      1. Go to the case ``main``. Run ``blockMesh``. Run ``sample``.
+
+      2. The inlet is divided into two patches, ``inletBot`` and ``inletTop``.
          Velocity fields are generated for each patch separately.
 
-      10. The generation procedure is controlled by a configuration script.
+      3. The generation procedure is controlled by a configuration script.
           One for each inlet patch, ``rescalingConfigBot`` and
           ``rescalingConfigTop``.
 
-      11. Explore the options in the config.
+      4. Explore the options in the config.
 
-      12. Run ``runLundRescaling.py --config=rescalingConfigTop/Bot``.
+      5. Run ``runLundRescaling.py --config=rescalingConfigTop/Bot``.
 
-      13. Run the case.
+      6. Run the case.
 
 
 
