@@ -33,7 +33,7 @@ The plane located downstream is referred to as the recycling plane.
 
 .. _fig-lund-rescaling:
 
-.. figure:: /figures/lund_rescaling.svg
+.. figure:: /figures/lund_rescaling.*
    :align: center
 
    Schematic of the rescaling from a plane located downstream proposed by
@@ -53,7 +53,7 @@ The whole processes is schematicaly illustrated in
 
 .. _fig-lund-rescaling-eddylicious:
 
-.. figure:: /figures/lund_rescaling_eddylicious.svg
+.. figure:: /figures/lund_rescaling_eddylicious.*
    :align: center
 
    Schematic showing how the rescaling proposed in :cite:`Lund1998` is

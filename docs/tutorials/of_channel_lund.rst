@@ -55,7 +55,7 @@ a reasonable time on a single workstation.
 
 .. _fig-channel-flow:
 
-.. figure:: figures/channel_flow.svg
+.. figure:: figures/channel_flow.*
    :align: center
    :width: 500px
 
