@@ -90,39 +90,31 @@ streamwise velocity is
 
 .. math::
 
-   \begin{align}
-      & U^\text{inner}_\text{infl}(y^+) =
+      &  U^\text{inner}_\text{infl}(y^+) =
       \gamma U^\text{inner}_\text{prec}(y^+),\\
-      & U^\text{outer}_\text{infl}(\eta) =
+      &  U^\text{outer}_\text{infl}(\eta) =
       \gamma U^\text{outer}_\text{prec}(\eta) + U_{e, \text{infl}} -
       \gamma U_{e, \text{prec}}.
-   \end{align}
 
 The rescaling for the fluctuations is defined as
 
 .. math::
 
-   \begin{align}
       & (u'_i)^\text{inner}_\text{infl}(y^+) =
       \gamma (u'_i)^\text{inner}(y^+),\\
       & (u'_i)^\text{outer}\text{infl}(\eta) =
       \gamma (u'_i)^\text{outer}(\eta).
-   \end{align}
 
 The inner and outer components are blended together using a weighted average:
 
 .. math::
-   \begin{align}
       u_{i, \text{infl}} = u_{i, \text{infl}}^\text{inner}[1-W(\eta)] +
       u_{i, \text{infl}}^\text{outer}W(\eta).
-   \end{align}
 
 The weight function :math:`W(\eta)` is defined as
 
 .. math::
-   \begin{equation}
       W(\eta) = \frac{1}{2} \left\{ 1+ \dfrac{\tanh \left( \frac{\alpha(\eta - b)}{(1-2b)\eta +b}\right)}{\tan(\alpha)} \right\},
-   \end{equation}
 
 where :math:`\alpha =4` and :math:`b=0.2`.
 
