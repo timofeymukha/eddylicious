@@ -43,7 +43,7 @@ simple format.
 .. admonition:: The format of the face centres file
 
     .. math::
-        \begin{align*}
+
         & N_p\\
         & (\\
         & (x_0, \: y_0, \: z_0)\\
@@ -52,7 +52,6 @@ simple format.
         & \vdots\\
         & (x_{p-1}, \:  y_{p-1}, \: z_{p-1})\\
         & )\\
-        \end{align*}
 
 The format of the file containing a sampled vector field is identical,
 however instead of the coordinates each row contains the three components of

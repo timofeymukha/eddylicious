@@ -71,10 +71,8 @@ The following relationships stem from this assumption.
 
 .. math::
 
-   \begin{align}
         & U^{\text{inner}}(y^+) = u_\tau f_1(y^+),\\
         & U_e - U^{\text{outer}}(\eta) = u_\tau f_2(\eta).
-   \end{align}
 
 Another assumption, that is fulfilled automatically in the setting proposed
 by Lund et al, but not within the framework of eddylicious, is that the
