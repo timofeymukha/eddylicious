@@ -108,12 +108,14 @@ The rescaling for the fluctuations is defined as
 The inner and outer components are blended together using a weighted average:
 
 .. math::
+
       u_{i, \text{infl}} = u_{i, \text{infl}}^\text{inner}[1-W(\eta)] +
       u_{i, \text{infl}}^\text{outer}W(\eta).
 
 The weight function :math:`W(\eta)` is defined as
 
 .. math::
+
       W(\eta) = \frac{1}{2} \left\{ 1+ \dfrac{\tanh \left( \frac{\alpha(\eta - b)}{(1-2b)\eta +b}\right)}{\tan(\alpha)} \right\},
 
 where :math:`\alpha =4` and :math:`b=0.2`.
