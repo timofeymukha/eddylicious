@@ -20,9 +20,11 @@ import mock
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-#root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-#if not root_dir in sys.path:
-#    sys.path.append(root_dir)
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+if not root_dir in sys.path:
+    sys.path.append(root_dir)
+
+print sys.path
 
 # -- General configuration ------------------------------------------------
 

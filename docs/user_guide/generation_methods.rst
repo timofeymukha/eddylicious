@@ -71,8 +71,8 @@ The following relationships stem from this assumption.
 
 .. math::
 
-        & U^{\text{inner}}(y^+) = u_\tau f_1(y^+),\\
-        & U_e - U^{\text{outer}}(\eta) = u_\tau f_2(\eta).
+   & U^{\text{inner}}(y^+) = u_\tau f_1(y^+),\\
+   & U_e - U^{\text{outer}}(\eta) = u_\tau f_2(\eta).
 
 Another assumption, that is fulfilled automatically in the setting proposed
 by Lund et al, but not within the framework of eddylicious, is that the
@@ -88,33 +88,33 @@ streamwise velocity is
 
 .. math::
 
-      &  U^\text{inner}_\text{infl}(y^+) =
-      \gamma U^\text{inner}_\text{prec}(y^+),\\
-      &  U^\text{outer}_\text{infl}(\eta) =
-      \gamma U^\text{outer}_\text{prec}(\eta) + U_{e, \text{infl}} -
-      \gamma U_{e, \text{prec}}.
+   &  U^\text{inner}_\text{infl}(y^+) =
+   \gamma U^\text{inner}_\text{prec}(y^+),\\
+   &  U^\text{outer}_\text{infl}(\eta) =
+   \gamma U^\text{outer}_\text{prec}(\eta) + U_{e, \text{infl}} -
+   \gamma U_{e, \text{prec}}.
 
 The rescaling for the fluctuations is defined as
 
 .. math::
 
-      & (u'_i)^\text{inner}_\text{infl}(y^+) =
-      \gamma (u'_i)^\text{inner}(y^+),\\
-      & (u'_i)^\text{outer}\text{infl}(\eta) =
-      \gamma (u'_i)^\text{outer}(\eta).
+   & (u'_i)^\text{inner}_\text{infl}(y^+) =
+   \gamma (u'_i)^\text{inner}(y^+),\\
+   & (u'_i)^\text{outer}\text{infl}(\eta) =
+   \gamma (u'_i)^\text{outer}(\eta).
 
 The inner and outer components are blended together using a weighted average:
 
 .. math::
 
-      u_{i, \text{infl}} = u_{i, \text{infl}}^\text{inner}[1-W(\eta)] +
-      u_{i, \text{infl}}^\text{outer}W(\eta).
+   u_{i, \text{infl}} = u_{i, \text{infl}}^\text{inner}[1-W(\eta)] +
+   u_{i, \text{infl}}^\text{outer}W(\eta).
 
 The weight function :math:`W(\eta)` is defined as
 
 .. math::
 
-      W(\eta) = \frac{1}{2} \left\{ 1+ \dfrac{\tanh \left( \frac{\alpha(\eta - b)}{(1-2b)\eta +b}\right)}{\tan(\alpha)} \right\},
+   W(\eta) = \frac{1}{2} \left\{ 1+ \dfrac{\tanh \left( \frac{\alpha(\eta - b)}{(1-2b)\eta +b}\right)}{\tan(\alpha)} \right\},
 
 where :math:`\alpha =4` and :math:`b=0.2`.
 
