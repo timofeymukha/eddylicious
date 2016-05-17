@@ -5,6 +5,7 @@ __all__ = ["blending_function", "delta_99", "delta_star", "theta",
            "chunks_and_offsets", "chauhan_U_inner", "chauhan_U_inner_mod",
            "chauhan_wake", "chauhan_U_composite", "epsilon_ReT"]
 
+
 # Blending function for inner and outer scales
 def blending_function(eta, alpha=4, b=0.2):
     """Return the value of the blending function W for Lund's rescaling.
@@ -36,7 +37,7 @@ def blending_function(eta, alpha=4, b=0.2):
 
 
 def delta_99(y, v):
-    """Compute delta_99."""
+    """Compute :math:`\delta_{99}`."""
 
     for i in xrange(y.size):
         if v[i] >= 0.99*np.max(v):
@@ -46,7 +47,8 @@ def delta_99(y, v):
 
 
 def delta_star(y, v):
-    """Compute delta^* using Simpson's method."""
+    """Compute the displacement thickness :math:`\delta^*` using
+    Simpson's method."""
 
     return simps((1-v/v[-1]), x=y)
 

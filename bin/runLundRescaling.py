@@ -17,6 +17,19 @@ from eddylicious.writers.hdf5_writers import write_points_to_hdf5
 from eddylicious.generators.lund_rescaling import lund_generate
 from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
 
+
+def config_to_dict(configFile):
+    # Read the config file into a dictionary
+    configDict = {}
+
+    for line in configFile:
+        if (line[0] == '#') or (line == '\n'):
+            continue
+        configDict[line.split()[0]] = line.split()[1]
+
+    return configDict
+
+
 # Get processor rank
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -33,17 +46,12 @@ parser.add_argument('--config',
 
 args = parser.parse_args()
 
-# Read the config file into a dictionary
-configDict = {}
-
+# PARSE THE CONFIG
 configFile = open(args.config, mode='r')
+configDict = config_to_dict(configFile)
 
-for line in configFile:
-    if (line[0] == '#') or (line == '\n'):
-        continue
-    configDict[line.split()[0]] = line.split()[1]
 
-# Read the readers and writers
+# Readers and writers
 readPath = configDict["readPath"]
 inflowReadPath = configDict["inflowGeometryPath"]
 writePath = configDict["writePath"]
@@ -55,7 +63,8 @@ reader = configDict["reader"]
 inflowReader = configDict["inflowGeometryReader"]
 writer = configDict["writer"]
 
-hdf5FileName = configDict["hdf5FileName"]
+if writer == "hdf5":
+    hdf5FileName = configDict["hdf5FileName"]
 
 # Determine which half of the channel flow will be used
 if configDict["half"] == "top":
@@ -64,6 +73,45 @@ elif configDict["half"] == "bottom":
     flip = False
 else:
     raise ValueError("half should be either 'top' of 'bottom'")
+
+# Viscosity
+nuInfl = float(configDict["nuInflow"])
+nuPrec = float(configDict["nuPrecursor"])
+
+# Boundary layer thickneses
+deltaInfl = float(configDict["delta99"])
+
+# Freestream velocity
+u0Infl = float(configDict["Ue"])
+
+# Friction velocities
+ReDelta = u0Infl*deltaInfl/nuInfl
+cfInfl = 0.02*pow(1.0/ReDelta, 1.0/6)
+
+if configDict["uTauInflow"] == "compute":
+    uTauInfl = u0Infl*np.sqrt(cfInfl/2)
+else:
+    uTauInfl = float(configDict["uTauInflow"])
+
+uTauPrec = float(configDict["uTauPrecursor"])
+
+gamma = uTauInfl/uTauPrec
+
+# Shift in coordinates
+xOrigin = float(configDict["xOrigin"])
+yOrigin = float(configDict["yOrigin"])
+
+# Time-step and initial time for the writer
+dt = float(configDict["dt"])
+t0 = float(configDict["t0"])
+tEnd = float(configDict["tEnd"])
+timePrecision = int(configDict["tPrecision"])
+size = int((tEnd-t0)/dt+1)
+
+if rank == 0:
+    print "Producing database with", size, "time-steps."
+
+# SET UP THE READER
 
 if reader == "foamFile":
     dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
@@ -79,14 +127,13 @@ if reader == "foamFile":
 elif reader == "hdf5":
     dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
     times = dbFile["velocity"]["times"]
-
 else:
     raise ValueError("Unknown reader: "+reader)
 
 if rank == 0:
     print "Reading from database with ", len(times), " time-steps."
 
-# Get the mean profile
+# SET UP MEAN PROFILE
 if reader == "foamFile":
     uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
                                          "collapsedFields"))
@@ -108,8 +155,11 @@ if not flip:
 else:
     uMean = uMean[int(totalPointsY*0.5)+1:]
 
+u0Prec = np.max(uMean)
+
 nPointsY = uMean.size
 
+# SET UP GEOMETRY
 # Read grid for the recycling plane
 if reader == "foamFile":
     pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
@@ -153,48 +203,11 @@ else:
 
 [nPointsYInfl, nPointsZInfl] = pointsYInfl.shape
 
-# Define and compute the parameters of the boundary layer
+# Check if Lz is the same
+if (not pointsZInfl[0, -1] == pointsZ[0, -1]) and (rank == 0):
+    print ("Warning: the lengths of the domains in the spanwise direction"
+            "is not equal")
 
-# Viscosity
-nuInfl = float(configDict["nuInflow"])
-nuPrec = float(configDict["nuPrecursor"])
-
-
-# Boundary layer thickneses
-deltaInfl = float(configDict["delta99"])
-
-# Freestream velocity, and centerline velocity
-U0 = np.max(uMean)
-Ue = float(configDict["Ue"])
-
-# Reynolds number based on delta
-ReDelta = Ue*deltaInfl/nuInfl
-
-# Cf at the inflow, to get u_tau
-cfInfl = 0.02*pow(1.0/ReDelta, 1.0/6)
-
-# Friction velocities
-if configDict["uTauInflow"] == "compute":
-    uTauInfl = Ue*np.sqrt(cfInfl/2)
-else:
-    uTauInfl = float(configDict["uTauInflow"])
-
-uTauPrec = float(configDict["uTauPrecursor"])
-
-ReTauInfl = uTauInfl*deltaInfl/nuInfl
-
-# gamma, the ratio of friction velocities
-gamma = uTauInfl/uTauPrec
-
-# Shift in coordinates
-xOrigin = float(configDict["xOrigin"])
-yOrigin = float(configDict["yOrigin"])
-
-# Time-step and initial time for the writer
-dt = float(configDict["dt"])
-t0 = float(configDict["t0"])
-tEnd = float(configDict["tEnd"])
-timePrecision = int(configDict["tPrecision"])
 
 # Get the grid points along y as 1d arrays for convenience
 yPrec = pointsY[:, 0]
@@ -208,7 +221,7 @@ else:
     yOriginPrec = 2
     deltaPrec = delta_99(np.flipud(np.abs(yPrec-2)), np.flipud(uMean))
 
-ReTauPrec = uTauPrec*deltaPrec/nuPrec
+reTauPrec = uTauPrec*deltaPrec/nuPrec
 
 etaPrec = np.abs(yPrec - yOriginPrec)/deltaPrec
 etaInfl = np.abs(yInfl- yOrigin)/deltaInfl
@@ -232,13 +245,34 @@ for i in xrange(etaInfl.size):
     if etaInfl[i] <= 0.7:
         nInner += 1
 
-if ReTauInfl > ReTauPrec and rank == 0:
-    print "WARNING: Re_tau in the precursor is lower than in the desired TBL"
+# Create the reader functions
+if reader == "foamFile":
+    if not flip:
+        readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
+                                                 nPointsZ, yInd, zInd,
+                                                 addValBot=0, addValTop=0,
+                                                 excludeTop=totalPointsY-nPointsY,
+                                                 interpValTop=True)
+    else:
+        readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
+                                                 nPointsZ, yInd, zInd,
+                                                 addValBot=0, addValTop=0,
+                                                 excludeBot=totalPointsY-nPointsY,
+                                                 interpValBot=True)
+elif reader == "hdf5":
+    if not flip:
+        readerFunc = read_velocity_from_hdf5(readPath,
+                                             excludeTop=totalPointsY-nPointsY,
+                                             interpValTop=True)
+    else:
+        readerFunc = read_velocity_from_hdf5(readPath,
+                                             excludeBot=totalPointsY-nPointsY,
+                                             interpValBot=True)
+else:
+    raise ValueError("Unknown reader: "+reader)
 
-size = int((tEnd-t0)/dt+1)
 
-if rank == 0:
-    print "Producing database with", size, "time-steps."
+# SET UP WRITERS
 
 # Write points and modify writePath appropriately
 if writer == "tvmfv":
@@ -268,39 +302,16 @@ elif writer == "hdf5":
 else:
     raise ValueError("Unknown writer: "+writer)
 
-# Create the reader functions
-if reader == "foamFile":
-    if not flip:
-        readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
-                                                 nPointsZ, yInd, zInd,
-                                                 addValBot=0, addValTop=0,
-                                                 excludeTop=totalPointsY-nPointsY,
-                                                 interpValTop=True)
-    else:
-        readerFunc = read_velocity_from_foamfile(dataDir, sampleSurfaceName,
-                                                 nPointsZ, yInd, zInd,
-                                                 addValBot=0, addValTop=0,
-                                                 excludeBot=totalPointsY-nPointsY,
-                                                 interpValBot=True)
-elif reader == "hdf5":
-    if not flip:
-        readerFunc = read_velocity_from_hdf5(readPath,
-                                             excludeTop=totalPointsY-nPointsY,
-                                             interpValTop=True)
-    else:
-        readerFunc = read_velocity_from_hdf5(readPath,
-                                             excludeBot=totalPointsY-nPointsY,
-                                             interpValBot=True)
-else:
-    raise ValueError("Unknown reader: "+reader)
 
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
                                        nInfl, nInner,
                                        etaInfl, yPlusInfl, nPointsZInfl,
-                                       Ue, U0, gamma)
+                                       u0Infl, u0Prec, gamma)
 
-ReThetaInfl = theta(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
-ReDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*Ue/nuInfl
+reThetaInfl = theta(yInfl, uMeanInfl[:, 0])*u0Infl/nuInfl
+reDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*u0Infl/nuInfl
+reDelta99Infl = deltaInfl*u0Infl/nuInfl
+reTauInfl = uTauInfl*deltaInfl/nuInfl
 
 # Generate the inflow fields
 if rank == 0:
@@ -316,3 +327,14 @@ lund_generate(readerFunc,
               times)
 if rank == 0:
     print "Process 0 done, waiting for the others..."
+
+comm.Barrier()
+if rank == 0:
+    print "Done"
+
+if rank == 0:
+    print "Inflow boundary properties:"
+    print "    Re_theta", reThetaInfl
+    print "    Re_delta*", reDeltaStarInfl
+    print "    Re_delta99", reDelta99Infl
+    print "    Re_tau", reTauInfl

@@ -22,7 +22,7 @@ __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
 def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
                                nInfl, nInner,
                                etaInfl, yPlusInfl, nPointsZInfl,
-                               Ue, U0, gamma):
+                               u0Infl, u0Prec, gamma):
     """Rescale the mean velocity profile using Lunds rescaling.
 
     This function rescales the mean velocity profile taken from the
@@ -54,10 +54,10 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     nPointsZInfl : int
         The amount of points in the spanwise direction for the inflow
         boundary.
-    Ue : float
-        The freestream velocity.
-    U0 : float
-        The centerline velocity for the precursor.
+    u0Infl : float
+        The freestream velocity at the inflow.
+    u0Prec : float
+        The freestream velocity for the precursor.
     gamma : float
         The ration of the friction velocities in the inflow boundary
         layer and the precursor.
@@ -72,8 +72,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     assert nInfl > 0
     assert nInner > 0
     assert nPointsZInfl > 0
-    assert Ue > 0
-    assert U0 > 0
+    assert u0Infl > 0
+    assert u0Prec > 0
     assert gamma > 0
     assert np.all(etaInfl >= 0)
     assert np.all(etaPrec >= 0)
@@ -93,13 +93,13 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     uMeanInterpPlus = interp1d(yPlusPrec, uMeanPrec)
 
     uMeanInner = gamma*uMeanInterpPlus(yPlusInfl[:nInner])
-    uMeanOuter = gamma*uMeanInterp(etaInfl[:nInfl]) + Ue - gamma*U0
+    uMeanOuter = gamma*uMeanInterp(etaInfl[:nInfl]) + u0Infl - gamma*u0Prec
 
     uMeanInfl = np.zeros(etaInfl.shape)
     uMeanInfl[:nInner] = uMeanInner*(1-blending_function(etaInfl[:nInner])) + \
         uMeanOuter[:nInner]*blending_function(etaInfl[:nInner])
     uMeanInfl[nInner:nInfl] = uMeanOuter[nInner:nInfl]
-    uMeanInfl[nInfl:] = Ue
+    uMeanInfl[nInfl:] = u0Infl
     uMeanInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanInfl[:, np.newaxis]
 
     assert np.all(uMeanInfl >= 0)
@@ -321,7 +321,7 @@ def lund_generate(readerFunction,
         t = float(("{0:."+str(timePrecision)+"f}").format(t))
         position = int(offsets[rank]) + i
 
-        if rank == 0:
+        if (rank == 0) and (np.mod(i, 10) == 0):
             print "     Rescaled about", i/float(chunks[rank])*100, "%" 
 
         # Read U data
