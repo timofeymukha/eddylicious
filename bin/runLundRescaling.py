@@ -219,7 +219,7 @@ if flip == False:
     deltaPrec = delta_99(yPrec, uMean)
 else:
     yOriginPrec = 2
-    deltaPrec = delta_99(np.flipud(np.abs(yPrec-2)), np.flipud(uMean))
+    deltaPrec = delta_99(np.flipud(np.abs(yPrec - yOrigin)), np.flipud(uMean))
 
 reTauPrec = uTauPrec*deltaPrec/nuPrec
 
@@ -308,8 +308,15 @@ uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
                                        etaInfl, yPlusInfl, nPointsZInfl,
                                        u0Infl, u0Prec, gamma)
 
-reThetaInfl = theta(yInfl, uMeanInfl[:, 0])*u0Infl/nuInfl
-reDeltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])*u0Infl/nuInfl
+if not flip:
+    thetaInfl = theta(yInfl, uMeanInfl[:, 0])
+    deltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])
+else:
+    thetaInfl = theta(np.flipud(np.abs(yInfl - yOrigin)), uMeanInfl[::-1, 0])
+    deltaStarInfl = delta_star(np.flipud(np.abs(yInfl- yOrigin)), uMeanInfl[::-1, 0])
+
+reThetaInfl = thetaInfl*u0Infl/nuInfl
+reDeltaStarInfl = deltaStarInfl*u0Infl/nuInfl
 reDelta99Infl = deltaInfl*u0Infl/nuInfl
 reTauInfl = uTauInfl*deltaInfl/nuInfl
 
@@ -325,6 +332,7 @@ lund_generate(readerFunc,
               etaInfl, yPlusInfl, pointsZInfl,
               nInfl, nInner, gamma,
               times)
+
 if rank == 0:
     print "Process 0 done, waiting for the others..."
 
