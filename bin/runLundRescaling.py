@@ -8,6 +8,7 @@ import h5py as h5py
 from eddylicious.generators.helper_functions import delta_99
 from eddylicious.generators.helper_functions import theta
 from eddylicious.generators.helper_functions import delta_star
+from eddylicious.generators.helper_functions import blending_function
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile
 from eddylicious.readers.hdf5_readers import read_points_from_hdf5
@@ -78,17 +79,28 @@ else:
 nuInfl = float(configDict["nuInflow"])
 nuPrec = float(configDict["nuPrecursor"])
 
-# Boundary layer thickneses
-deltaInfl = float(configDict["delta99"])
+# The outer scale
+if "delta99" in configDict:
+    deltaInfl = float(configDict["delta99"])
+    blendingFunction = blending_function
+elif "theta" in configDict:
+    thetaInfl = float(configDict["theta"])
+else:
+    raise ValueError("The config file should provide delta99 or theta")
 
 # Freestream velocity
 u0Infl = float(configDict["Ue"])
 
 # Friction velocities
-ReDelta = u0Infl*deltaInfl/nuInfl
-cfInfl = 0.02*pow(1.0/ReDelta, 1.0/6)
+if "delta99" in configDict:
+    reDelta99Infl = u0Infl*deltaInfl/nuInfl
+    cfInfl = 0.02*pow(1.0/reDelta99Infl, 1.0/6)
+elif "theta" in configDict:
+    reThetaInfl = u0Infl*thetaInfl/nuInfl
+
 
 if configDict["uTauInflow"] == "compute":
+    # TODO: TREAT case when theta is provided
     uTauInfl = u0Infl*np.sqrt(cfInfl/2)
 else:
     uTauInfl = float(configDict["uTauInflow"])
@@ -217,14 +229,22 @@ yInfl = pointsYInfl[:, 0]
 if flip == False:
     yOriginPrec = 0
     deltaPrec = delta_99(yPrec, uMean)
+    thetaPrec = theta(yPrec, uMean)
 else:
+    #TODO should be generic with respect to precursor channel height
     yOriginPrec = 2
     deltaPrec = delta_99(np.flipud(np.abs(yPrec - yOrigin)), np.flipud(uMean))
+    thetaPrec = theta(np.flipud(np.abs(yPrec - yOrigin)), np.flipud(uMean))
 
 reTauPrec = uTauPrec*deltaPrec/nuPrec
 
-etaPrec = np.abs(yPrec - yOriginPrec)/deltaPrec
-etaInfl = np.abs(yInfl- yOrigin)/deltaInfl
+if "delta99" in configDict:
+    etaPrec = np.abs(yPrec - yOriginPrec)/deltaPrec
+    etaInfl = np.abs(yInfl- yOrigin)/deltaInfl
+elif "theta" in configDict:
+    etaPrec = np.abs(yPrec - yOriginPrec)/thetaPrec
+    etaInfl = np.abs(yInfl- yOrigin)/thetaInfl
+
 
 # Inner scale coordinates
 yPlusPrec = np.abs(yPrec - yOriginPrec)*uTauPrec/nuPrec
@@ -306,18 +326,30 @@ else:
 uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
                                        nInfl, nInner,
                                        etaInfl, yPlusInfl, nPointsZInfl,
-                                       u0Infl, u0Prec, gamma)
+                                       u0Infl, u0Prec, gamma, blendingFunction)
 
 if not flip:
-    thetaInfl = theta(yInfl, uMeanInfl[:, 0])
+    if "delta99" in configDict:
+        deltaInfl = delta_99(yInfl, uMeanInfl[:, 0])
+    else:
+        thetaInfl = theta(yInfl, uMeanInfl[:, 0])
     deltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])
 else:
-    thetaInfl = theta(np.flipud(np.abs(yInfl - yOrigin)), uMeanInfl[::-1, 0])
-    deltaStarInfl = delta_star(np.flipud(np.abs(yInfl- yOrigin)), uMeanInfl[::-1, 0])
+    if "delta99" in configDict:
+        deltaInfl = delta_99(np.flipud(np.abs(yInfl - yOrigin)),
+                             uMeanInfl[::-1, 0])
+    else:
+        thetaInfl = theta(np.flipud(np.abs(yInfl - yOrigin)),
+                          uMeanInfl[::-1, 0])
+    deltaStarInfl = delta_star(np.flipud(np.abs(yInfl- yOrigin)),
+                               uMeanInfl[::-1, 0])
 
-reThetaInfl = thetaInfl*u0Infl/nuInfl
+if "delta99" in configDict:
+    reThetaInfl = thetaInfl*u0Infl/nuInfl
+elif "theta" in configDict:
+    reDelta99Infl = deltaInfl*u0Infl/nuInfl
+
 reDeltaStarInfl = deltaStarInfl*u0Infl/nuInfl
-reDelta99Infl = deltaInfl*u0Infl/nuInfl
 reTauInfl = uTauInfl*deltaInfl/nuInfl
 
 # Generate the inflow fields
@@ -331,7 +363,7 @@ lund_generate(readerFunc,
               etaPrec, yPlusPrec, pointsZ,
               etaInfl, yPlusInfl, pointsZInfl,
               nInfl, nInner, gamma,
-              times)
+              times, blendingFunction)
 
 if rank == 0:
     print "Process 0 done, waiting for the others..."

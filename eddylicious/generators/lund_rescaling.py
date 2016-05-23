@@ -22,7 +22,7 @@ __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
 def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
                                nInfl, nInner,
                                etaInfl, yPlusInfl, nPointsZInfl,
-                               u0Infl, u0Prec, gamma):
+                               u0Infl, u0Prec, gamma, blendingFunction):
     """Rescale the mean velocity profile using Lunds rescaling.
 
     This function rescales the mean velocity profile taken from the
@@ -61,6 +61,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     gamma : float
         The ration of the friction velocities in the inflow boundary
         layer and the precursor.
+    blendingFunction : function
+        The function for blending the inner and outer profiles.
 
     Returns
     -------
@@ -96,8 +98,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     uMeanOuter = gamma*uMeanInterp(etaInfl[:nInfl]) + u0Infl - gamma*u0Prec
 
     uMeanInfl = np.zeros(etaInfl.shape)
-    uMeanInfl[:nInner] = uMeanInner*(1-blending_function(etaInfl[:nInner])) + \
-        uMeanOuter[:nInner]*blending_function(etaInfl[:nInner])
+    uMeanInfl[:nInner] = uMeanInner*(1-blendingFunction(etaInfl[:nInner])) + \
+        uMeanOuter[:nInner]*blendingFunction(etaInfl[:nInner])
     uMeanInfl[nInner:nInfl] = uMeanOuter[nInner:nInfl]
     uMeanInfl[nInfl:] = u0Infl
     uMeanInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanInfl[:, np.newaxis]
@@ -113,7 +115,7 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
 def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
                               uPrimeX, uPrimeY, uPrimeZ, gamma,
                               etaInfl, yPlusInfl, pointsZInfl,
-                              nInfl, nInner):
+                              nInfl, nInner, blendingFunction):
     """Rescale the fluctuations of velocity using Lund et al's
     rescaling.
 
@@ -159,6 +161,8 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
         The amount of points where inner rescaling should be considered.
         For points beyound nInner, the outer rescaling only we be
         computed. The relaxes the demand on Re_tau for the precursor.
+    blendingFunction : function
+        The function for blending the inner and outer profiles.
 
     Returns
     -------
@@ -216,14 +220,14 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
                                        etaInfl[:nInfl])
 
     uPrimeXInfl[:nInfl] = \
-        uPrimeXInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeXOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
+        uPrimeXInner*(1-blendingFunction(etaInfl[0:nInfl]))[:, np.newaxis] + \
+        uPrimeXOuter*blendingFunction(etaInfl[0:nInfl])[:, np.newaxis]
     uPrimeYInfl[:nInfl] = \
-        uPrimeYInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeYOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
+        uPrimeYInner*(1-blendingFunction(etaInfl[0:nInfl]))[:, np.newaxis] + \
+        uPrimeYOuter*blendingFunction(etaInfl[0:nInfl])[:, np.newaxis]
     uPrimeZInfl[:nInfl] = \
-        uPrimeZInner*(1-blending_function(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeZOuter*blending_function(etaInfl[0:nInfl])[:, np.newaxis]
+        uPrimeZInner*(1-blendingFunction(etaInfl[0:nInfl]))[:, np.newaxis] + \
+        uPrimeZOuter*blendingFunction(etaInfl[0:nInfl])[:, np.newaxis]
     if flip:
         return map(np.flipud, [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl])
     else:
@@ -237,7 +241,7 @@ def lund_generate(readerFunction,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   nInfl, nInner, gamma,
-                  times):
+                  times, blendingFunction):
     """Generate the files with the inflow velocity using Lund's
     rescaling, in parallel.
 
@@ -302,6 +306,8 @@ def lund_generate(readerFunction,
     times : list of floats or strings
         The times for which the velocity field was sampled in the
         precursor simulation.
+    blendingFunction : function
+        The function for blending the inner and outer profiles.
 
     """
     # Grab info regarding parallelization
