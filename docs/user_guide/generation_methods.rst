@@ -1,7 +1,33 @@
 .. _generation_methods:
 
-Available inflow generation methods
-===================================
+Inflow generation methods
+=========================
+
+.. _using_generators:
+
+Using the generators
+--------------------
+
+Each generation method provided by the library has an executable Python script
+associated with it.
+Running the appropriate script executes the generation procedure.
+All inflow generation methods depend on a certain amount of parameters.
+These parameters are communicated to the sruot via a configuration file, which
+is passed as a command-line argument. ::
+
+  nameOfTheScript --config=configurationFileName
+
+The configuration file is a simple text file, with the following
+layout ::
+
+  # This is a comment, it can describe the parameter below
+  parameterOne    valueOfParameter1
+
+  # Another comment
+  parameterTwo    valueOfParameter2
+
+Which parameters should be present depends on the method that is being
+used and are described for each method individually below.
 
 .. _lund_rescaling:
 

@@ -52,7 +52,7 @@ def main():
 
 # Readers and writers
     readPath = configDict["readPath"]
-    inflowReadPath = configDict["inflowGeometryPath"]
+    inflowGeometryPath = configDict["inflowGeometryPath"]
     writePath = configDict["writePath"]
 
     sampleSurfaceName = configDict["sampleSurfaceName"]
@@ -206,7 +206,7 @@ def main():
 # Read grid for the inflow plane
     if inflowReader == "foamFile":
         [pointsYInfl, pointsZInfl, yIndInfl, zIndInfl] =\
-            read_points_from_foamfile(os.path.join(inflowReadPath))
+            read_points_from_foamfile(os.path.join(inflowGeometryPath))
     else:
         raise ValueError("Unknown inflow reader: "+inflowReader)
 

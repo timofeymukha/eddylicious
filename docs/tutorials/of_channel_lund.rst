@@ -222,7 +222,7 @@ The main simulation
 
       4. Explore the options in the config.
 
-      5. Run ``runLundRescaling.py --config=rescalingConfigTop/Bot``.
+      5. Run ``runLundRescaling --config=rescalingConfigTop/Bot``.
 
       6. Run the case.
 
