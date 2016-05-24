@@ -6,10 +6,7 @@ import numpy as np
 import argparse
 from mpi4py import MPI
 import h5py as h5py
-from eddylicious.generators.helper_functions import delta_99
-from eddylicious.generators.helper_functions import theta
-from eddylicious.generators.helper_functions import delta_star
-from eddylicious.generators.helper_functions import blending_function
+from eddylicious.generators.helper_functions import *
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile
 from eddylicious.readers.hdf5_readers import read_points_from_hdf5
@@ -86,6 +83,7 @@ def main():
         blendingFunction = blending_function
     elif "theta" in configDict:
         thetaInfl = float(configDict["theta"])
+        blendingFunction = blending_function_theta
     else:
         raise ValueError("The config file should provide delta99 or theta")
 
