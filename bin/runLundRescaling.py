@@ -90,7 +90,7 @@ def main():
 # Freestream velocity
     u0Infl = float(configDict["Ue"])
 
-# Friction velocities
+# Friction velocity
     if "delta99" in configDict:
         reDelta99Infl = u0Infl*deltaInfl/nuInfl
         cfInfl = 0.02*pow(1.0/reDelta99Infl, 1.0/6)
@@ -103,9 +103,6 @@ def main():
     else:
         uTauInfl = float(configDict["uTauInflow"])
 
-    uTauPrec = float(configDict["uTauPrecursor"])
-
-    gamma = uTauInfl/uTauPrec
 
 # Shift in coordinates
     xOrigin = float(configDict["xOrigin"])
@@ -212,12 +209,6 @@ def main():
 
     nPointsZInfl = pointsYInfl.shape[1]
 
-# Check if Lz is the same
-    if (not pointsZInfl[0, -1] == pointsZ[0, -1]) and (rank == 0):
-        print("Warning: the lengths of the domains in the spanwise direction"
-              "is not equal")
-
-
 # Get the grid points along y as 1d arrays for convenience
     yPrec = pointsY[:, 0]
     yInfl = pointsYInfl[:, 0]
@@ -226,14 +217,19 @@ def main():
     if not flip:
         yOriginPrec = 0
         deltaPrec = delta_99(yPrec, uMean)
+        deltaStarPrec = delta_star(yPrec, uMean)
         thetaPrec = theta(yPrec, uMean)
+        uTauPrec = np.sqrt(nuPrec*uMean[1]/yPrec[1])
     else:
     # TODO should be generic with respect to precursor channel height
         yOriginPrec = 2
-        deltaPrec = delta_99(np.flipud(np.abs(yPrec - yOrigin)),
+        deltaPrec = delta_99(np.flipud(np.abs(yPrec - yOriginPrec)),
                              np.flipud(uMean))
-        thetaPrec = theta(np.flipud(np.abs(yPrec - yOrigin)),
+        deltaStarPrec = delta_star(np.flipud(np.abs(yPrec - yOriginPrec)),
+                                  np.flipud(uMean))
+        thetaPrec = theta(np.flipud(np.abs(yPrec - yOriginPrec)),
                           np.flipud(uMean))
+        uTauPrec = np.sqrt(nuPrec*np.abs(uMean[-2]/(yOriginPrec-yPrec[-2])))
 
     if "delta99" in configDict:
         etaPrec = np.abs(yPrec - yOriginPrec)/deltaPrec
@@ -244,6 +240,7 @@ def main():
 
 
 # Inner scale coordinates
+    gamma = uTauInfl/uTauPrec
     yPlusPrec = np.abs(yPrec - yOriginPrec)*uTauPrec/nuPrec
     yPlusInfl = np.abs(yInfl - yOrigin)*uTauInfl/nuInfl
 
@@ -357,6 +354,19 @@ def main():
     reDeltaStarInfl = deltaStarInfl*u0Infl/nuInfl
     reTauInfl = uTauInfl*deltaInfl/nuInfl
 
+    if rank == 0:
+        print("Precursor properties:")
+        print("    Re_theta "+str(thetaPrec*u0Prec/nuPrec))
+        print("    Re_delta* "+str(deltaStarPrec*u0Prec/nuPrec))
+        print("    Re_delta99 "+str(deltaPrec*u0Prec/nuPrec))
+        print("    Re_tau "+str(reTauInfl))
+        print(" ")
+        print("    theta "+str(thetaPrec))
+        print("    delta* "+str(deltaStarPrec))
+        print("    delta99 "+str(deltaPrec))
+        print("    U0 "+str(u0Prec))
+        print("    u_tau "+str(uTauPrec))
+
 # Generate the inflow fields
     if rank == 0:
         print("Generating the inflow fields.")
@@ -387,6 +397,10 @@ def main():
         print("    theta "+str(thetaInfl))
         print("    delta* "+str(deltaStarInfl))
         print("    delta99 "+str(deltaInfl))
+        if not flip:
+            print("    y+_1 "+str(uTauInfl/nuInfl*yInfl[1]))
+        else:
+            print("    y+_1 "+str(uTauInfl/nuInfl*np.abs((yOrigen-yInfl[-2]))))
 
 if __name__ == "__main__":
     main()
