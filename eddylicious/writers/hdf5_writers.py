@@ -51,8 +51,8 @@ def write_velocity_to_hdf5(file, t, uX, uY, uZ, iteration):
 
     Parameters
     ---------
-    writePath : str
-        The path of the HDF5 file.
+    file : h5py.File
+        The the HDF5 file.
     t : float
         The value of time associated with the written
         velocity field.

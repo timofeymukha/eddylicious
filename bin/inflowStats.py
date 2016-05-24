@@ -1,9 +1,12 @@
+from __future__ import print_function
+from __future__ import division
 import numpy as np
 import os as os
 import h5py
 import argparse
 from mpi4py import MPI
 from eddylicious.generators.helper_functions import chunks_and_offsets
+
 
 def main():
     comm = MPI.COMM_WORLD
@@ -33,7 +36,7 @@ def main():
 
 # Open the hdf5 database
     if rank == 0:
-        print "Opening the database"
+        print("Opening the database")
 
     dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
     times = dbFile['time'][()]
@@ -46,25 +49,28 @@ def main():
     uSquaredMean = np.zeros((points.shape[0], 3))
 
     if rank == 0:
-        print "Calculating the statistics"
+        print("Calculating the statistics")
 
     [chunks, offsets] = chunks_and_offsets(nProcs, size)
 
-    for i in xrange(chunks[rank]):
+    for i in range(chunks[rank]):
         if rank == 0:
-            print "Computed about", i/float(chunks[rank])*100, "%"
+            print("Computed about" + str(i/chunks[rank]*100) + "%")
 
         position = offsets[rank] + i
 
         uMean += dbFile['velocity'][position, :, :]
         uSquaredMean += dbFile['velocity'][position, :, :]**2
 
+    comm.Barrier()
+    if rank == 0:
+        print("Done")
 
     uMean = comm.gather(uMean, root=0)
     uSquaredMean = comm.gather(uSquaredMean, root=0)
 
     if rank == 0:
-        for i in xrange(nProcs-1):
+        for i in range(nProcs-1):
             uMean[0] += uMean[i+1]
             uSquaredMean[0] += uSquaredMean[i+1]
 
@@ -73,7 +79,7 @@ def main():
 
         uPrime2Mean = uSquaredMean - uMean**2
 
-        print "Reshaping and averaging"
+        print("Reshaping and averaging")
         # Sort along y first
         yInd = np.argsort(points[:, 0])
         points[:, 0] = points[yInd, 0]
@@ -87,7 +93,7 @@ def main():
 
         # Find the number of points along z
         nPointsZ = 0
-        for i in xrange(points[:, 0].size):
+        for i in range(points[:, 0].size):
             if points[i, 0] == points[0, 0]:
                 nPointsZ += 1
             else:
@@ -100,17 +106,17 @@ def main():
         uMeanY = np.copy(np.reshape(uMean[:, 1], (-1, nPointsZ)))
         uMeanZ = np.copy(np.reshape(uMean[:, 2], (-1, nPointsZ)))
         uPrime2MeanXX = np.copy(np.reshape(uPrime2Mean[:, 0],
-                                        (-1, nPointsZ)))
+                                           (-1, nPointsZ)))
         uPrime2MeanYY = np.copy(np.reshape(uPrime2Mean[:, 1],
-                                        (-1, nPointsZ)))
+                                           (-1, nPointsZ)))
         uPrime2MeanZZ = np.copy(np.reshape(uPrime2Mean[:, 2],
-                                        (-1, nPointsZ)))
+                                           (-1, nPointsZ)))
 
         # For each y order the points in z
 
         zInd = np.zeros(pointsZ.shape, dtype=np.int)
 
-        for i in xrange(pointsZ.shape[0]):
+        for i in range(pointsZ.shape[0]):
             zInd[i, :] = np.argsort(pointsZ[i, :])
             pointsZ[i, :] = pointsZ[i, zInd[i, :]]
             uMeanX[i, :] = uMeanX[i, zInd[i, :]]
@@ -131,7 +137,7 @@ def main():
         uPrime2MeanYY = np.mean(uPrime2MeanYY, axis=1)
         uPrime2MeanZZ = np.mean(uPrime2MeanZZ, axis=1)
 
-        print "Outputting data"
+        print("Outputting data")
 
         if not os.path.exists(writeDir):
             os.makedirs(writeDir)

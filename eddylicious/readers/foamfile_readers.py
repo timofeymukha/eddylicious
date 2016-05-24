@@ -70,7 +70,7 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
         The sorting indices from the sorting performed.
 
     """
-    with file(readPath) as pointsFile:
+    with open(readPath) as pointsFile:
         points = [line.rstrip(')\n') for line in pointsFile]
 
     points = [line.lstrip('(') for line in points]
@@ -85,7 +85,7 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
 
 # Find the number of points along z
     nPointsZ = 0
-    for i in xrange(points[:, 0].size):
+    for i in range(points[:, 0].size):
         if points[i, 0] == points[0, 0]:
             nPointsZ += 1
         else:
@@ -98,7 +98,7 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
 # For each y order the points in z
     zInd = np.zeros(pointsZ.shape, dtype=np.int)
 
-    for i in xrange(pointsZ.shape[0]):
+    for i in range(pointsZ.shape[0]):
         zInd[i, :] = np.argsort(pointsZ[i, :])
         pointsZ[i, :] = pointsZ[i, zInd[i, :]]
 
@@ -138,9 +138,9 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
                                 interpValBot=False, interpValTop=False):
     """Read the values of the velocity field from a foamFile-format file.
 
-    Reads in the values of the velocity components stored as in foamFile
+    Reads in the values of the velocity components stored in the foamFile
     file-format. The velocity field is read and the transformed into a
-    2d numpy array, where the array's axes correspond to wall-normal and
+    2d ndarray, where the array's axes correspond to wall-normal and
     spanwise directions. To achieve this, the sorting indices obtained
     when reordering the mesh points are used.
 
@@ -149,6 +149,8 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
     baseReadPath : str
         The path where the time-directories with the velocity values are
         located.
+    surfaceName: str
+        The name of the surface that was used for sampling.
     nPointsZ : int
         The amount of points in the mesh in the spanwise direction.
     yInd : ndarray
@@ -198,7 +200,7 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
         """
         readUPath = os.path.join(baseReadPath, str(time), surfaceName,
                                  "vectorField", "U")
-        with file(readUPath) as UFile:
+        with open(readUPath) as UFile:
             u = [line.rstrip(')\n') for line in UFile]
 
         u = [line.lstrip('(') for line in u]
@@ -215,9 +217,8 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
         uY = np.copy(np.reshape(u[:, 1], (-1, nPointsZ)))
         uZ = np.copy(np.reshape(u[:, 2], (-1, nPointsZ)))
 
-
         # Sort along z
-        for i in xrange(uX.shape[0]):
+        for i in range(uX.shape[0]):
             uX[i, :] = uX[i, zInd[i, :]]
             uY[i, :] = uY[i, zInd[i, :]]
             uZ[i, :] = uZ[i, zInd[i, :]]
@@ -246,12 +247,9 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
 
         # Interpolate for the first point in the wall-normal direction
         if interpValBot and excludeBot:
-            uX[excludeBot, :] = 0.5*(uX[excludeBot-1, :] +
-                                         uX[excludeBot, :])
-            uY[excludeBot, :] = 0.5*(uY[excludeBot-1, :] +
-                                         uY[excludeBot, :])
-            uZ[excludeBot, :] = 0.5*(uZ[excludeBot-1, :] +
-                                         uZ[excludeBot, :])
+            uX[excludeBot, :] = 0.5*(uX[excludeBot-1, :] + uX[excludeBot, :])
+            uY[excludeBot, :] = 0.5*(uY[excludeBot-1, :] + uY[excludeBot, :])
+            uZ[excludeBot, :] = 0.5*(uZ[excludeBot-1, :] + uZ[excludeBot, :])
 
         # Cap the points
         if excludeTop:

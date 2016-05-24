@@ -1,9 +1,12 @@
+from __future__ import print_function
+from __future__ import division
 import numpy as np
 import os as os
 import h5py as h5py
 import argparse
 from mpi4py import MPI
 from eddylicious.generators.helper_functions import chunks_and_offsets
+
 
 def main():
     comm = MPI.COMM_WORLD
@@ -13,16 +16,16 @@ def main():
 # Define the command-line arguments
     parser = argparse.ArgumentParser(
                 description="A script for calculating the statistics \
-                        of a precursor database.")
+                             of a precursor database.")
 
     parser.add_argument('--readPath',
                         type=str,
-                        help='The HDF5 file with the databse.',
+                        help='The HDF5 file with the database.',
                         required=True)
     parser.add_argument('--writePath',
                         type=str,
                         help='The location where to write the \
-                            produced plots.',
+                             produced plots.',
                         required=True)
 
     args = parser.parse_args()
@@ -34,11 +37,10 @@ def main():
 # Open the hdf5 database
 
     if rank == 0:
-        print "Opening the database"
+        print("Opening the database")
     dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
 
     pointsY = dbFile["points"]["pointsY"]
-    pointsZ = dbFile["points"]["pointsZ"]
 
     size = dbFile["velocity"]["uX"].shape[0]
     nPointsY = pointsY.shape[0]
@@ -48,13 +50,12 @@ def main():
     uSquaredMean = np.zeros((nPointsY, nPointsZ, 3))
 
     if rank == 0:
-        print "Calculating the statistics"
+        print("Calculating the statistics")
 
     [chunks, offsets] = chunks_and_offsets(nProcs, size)
 
-    for i in xrange(chunks[rank]):
-        if rank == 0:
-            print "Computed about", i/float(chunks[rank])*100, "%"
+    for i in range(chunks[rank]):
+        print("Computed about "+str(int(i/chunks[rank]*100))+"%")
 
         position = offsets[rank] + i
 
@@ -69,7 +70,7 @@ def main():
     uSquaredMean = comm.gather(uSquaredMean, root=0)
 
     if rank == 0:
-        for i in xrange(nProcs-1):
+        for i in range(nProcs-1):
             uMean[0] += uMean[i+1]
             uSquaredMean[0] += uSquaredMean[i+1]
 
@@ -82,18 +83,18 @@ def main():
         uMean = np.mean(uMean, axis=1)
         uPrime2Mean = np.mean(uPrime2Mean, axis=1)
 
-        print "Outputting data"
+        print("Outputting data")
 
         if not os.path.exists(writeDir):
             os.makedirs(writeDir)
 
         np.savetxt(os.path.join(writeDir, "y"), pointsY[:, 0])
-        np.savetxt(os.path.join(writeDir, "uMeanX"), uMean[:,0])
-        np.savetxt(os.path.join(writeDir, "uMeanY"), uMean[:,1])
-        np.savetxt(os.path.join(writeDir, "uMeanZ"), uMean[:,2])
-        np.savetxt(os.path.join(writeDir, "uPrime2MeanXX"), uPrime2Mean[:,0])
-        np.savetxt(os.path.join(writeDir, "uPrime2MeanYY"), uPrime2Mean[:,1])
-        np.savetxt(os.path.join(writeDir, "uPrime2MeanZZ"), uPrime2Mean[:,2])
+        np.savetxt(os.path.join(writeDir, "uMeanX"), uMean[:, 0])
+        np.savetxt(os.path.join(writeDir, "uMeanY"), uMean[:, 1])
+        np.savetxt(os.path.join(writeDir, "uMeanZ"), uMean[:, 2])
+        np.savetxt(os.path.join(writeDir, "uPrime2MeanXX"), uPrime2Mean[:, 0])
+        np.savetxt(os.path.join(writeDir, "uPrime2MeanYY"), uPrime2Mean[:, 1])
+        np.savetxt(os.path.join(writeDir, "uPrime2MeanZZ"), uPrime2Mean[:, 2])
         np.savetxt(os.path.join(writeDir, "y"), pointsY[:, 0])
 
 if __name__ == "__main__":

@@ -2,11 +2,10 @@ import numpy as np
 from scipy.integrate import simps
 
 __all__ = ["blending_function", "delta_99", "delta_star", "theta",
-           "chunks_and_offsets", "chauhan_U_inner", "chauhan_U_inner_mod",
-           "chauhan_wake", "chauhan_U_composite", "epsilon_ReT"]
+           "chunks_and_offsets", "blending_function_theta"]
 
 
-# Blending function for inner and outer scales
+# Blending function for inner and outer scales as defined by Lund et al
 def blending_function(eta, alpha=4, b=0.2):
     """Return the value of the blending function W for Lund's rescaling.
 
@@ -16,18 +15,18 @@ def blending_function(eta, alpha=4, b=0.2):
 
     Parameters
     ----------
-    eta : 1d ndarray
+    eta : ndarray
         The values of the non-dimensionalized wall-normal
         coordinate.
-    alpha : double, optional
+    alpha : float, optional
         The value of alpha (default 4.0).
-    b : double
+    b : float
         The value of b (default 0.2).
-    """
 
+    """
     val = np.zeros(eta.shape)
 
-    for i in xrange(eta.size):
+    for i in range(eta.size):
         if eta[i] <= 1:
             val[i] = 0.5*(1+1/np.tanh(alpha)*np.tanh(alpha*(eta[i]-b) /
                           ((1-2*b)*eta[i]+b)))
@@ -36,10 +35,41 @@ def blending_function(eta, alpha=4, b=0.2):
     return val
 
 
+def blending_function_theta(eta, alpha=15, b=2):
+    """Return the value of the blending function for matching inner and
+    outer profiles.
+
+    Return the value of the blending function for inner and and outer
+    profiles produced by Lund's rescaling. Suitable for values of eta
+    obtained when momentum thickness is used as the outer scale. For
+    eta>10 the function returns 1.
+
+    Parameters
+    ----------
+    eta : ndarray
+        The values of the non-dimensionalized wall-normal
+        coordinate.
+    alpha : float, optional
+        The value of alpha (default 15.0).
+    b : float
+        The value of b (default 2).
+
+    """
+    val = np.zeros(eta.shape)
+
+    for i in range(eta.size):
+        if eta[i] <= 10:
+            val[i] = 0.5*(1+1/np.tanh(alpha)*np.tanh(alpha*(eta[i]-b) /
+                          ((10-2*b)*eta[i]+b)))
+        else:
+            val[i] = 1.0
+    return val
+
+
 def delta_99(y, v):
     """Compute :math:`\delta_{99}`."""
 
-    for i in xrange(y.size):
+    for i in range(y.size):
         if v[i] >= 0.99*np.max(v):
             delta99 = y[i-1]
             break
@@ -97,7 +127,7 @@ def chunks_and_offsets(nProcs, size):
     chunks = np.zeros(nProcs, dtype=np.int64)
     nrAlloced = 0
 
-    for i in xrange(nProcs):
+    for i in range(nProcs):
         remainder = size - nrAlloced
         buckets = (nProcs - i)
         chunks[i] = remainder / buckets
@@ -106,7 +136,7 @@ def chunks_and_offsets(nProcs, size):
     # Calculate the offset for each processor
     offsets = np.zeros(chunks.shape, dtype=np.int64)
 
-    for i in xrange(offsets.shape[0]-1):
+    for i in range(offsets.shape[0]-1):
         offsets[i+1] = np.sum(chunks[:i+1])
 
     try:
@@ -116,28 +146,3 @@ def chunks_and_offsets(nProcs, size):
 
 
     return [chunks, offsets]
-
-def chauhan_U_inner(yPlus, kappa=0.384, a=-10.361):
-    alpha = (-1/kappa - a)/2
-    beta = np.sqrt(-2*a*alpha-alpha**2)
-    R = np.sqrt(alpha**2 + beta**2)
-    return  1/kappa*np.log(-(yPlus-a)/a) + R**2/(a*(4*alpha-a))* \
-            ((4*alpha+a)*np.log(-a/R*np.sqrt((yPlus-alpha)**2 + beta**2)/ \
-            (yPlus - a)) + alpha/beta*(4*alpha + 5*a)*(np.arctan((yPlus-alpha)/beta) \
-            + np.arctan(alpha/beta)))
-
-def chauhan_U_inner_mod(yPlus, kappa=0.384, a=-10.361):
-    return chauhan_U_inner(yPlus, kappa, a) + 1/2.85*np.exp(-np.log(yPlus/30)**2)
-
-def chauhan_wake(eta, Pi, a2=132.8410, a3=-166.2041, a4=71.9114):
-    nom1 = 1 - np.exp(-0.25*(5*a2 + 6*a3 + 7*a4)*eta**4 + a2*eta**5 + a3*eta**6 + a4*eta**7)
-    nom2 = 1 - 0.5/Pi*np.log(eta)
-    denom = 1 - np.exp(-0.25*(a2+2*a3+3*a4))
-    return nom1*nom2/denom
-
-def chauhan_U_composite(yPlus, eta, Pi, kappa=0.384, a=-10.361):
-    return chauhan_U_inner_mod(yPlus, kappa, a) + 2*Pi/kappa*chauhan_wake(eta, Pi)
-
-def epsilon_ReT(y, ReTau, kappa, APlus):
-    return (0.5*np.sqrt(1 + kappa**2*ReTau**2/9*(1 - (y - 1)**2)**2*(1 + 2*(y-1)**2)**2*(1 - np.exp(-y*ReTau/APlus))**2) - 0.5)
-

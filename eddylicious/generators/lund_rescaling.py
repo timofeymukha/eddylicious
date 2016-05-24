@@ -12,7 +12,6 @@ import numpy as np
 from mpi4py import MPI
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
-from .helper_functions import blending_function
 from .helper_functions import chunks_and_offsets
 from ..writers.tvmfv_writers import write_velocity_to_tvmfv
 from ..writers.hdf5_writers import write_velocity_to_hdf5
@@ -49,9 +48,9 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
         The amount of points where inner rescaling should be considered.
         For points beyound nInner, the outer rescaling only we be
         computed. The relaxes the demand on Re_tau for the precursor.
-    etaInfl : 1d ndarray
+    etaInfl : ndarray
         The values of eta for the mesh points at the inflow boundary.
-    yPlusInfl : 1d ndarray
+    yPlusInfl : ndarray
         The values of y+ for the meshpoints at the inflow boundary.
     nPointsZInfl : int
         The amount of points in the spanwise direction for the inflow
@@ -148,11 +147,11 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
     gamma : float
         The ration of the friction velocities in the inflow boundary
         layer and the precursor.
-    etaInfl : 1d ndarray
+    etaInfl : ndarray
         The values of eta for the mesh points at the inflow boundary.
-    yPlusInfl : 1d ndarray
+    yPlusInfl : ndarray
         The values of y+ for the meshpoints at the inflow boundary.
-    pointsZInfl : int
+    pointsZInfl : ndarray
         A 2d array containing the values of z for the points of the
         inflow boundary.
     nInfl : int
@@ -171,7 +170,7 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
     List of ndarrays
         The list contains three items, each a 2d ndarray. The first
         array contains the rescaled fluctuations of the x component of
-        veloicty. The second -- of the y component of velocity. The
+        velocity. The second -- of the y component of velocity. The
         third -- of the z component of velocity.
     """
 
@@ -324,13 +323,13 @@ def lund_generate(readerFunction,
     [chunks, offsets] = chunks_and_offsets(nProcs, size)
 
     # Perform the rescaling
-    for i in xrange(chunks[rank]):
+    for i in range(chunks[rank]):
         t = t0 + dt*i + dt*int(offsets[rank])
         t = float(("{0:."+str(timePrecision)+"f}").format(t))
         position = int(offsets[rank]) + i
 
         if (rank == 0) and (np.mod(i, int(chunks[rank]/10)) == 0):
-            print("     Rescaled about "+str(int(i/float(chunks[rank])*100))+"%") 
+            print("     Rescaled about "+str(int(i/chunks[rank]*100))+"%")
 
         # Read U data
         if readerFunction.reader == "foamFile":

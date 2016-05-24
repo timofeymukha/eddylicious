@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import division
 import os
 import numpy as np
 import h5py as h5py
@@ -19,13 +21,13 @@ def main():
                 description="A script for converting a database stored \
                             as a collection of foamFile-formatted files to \
                             a single hdf5 file. \
-                            The file contains two groups: points and velocity. \
-                            The points group contains the datasets pointsY and \
+                            The file contains two groups: points and velocity.\
+                            The points group contains the datasets pointsY and\
                             pointsZ. \
                             The velocity group contains the datasets: \
                             uMean, uX, uY and uZ. \
-                            Also, the attributes nPointsY, nPointsZ and nPoints \
-                            are added to the root of the file."
+                            Also, the attributes nPointsY, nPointsZ and\
+                            nPoints are added to the root of the file."
                                     )
 
     parser.add_argument('--precursorPath',
@@ -56,8 +58,8 @@ def main():
     uMeanFile = args.uMeanFile
     fileName = args.fileName
 
-
-    dataDir = os.path.join(precursorCaseDir, "postProcessing", "sampledSurface")
+    dataDir = os.path.join(precursorCaseDir, "postProcessing",
+                           "sampledSurface")
 
 # Grab the existing times and sort
     times = os.listdir(dataDir)
@@ -79,7 +81,7 @@ def main():
 # Allocate arrays for the fluctuations
     if rank == 0:
         if os.path.isfile(fileName):
-            print "HDF5 file already exsists. It it will be overwritten."
+            print("HDF5 file already exsists. It it will be overwritten.")
             os.remove(fileName)
 
     dbFile = h5py.File(fileName, 'a', driver='mpio', comm=MPI.COMM_WORLD)
@@ -93,17 +95,20 @@ def main():
     velocityGroup.create_dataset("uMean", data=uMean)
 
     velocityGroup.create_dataset("times", data=[float(times[i])
-                                                for i in xrange(times.size)])
+                                                for i in range(times.size)])
 
     uX = velocityGroup.create_dataset("uX", (len(times),
-                                            pointsY.shape[0],
-                                            pointsY.shape[1]), dtype=np.float64)
+                                             pointsY.shape[0],
+                                             pointsY.shape[1]),
+                                      dtype=np.float64)
     uY = velocityGroup.create_dataset("uY", (len(times),
-                                            pointsY.shape[0],
-                                            pointsY.shape[1]), dtype=np.float64)
+                                             pointsY.shape[0],
+                                             pointsY.shape[1]),
+                                      dtype=np.float64)
     uZ = velocityGroup.create_dataset("uZ", (len(times),
-                                            pointsY.shape[0],
-                                            pointsY.shape[1]), dtype=np.float64)
+                                             pointsY.shape[0],
+                                             pointsY.shape[1]),
+                                      dtype=np.float64)
 
     dbFile.attrs["nPointsY"] = pointsY.shape[0]
     dbFile.attrs["nPointsZ"] = pointsY.shape[1]
@@ -111,14 +116,14 @@ def main():
 
     [chunks, offsets] = chunks_and_offsets(nProcs, len(times))
 
-    readFunc = read_velocity_from_foamfile(dataDir, surfaceName,  nPointsZ,
-                                        yInd, zInd, addValBot=0, addValTop=0)
-
+    readFunc = read_velocity_from_foamfile(dataDir, surfaceName,
+                                           nPointsZ, yInd, zInd,
+                                           addValBot=0, addValTop=0)
 
 # Read in the fluctuations
-    for i in xrange(chunks[rank]):
+    for i in range(chunks[rank]):
         if rank == 0:
-            print "Converted about", i/float(chunks[rank])*100, "%"
+            print("Converted about" + str(i/chunks[rank]*100)+"%")
 
         position = offsets[rank] + i
         # Read in U
@@ -129,11 +134,11 @@ def main():
         uZ[position, :, :] = uZVal
 
     if rank == 0:
-        print "Process 0 done, waiting for the others..."
+        print("Process 0 done, waiting for the others...")
 
     comm.Barrier()
     if rank == 0:
-        print "Done"
+        print("Done")
 
-if __name__ =" __main__":
+if __name__ == " __main__":
     main()

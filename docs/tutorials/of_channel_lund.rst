@@ -185,7 +185,17 @@ Please follow the following steps.
          The ``foamFile`` format is chosen, since eddylicious can read in data
          stored in that format.
 
-      4. Run ``blockMesh``. Run the case.
+      4. Run ``blockMesh`` in order to create the mesh.
+         It is recommended that you run the case using 4 processors.
+         You can, however, modify this value in ``system/decomposeParDict``.
+         In order to decompose  the mesh run ``decomposePar``.
+
+      5. Now everything is ready to run the case.
+         The solver ``pimpleFoam`` will be used.
+         Execute the solver. If you are running in parallel, add the
+         ``-parallel`` flag and execute the solver with your MPI executable and
+         the appropriate number of cores as an argument.
+         Running the case will take a while.
 
       5. Run ``postChannelFlow``
          (https://bitbucket.org/lesituu/postchannelflow)

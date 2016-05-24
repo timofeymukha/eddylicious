@@ -93,7 +93,6 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
     if not np.isnan(exchangeValTop):
         pointsY[-1, :] = exchangeValTop
 
-
     return [pointsY, pointsZ]
 
 
@@ -111,15 +110,16 @@ def read_velocity_from_hdf5(readPath, addValBot=float('nan'),
     ---------
     readPath : str
         The path to the file containing the velocity field.
-    timeIndex : int
-        The time-index associated with the data, i.e. the index of the
-        first dimension of the hdf5 file.
-    nPointsY: int
-        The amount of points to read in the wall-normal direction.
     addValBot : float, optional
         Append a row of values from below.
     addValTop : float, optional
         Append a row of values from above.
+    excludeBot : int, optional
+        How many points to remove from the bottom in the y direction.
+        (default 0).
+    excludeTop: int, optional
+        How many points to remove from the top in the y direction.
+        (default 0).
     interpValBot : bool, optional
         Whether to interpolate the first value in the wall-normal
         direction using two points. (default False)
@@ -140,7 +140,7 @@ def read_velocity_from_hdf5(readPath, addValBot=float('nan'),
 
         Parameters
         ----------
-        timeIndex, int
+        timeIndex: int
             The value of the time-index, i.e. the location in the
             times-array.
 
