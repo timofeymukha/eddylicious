@@ -6,6 +6,8 @@ data for spatially-developing boundary layer simulations.
 J. Comp. Phys. 1998; 140:233-58.
 
 """
+from __future__ import print_function
+from __future__ import division
 import numpy as np
 from mpi4py import MPI
 from scipy.interpolate import interp1d
@@ -327,8 +329,8 @@ def lund_generate(readerFunction,
         t = float(("{0:."+str(timePrecision)+"f}").format(t))
         position = int(offsets[rank]) + i
 
-        if (rank == 0) and (np.mod(i, 10) == 0):
-            print "     Rescaled about", i/float(chunks[rank])*100, "%" 
+        if (rank == 0) and (np.mod(i, int(chunks[rank]/10)) == 0):
+            print("     Rescaled about "+str(int(i/float(chunks[rank])*100))+"%") 
 
         # Read U data
         if readerFunction.reader == "foamFile":
@@ -354,7 +356,8 @@ def lund_generate(readerFunction,
                                                              yPlusInfl,
                                                              pointsZInfl,
                                                              nInfl,
-                                                             nInner)
+                                                             nInner,
+                                                             blendingFunction)
 
         # Add mean
         uXInfl += uMeanInfl
