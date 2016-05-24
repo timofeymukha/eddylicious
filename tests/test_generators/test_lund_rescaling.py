@@ -20,7 +20,7 @@ def test_lund_rescale_mean_velocity_same_grid():
                                                    eta.size, eta, yPlus, 1,
                                                    u[-1], u[-1], 1,
                                                    blending_function)[:, 0],
-                        u)
+                       u)
 
 
 # Test rescaling dns data onto itself, using a different grid
@@ -45,9 +45,9 @@ def test_lund_rescale_mean_velocity_different_grid():
 
 # Test recaling dns data onto itself, using a different grid with eta > 1
 def test_lund_rescale_mean_velocity_eta_greater_one():
-    file = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
-                     "channel_flow_180", "dns.dat")
-    dns = np.genfromtxt(file)
+    fileName = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
+                         "channel_flow_180", "dns.dat")
+    dns = np.genfromtxt(fileName)
 
     eta = dns[:, 0]
     yPlus = dns[:, 1]
@@ -72,9 +72,9 @@ def test_lund_rescale_mean_velocity_eta_greater_one():
 # Test recaling dns data onto itself, using a different grid with eta > 1
 # and nInner < nInfl
 def test_lund_rescale_mean_velocity_eta_greater_one_ninner_less_ninfl():
-    file = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
+    fileName = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
                      "channel_flow_180", "dns.dat")
-    dns = np.genfromtxt(file)
+    dns = np.genfromtxt(fileName)
 
     eta = dns[:, 0]
     yPlus = dns[:, 1]

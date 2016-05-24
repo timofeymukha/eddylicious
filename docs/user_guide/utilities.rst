@@ -1,4 +1,13 @@
 .. _utilities:
 
-Available utilities
-===================
+Utilities
+=========
+
+inflowStats
+-----------
+
+precursorStats
+--------------
+
+convertFoamFileToHDF5
+---------------------
