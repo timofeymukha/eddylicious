@@ -122,8 +122,8 @@ def main():
 
 # Read in the fluctuations
     for i in range(chunks[rank]):
-        if rank == 0:
-            print("Converted about" + str(i/chunks[rank]*100)+"%")
+        if rank == 0 and (np.mod(i, int(chunks[rank]/20)) == 0):
+            print("Converted about " + str(i/chunks[rank]*100)+"%")
 
         position = offsets[rank] + i
         # Read in U
@@ -137,6 +137,7 @@ def main():
         print("Process 0 done, waiting for the others...")
 
     comm.Barrier()
+    dbFile.close()
     if rank == 0:
         print("Done")
 

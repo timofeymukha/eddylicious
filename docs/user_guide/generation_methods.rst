@@ -183,11 +183,11 @@ The configuration file should define the following parameters.
    * ``uTauInflow`` --- the friction velocity at he inlet of the main
      simulation, at the inlet.
 
-   * ``uTauPrecursor`` --- the friction velocity at the sampling plane in the
-     precursor simulation.
-
    * ``delta99`` --- desired :math:`\delta_{99}` at the inlet of the main
-     simulation.
+     simulation. If used, ``theta`` should not be prescribed.
+
+   * ``theta`` --- desired momentum thickness  at the inlet of the main
+     simulation. If used, ``delta99`` should not be prescribed.
 
    * ``Ue`` --- desired freestream velocity at the inlet of the main simulation.
 

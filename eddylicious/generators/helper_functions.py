@@ -58,11 +58,8 @@ def blending_function_theta(eta, alpha=15, b=2):
     val = np.zeros(eta.shape)
 
     for i in range(eta.size):
-        if eta[i] <= 10:
-            val[i] = 0.5*(1+1/np.tanh(alpha)*np.tanh(alpha*(eta[i]-b) /
-                          ((10-2*b)*eta[i]+b)))
-        else:
-            val[i] = 1.0
+        val[i] = 0.5*(1+1/np.tanh(alpha)*np.tanh(alpha*(eta[i]-b) /
+                 ((10-2*b)*eta[i]+b)))
     return val
 
 

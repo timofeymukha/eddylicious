@@ -96,6 +96,7 @@ def main():
         cfInfl = 0.02*pow(1.0/reDelta99Infl, 1.0/6)
     elif "theta" in configDict:
         reThetaInfl = u0Infl*thetaInfl/nuInfl
+        cfInfl = 0.013435*(reThetaInfl - 373.83)**(-2/11)
 
     if configDict["uTauInflow"] == "compute":
 # TODO: TREAT case when theta is provided
@@ -212,6 +213,7 @@ def main():
 # Get the grid points along y as 1d arrays for convenience
     yPrec = pointsY[:, 0]
     yInfl = pointsYInfl[:, 0]
+    yInfl = np.abs(yInfl - yOrigin)
 
 # Outer scale coordinates
     if not flip:
@@ -233,16 +235,16 @@ def main():
 
     if "delta99" in configDict:
         etaPrec = np.abs(yPrec - yOriginPrec)/deltaPrec
-        etaInfl = np.abs(yInfl - yOrigin)/deltaInfl
+        etaInfl = yInfl/deltaInfl
     elif "theta" in configDict:
         etaPrec = np.abs(yPrec - yOriginPrec)/thetaPrec
-        etaInfl = np.abs(yInfl - yOrigin)/thetaInfl
+        etaInfl = yInfl/thetaInfl
 
 
 # Inner scale coordinates
     gamma = uTauInfl/uTauPrec
     yPlusPrec = np.abs(yPrec - yOriginPrec)*uTauPrec/nuPrec
-    yPlusInfl = np.abs(yInfl - yOrigin)*uTauInfl/nuInfl
+    yPlusInfl = yInfl*uTauInfl/nuInfl
 
 # Points containing the boundary layer at the inflow plane
     nInfl = 0
@@ -254,10 +256,11 @@ def main():
                 nInfl += 1
 
 # Points where inner scaling will be used
-    nInner = 0
-    for i in range(etaInfl.size):
-        if etaInfl[i] <= 0.7:
-            nInner += 1
+    #nInner = 0
+    #for i in range(etaInfl.size):
+    #    if etaInfl[i] <= 0.7:
+    #        nInner += 1
+    nInner = nInfl
 
 # Create the reader functions
     if reader == "foamFile":
@@ -330,21 +333,23 @@ def main():
                                            u0Infl, u0Prec, gamma,
                                            blendingFunction)
 
-    if not flip:
+    if etaInfl[0] < etaInfl[1]:
         if "delta99" in configDict:
             thetaInfl = theta(yInfl, uMeanInfl[:, 0])
         else:
             deltaInfl = delta_99(yInfl, uMeanInfl[:, 0])
         deltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])
+        uTauInfl = np.sqrt(nuInfl*np.min(uMeanInfl[:, 0])/yInfl[0])
     else:
         if "delta99" in configDict:
-            thetaInfl = theta(np.flipud(np.abs(yInfl - yOrigin)),
+            thetaInfl = theta(np.flipud(yInfl),
                               uMeanInfl[::-1, 0])
         else:
-            deltaInfl = delta_99(np.flipud(np.abs(yInfl - yOrigin)),
+            deltaInfl = delta_99(np.flipud(yInfl),
                                  uMeanInfl[::-1, 0])
-        deltaStarInfl = delta_star(np.flipud(np.abs(yInfl - yOrigin)),
+        deltaStarInfl = delta_star(np.flipud(yInfl),
                                    uMeanInfl[::-1, 0])
+        uTauInfl = np.sqrt(nuInfl*np.min(uMeanInfl[:, 0])/yInfl[-1])
 
     if "delta99" in configDict:
         reThetaInfl = thetaInfl*u0Infl/nuInfl
@@ -359,7 +364,7 @@ def main():
         print("    Re_theta "+str(thetaPrec*u0Prec/nuPrec))
         print("    Re_delta* "+str(deltaStarPrec*u0Prec/nuPrec))
         print("    Re_delta99 "+str(deltaPrec*u0Prec/nuPrec))
-        print("    Re_tau "+str(reTauInfl))
+        print("    Re_tau "+str(uTauPrec*deltaPrec/nuPrec))
         print(" ")
         print("    theta "+str(thetaPrec))
         print("    delta* "+str(deltaStarPrec))
@@ -397,10 +402,10 @@ def main():
         print("    theta "+str(thetaInfl))
         print("    delta* "+str(deltaStarInfl))
         print("    delta99 "+str(deltaInfl))
-        if not flip:
-            print("    y+_1 "+str(uTauInfl/nuInfl*yInfl[1]))
-        else:
-            print("    y+_1 "+str(uTauInfl/nuInfl*np.abs((yOrigen-yInfl[-2]))))
+        print("    u_tau "+str(uTauInfl))
+        print("    U0 "+str(np.max(uMeanInfl)))
+        print("    cf "+str(cfInfl))
+        print("    y+_1 "+str(yPlusInfl[0]))
 
 if __name__ == "__main__":
     main()
