@@ -54,7 +54,7 @@ def main():
     [chunks, offsets] = chunks_and_offsets(nProcs, size)
 
     for i in range(chunks[rank]):
-        if rank == 0 and (np.mod(i, int(chunks[rank]/20)) == 0):
+        if rank == 0 and (np.mod(i, int(chunks[rank]/10)) == 0):
 
             print("Computed about " + str(int(i/chunks[rank]*100)) + "%")
 

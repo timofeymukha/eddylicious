@@ -99,7 +99,6 @@ def main():
         cfInfl = 0.013435*(reThetaInfl - 373.83)**(-2/11)
 
     if configDict["uTauInflow"] == "compute":
-# TODO: TREAT case when theta is provided
         uTauInfl = u0Infl*np.sqrt(cfInfl/2)
     else:
         uTauInfl = float(configDict["uTauInflow"])
