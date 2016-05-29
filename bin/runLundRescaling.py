@@ -16,6 +16,53 @@ from eddylicious.writers.hdf5_writers import write_points_to_hdf5
 from eddylicious.generators.lund_rescaling import lund_generate
 from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
 
+def compute_tbl_properties(eta, y, uMean, nu):
+
+    if eta[0] < eta[1]:
+        theta = momentum_thickness(y, uMean[:, 0])
+        delta = delta_99(y, uMean[:, 0])
+        deltaStar = delta_star(y, uMean[:, 0])
+        uTau = np.sqrt(nu*np.min(uMean[:, 0])/y[0])
+    else:
+        theta = theta(np.flipud(y), uMean[::-1, 0])
+        delta = delta_99(np.flipud(y), uMean[::-1, 0])
+        deltaStar = delta_star(np.flipud(y), uMean[::-1, 0])
+        uTau = np.sqrt(nu*np.min(uMean[:, 0])/y[-1])
+
+    u0 = np.max(uMean)
+    return theta, deltaStar, delta, uTau, u0
+
+def compute_ninfl(etaInfl, etaPrec):
+    nInfl = 0
+    for i in range(etaInfl.size):
+        if etaInfl[0] < etaInfl[-1]:
+            if etaInfl[i] <= np.max(etaPrec):
+                nInfl += 1
+        elif np.flipud(etaInfl)[i] <= np.max(etaPrec):
+                nInfl += 1
+    return nInfl
+
+def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
+                         uMean, yPlus):
+
+    reTheta = theta*u0/nu
+    reDelta99 = delta*u0/nu
+    reDeltaStar = deltaStar*u0/nu
+    reTau = uTau*delta/nu
+
+    print("    Re_theta "+str(reTheta))
+    print("    Re_delta* "+str(reDeltaStar))
+    print("    Re_delta99 "+str(reDelta99))
+    print("    Re_tau "+str(reTau))
+    print(" ")
+    print("    theta "+str(theta))
+    print("    delta* "+str(deltaStar))
+    print("    delta99 "+str(delta))
+    print("    u_tau "+str(uTau))
+    print("    U0 "+str(np.max(uMean)))
+    print("    cf "+str(0.5*(uTau/u0)**2))
+    print("    y+_1 "+str(yPlus[0]))
+
 
 def config_to_dict(configFile):
     # Read the config file into a dictionary
@@ -219,7 +266,7 @@ def main():
         yOriginPrec = 0
         deltaPrec = delta_99(yPrec, uMean)
         deltaStarPrec = delta_star(yPrec, uMean)
-        thetaPrec = theta(yPrec, uMean)
+        thetaPrec = momentum_thickness(yPrec, uMean)
         uTauPrec = np.sqrt(nuPrec*uMean[1]/yPrec[1])
     else:
     # TODO should be generic with respect to precursor channel height
@@ -246,19 +293,7 @@ def main():
     yPlusInfl = yInfl*uTauInfl/nuInfl
 
 # Points containing the boundary layer at the inflow plane
-    nInfl = 0
-    for i in range(etaInfl.size):
-        if etaInfl[0] < etaInfl[-1]:
-            if etaInfl[i] <= np.max(etaPrec):
-                nInfl += 1
-        elif np.flipud(etaInfl)[i] <= np.max(etaPrec):
-                nInfl += 1
-
-# Points where inner scaling will be used
-    #nInner = 0
-    #for i in range(etaInfl.size):
-    #    if etaInfl[i] <= 0.7:
-    #        nInner += 1
+    nInfl = compute_ninfl(etaInfl, etaPrec)
     nInner = nInfl
 
 # Create the reader functions
@@ -332,44 +367,10 @@ def main():
                                            u0Infl, u0Prec, gamma,
                                            blendingFunction)
 
-    if etaInfl[0] < etaInfl[1]:
-        if "delta99" in configDict:
-            thetaInfl = theta(yInfl, uMeanInfl[:, 0])
-        else:
-            deltaInfl = delta_99(yInfl, uMeanInfl[:, 0])
-        deltaStarInfl = delta_star(yInfl, uMeanInfl[:, 0])
-        uTauInfl = np.sqrt(nuInfl*np.min(uMeanInfl[:, 0])/yInfl[0])
-    else:
-        if "delta99" in configDict:
-            thetaInfl = theta(np.flipud(yInfl),
-                              uMeanInfl[::-1, 0])
-        else:
-            deltaInfl = delta_99(np.flipud(yInfl),
-                                 uMeanInfl[::-1, 0])
-        deltaStarInfl = delta_star(np.flipud(yInfl),
-                                   uMeanInfl[::-1, 0])
-        uTauInfl = np.sqrt(nuInfl*np.min(uMeanInfl[:, 0])/yInfl[-1])
-
-    if "delta99" in configDict:
-        reThetaInfl = thetaInfl*u0Infl/nuInfl
-    elif "theta" in configDict:
-        reDelta99Infl = deltaInfl*u0Infl/nuInfl
-
-    reDeltaStarInfl = deltaStarInfl*u0Infl/nuInfl
-    reTauInfl = uTauInfl*deltaInfl/nuInfl
-
     if rank == 0:
         print("Precursor properties:")
-        print("    Re_theta "+str(thetaPrec*u0Prec/nuPrec))
-        print("    Re_delta* "+str(deltaStarPrec*u0Prec/nuPrec))
-        print("    Re_delta99 "+str(deltaPrec*u0Prec/nuPrec))
-        print("    Re_tau "+str(uTauPrec*deltaPrec/nuPrec))
-        print(" ")
-        print("    theta "+str(thetaPrec))
-        print("    delta* "+str(deltaStarPrec))
-        print("    delta99 "+str(deltaPrec))
-        print("    U0 "+str(u0Prec))
-        print("    u_tau "+str(uTauPrec))
+        print_tbl_properties(thetaPrec, deltaStarPrec, deltaPrec, uTauPrec, u0Prec, nuPrec,
+                                uMean, yPlusPrec)
 
 # Generate the inflow fields
     if rank == 0:
@@ -388,23 +389,17 @@ def main():
         print("Process 0 done, waiting for the others...")
 
     comm.Barrier()
+
     if rank == 0:
         print("Done\n")
 
-    if rank == 0:
-        print("Inflow boundary properties:")
-        print("    Re_theta "+str(reThetaInfl))
-        print("    Re_delta* "+str(reDeltaStarInfl))
-        print("    Re_delta99 "+str(reDelta99Infl))
-        print("    Re_tau "+str(reTauInfl))
-        print(" ")
-        print("    theta "+str(thetaInfl))
-        print("    delta* "+str(deltaStarInfl))
-        print("    delta99 "+str(deltaInfl))
-        print("    u_tau "+str(uTauInfl))
-        print("    U0 "+str(np.max(uMeanInfl)))
-        print("    cf "+str(cfInfl))
-        print("    y+_1 "+str(yPlusInfl[0]))
+    [thetaInfl, deltaStarInfl, deltaInfl, uTauInfl, u0Infl] = compute_tbl_properties(etaInfl, yInfl,
+                                                                                     uMeanInfl, nuInfl) 
+
+    if rank  == 0:
+        print("Inflow boundary properties")
+        print_tbl_properties(thetaInfl, deltaStarInfl, deltaInfl, uTauInfl, u0Infl, nuInfl,
+                                uMeanInfl, yPlusInfl)
 
 if __name__ == "__main__":
     main()

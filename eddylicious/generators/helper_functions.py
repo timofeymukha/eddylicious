@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.integrate import simps
 
-__all__ = ["blending_function", "delta_99", "delta_star", "theta",
+__all__ = ["blending_function", "delta_99", "delta_star", "momentum_thickness",
            "chunks_and_offsets", "blending_function_theta"]
 
 
@@ -80,7 +80,7 @@ def delta_star(y, v):
     return simps((1-v/v[-1]), x=y)
 
 
-def theta(y, v):
+def momentum_thickness(y, v):
     """Compute the momentum thickness using Simpson's method."""
 
     return simps(v/v[-1]*(1-v/v[-1]), x=y)
