@@ -83,26 +83,30 @@ def get_umean_prec(reader, readPath, flip):
     if not flip:
         uMean = uMean[:int(totalPointsY*0.5)]
     else:
-        uMean = uMean[int(totalPointsY*0.5)+1:]
+        uMean = uMean[int(totalPointsY*0.5):]
 
     return uMean
 
 
 def compute_tbl_properties(y, uMean, nu, flip):
 
-    if not flip:
-        theta = momentum_thickness(y, uMean[:, 0])
-        delta = delta_99(y, uMean[:, 0])
-        deltaStar = delta_star(y, uMean[:, 0])
-        uTau = np.sqrt(nu*np.min(uMean[:, 0])/y[0])
-    else:
-        theta = momentum_thickness(np.flipud(y), uMean[::-1, 0])
-        delta = delta_99(np.flipud(y), uMean[::-1, 0])
-        deltaStar = delta_star(np.flipud(y), uMean[::-1, 0])
-        uTau = np.sqrt(nu*np.min(uMean[:, 0])/y[-1])
+    y = y[np.nonzero(y)]
+    uMean = uMean[np.nonzero(uMean)]
 
+    if not flip:
+        theta = momentum_thickness(y, uMean)
+        delta = delta_99(y, uMean)
+        deltaStar = delta_star(y, uMean)
+        uTau = np.sqrt(nu*uMean[0]/y[0])
+    else:
+        theta = momentum_thickness(np.flipud(y), uMean[::-1])
+        delta = delta_99(np.flipud(y), uMean[::-1])
+        deltaStar = delta_star(np.flipud(y), uMean[::-1])
+        uTau = np.sqrt(nu*uMean[-1]/y[-1])
+
+    yPlus1 = np.min(y)*uTau/nu
     u0 = np.max(uMean)
-    return theta, deltaStar, delta, uTau, u0
+    return theta, deltaStar, delta, uTau, u0, yPlus1
 
 
 def compute_ninfl(etaInfl, etaPrec):
@@ -117,7 +121,7 @@ def compute_ninfl(etaInfl, etaPrec):
 
 
 def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
-                         uMean, yPlus):
+                         uMean, yPlus1):
 
     reTheta = theta*u0/nu
     reDelta99 = delta*u0/nu
@@ -135,7 +139,7 @@ def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
     print("    u_tau "+str(uTau))
     print("    U0 "+str(np.max(uMean)))
     print("    cf "+str(0.5*(uTau/u0)**2))
-    print("    y+_1 "+str(yPlus[0]))
+    print("    y+_1 "+str(yPlus1))
 
 
 def config_to_dict(configFile):
@@ -246,7 +250,7 @@ def main():
 # SET UP GEOMETRY
 # Read grid for the recycling plane
 
-    totalPointsY = 2*nPointsY + 2
+    totalPointsY = 2*nPointsY
     times = get_times(reader, readPath)
 
     if reader == "foamFile":
@@ -301,13 +305,13 @@ def main():
     yInfl = pointsYInfl[:, 0]
     yInfl = np.abs(yInfl - yOrigin)
 
-    if yInfl[0] > yInfl[1]:
+    if yInfl[0] < yInfl[1]:
         flipInfl = False
     else:
         flipInfl = True
 
 # Outer scale coordinates
-    [thetaPrec, deltaStarPrec, deltaPrec, uTauPrec, u0Prec] =\
+    [thetaPrec, deltaStarPrec, deltaPrec, uTauPrec, u0Prec, yPlus1Prec] =\
         compute_tbl_properties(yPrec, uMeanPrec, nuPrec, flipPrec)
 
     if "delta99" in configDict:
@@ -360,21 +364,18 @@ def main():
     else:
         raise ValueError("Unknown reader: "+reader)
 
-
-# SET UP WRITERS
-
     # Get the write path appropriate for the reader
     writePath = set_write_path(configDict)
 
-    if rank == 0:
-        if writer == "tvmfv":
+    if writer == "tvmfv":
+        if rank == 0:
             write_points_to_tvmfv(os.path.join(writePath, "points"), pointsYInfl,
                                   pointsZInfl, xOrigin)
-        elif writer == "hdf5":
-            writePath.create_dataset("time", data=t0*np.ones((size, 1)))
-            writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
-                                     dtype=np.float64)
-            write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
+    elif writer == "hdf5":
+        writePath.create_dataset("time", data=t0*np.ones((size, 1)))
+        writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
+                                 dtype=np.float64)
+        write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
     uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
                                            nInfl, nInner,
@@ -385,11 +386,13 @@ def main():
     if rank == 0:
         print("Precursor properties:")
         print_tbl_properties(thetaPrec, deltaStarPrec, deltaPrec, uTauPrec, u0Prec, nuPrec,
-                                uMeanPrec, yPlusPrec)
+                                uMeanPrec, yPlus1Prec)
 
 # Generate the inflow fields
     if rank == 0:
         print("Generating the inflow fields.")
+
+    comm.Barrier()
 
     lund_generate(readerFunc,
                   writer, writePath,
@@ -408,13 +411,13 @@ def main():
     if rank == 0:
         print("Done\n")
 
-    [thetaInfl, deltaStarInfl, deltaInfl, uTauInfl, u0Infl] =\
-        compute_tbl_properties(yInfl, uMeanInfl, nuInfl, flipInfl)
+    [thetaInfl, deltaStarInfl, deltaInfl, uTauInfl, u0Infl, yPlus1Infl] =\
+            compute_tbl_properties(yInfl, uMeanInfl[:, 0], nuInfl, flipInfl)
 
     if rank == 0:
         print("Inflow boundary properties")
         print_tbl_properties(thetaInfl, deltaStarInfl, deltaInfl, uTauInfl,
-                             u0Infl, nuInfl, uMeanInfl, yPlusInfl)
+                             u0Infl, nuInfl, uMeanInfl, yPlus1Infl)
 
 if __name__ == "__main__":
     main()
