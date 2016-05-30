@@ -16,21 +16,94 @@ from eddylicious.writers.hdf5_writers import write_points_to_hdf5
 from eddylicious.generators.lund_rescaling import lund_generate
 from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
 
-def compute_tbl_properties(eta, y, uMean, nu):
 
-    if eta[0] < eta[1]:
+def set_write_path(config):
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    writer = config["writer"]
+    writePath = config["writePath"]
+
+    if writer == "tvmfv":
+        inletPatchName = config["inletPatchName"]
+        writePath = os.path.join(writePath, "constant", "boundaryData",
+                                 inletPatchName)
+        if rank == 0:
+            if not os.path.exists(writePath):
+                os.makedirs(writePath)
+
+    elif writer == "hdf5":
+        writePath = os.path.join(writePath, config["hdf5FileName"])
+        # If the hdf5 file exists, delete it.
+        if rank == 0 and os.path.isfile(writePath):
+            print("HDF5 database already exists. It it will be overwritten.")
+            os.remove(writePath)
+
+        # We change the writePath to be the hdf5 file itself
+        writePath = h5py.File(writePath, 'a', driver='mpio',
+                              comm=MPI.COMM_WORLD)
+    else:
+        raise ValueError("Unknown writer: "+writer)
+
+    return writePath
+
+
+def get_times(reader, readPath):
+    # Grab the existing times and sort them
+    if reader == "foamFile":
+        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
+        times = os.listdir(dataDir)
+        times = np.sort(times)
+    elif reader == "hdf5":
+        # Set the readPath to the file itself
+        readPath = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
+        times = readPath["velocity"]["times"]
+    else:
+        raise ValueError("Unknown reader: "+reader)
+
+    return times
+
+
+def get_umean_prec(reader, readPath, flip):
+    if reader == "foamFile":
+        uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
+                                             "collapsedFields"))
+        uMean = np.genfromtxt(os.path.join(readPath, "postProcessing",
+                                           "collapsedFields",
+                                           uMeanTimes[-1],
+                                           "UMean_X.xy"))[:, 1]
+        uMean = np.append(np.zeros((1, 1)), uMean)
+        uMean = np.append(uMean, np.zeros((1, 1)))
+    elif reader == "hdf5":
+        uMean = readPath["velocity"]["uMean"]
+    else:
+        raise ValueError("Unknown reader: "+reader)
+
+    totalPointsY = uMean.size
+
+    if not flip:
+        uMean = uMean[:int(totalPointsY*0.5)]
+    else:
+        uMean = uMean[int(totalPointsY*0.5)+1:]
+
+    return uMean
+
+
+def compute_tbl_properties(y, uMean, nu, flip):
+
+    if not flip:
         theta = momentum_thickness(y, uMean[:, 0])
         delta = delta_99(y, uMean[:, 0])
         deltaStar = delta_star(y, uMean[:, 0])
         uTau = np.sqrt(nu*np.min(uMean[:, 0])/y[0])
     else:
-        theta = theta(np.flipud(y), uMean[::-1, 0])
+        theta = momentum_thickness(np.flipud(y), uMean[::-1, 0])
         delta = delta_99(np.flipud(y), uMean[::-1, 0])
         deltaStar = delta_star(np.flipud(y), uMean[::-1, 0])
         uTau = np.sqrt(nu*np.min(uMean[:, 0])/y[-1])
 
     u0 = np.max(uMean)
     return theta, deltaStar, delta, uTau, u0
+
 
 def compute_ninfl(etaInfl, etaPrec):
     nInfl = 0
@@ -41,6 +114,7 @@ def compute_ninfl(etaInfl, etaPrec):
         elif np.flipud(etaInfl)[i] <= np.max(etaPrec):
                 nInfl += 1
     return nInfl
+
 
 def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
                          uMean, yPlus):
@@ -100,23 +174,19 @@ def main():
 # Readers and writers
     readPath = configDict["readPath"]
     inflowGeometryPath = configDict["inflowGeometryPath"]
-    writePath = configDict["writePath"]
 
     sampleSurfaceName = configDict["sampleSurfaceName"]
-    inletPatchName = configDict["inletPatchName"]
 
     reader = configDict["reader"]
     inflowReader = configDict["inflowGeometryReader"]
     writer = configDict["writer"]
 
-    if writer == "hdf5":
-        hdf5FileName = configDict["hdf5FileName"]
 
 # Determine which half of the channel flow will be used
     if configDict["half"] == "top":
-        flip = True
+        flipPrec = True
     elif configDict["half"] == "bottom":
-        flip = False
+        flipPrec = False
     else:
         raise ValueError("half should be either 'top' of 'bottom'")
 
@@ -124,27 +194,21 @@ def main():
     nuInfl = float(configDict["nuInflow"])
     nuPrec = float(configDict["nuPrecursor"])
 
-# The outer scale
-    if "delta99" in configDict:
-        deltaInfl = float(configDict["delta99"])
-        blendingFunction = blending_function
-    elif "theta" in configDict:
-        thetaInfl = float(configDict["theta"])
-        blendingFunction = blending_function_theta
-    else:
-        raise ValueError("The config file should provide delta99 or theta")
-
 # Freestream velocity
     u0Infl = float(configDict["Ue"])
 
-# Friction velocity
     if "delta99" in configDict:
-        reDelta99Infl = u0Infl*deltaInfl/nuInfl
-        cfInfl = 0.02*pow(1.0/reDelta99Infl, 1.0/6)
+        deltaInfl = float(configDict["delta99"])
+        blendingFunction = blending_function
+        cfInfl = 0.02*pow(nuInfl/(u0Infl*deltaInfl), 1.0/6)
     elif "theta" in configDict:
-        reThetaInfl = u0Infl*thetaInfl/nuInfl
-        cfInfl = 0.013435*(reThetaInfl - 373.83)**(-2/11)
+        thetaInfl = float(configDict["theta"])
+        blendingFunction = blending_function_theta
+        cfInfl = 0.013435*(nuInfl/(thetaInfl*u0Infl) - 373.83)**(-2/11)
+    else:
+        raise ValueError("The config file should provide delta99 or theta")
 
+    # Friction velocity
     if configDict["uTauInflow"] == "compute":
         uTauInfl = u0Infl*np.sqrt(cfInfl/2)
     else:
@@ -165,60 +229,31 @@ def main():
     if rank == 0:
         print("Producing database with "+str(size)+" time-steps.")
 
-# SET UP THE READER
-
-    if reader == "foamFile":
-        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
-    elif reader == "hdf5":
-        dataDir = readPath
-    else:
-        raise ValueError("Unknown reader: "+reader)
-
-# Grab the existing times and sort them
-    if reader == "foamFile":
-        times = os.listdir(dataDir)
-        times = np.sort(times)
-    elif reader == "hdf5":
-        dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
-        times = dbFile["velocity"]["times"]
-    else:
-        raise ValueError("Unknown reader: "+reader)
+    # get the times in the precursor database
+    times = get_times(reader, readPath)
 
     if rank == 0:
         print("Reading from database with "+str(len(times)) + " time-steps.")
 
-# SET UP MEAN PROFILE
-    if reader == "foamFile":
-        uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
-                                             "collapsedFields"))
-        uMean = np.genfromtxt(os.path.join(readPath, "postProcessing",
-                                           "collapsedFields",
-                                           uMeanTimes[-1],
-                                           "UMean_X.xy"))[:, 1]
-        uMean = np.append(np.zeros((1, 1)), uMean)
-        uMean = np.append(uMean, np.zeros((1, 1)))
-    elif reader == "hdf5":
-        uMean = dbFile["velocity"]["uMean"]
-    else:
-        raise ValueError("Unknown reader: "+reader)
+    # Get the mean velocity for the precursor
+    uMeanPrec = get_umean_prec(reader, readPath, flipPrec)
 
-    totalPointsY = uMean.size
+    # Get the centerline velocity for the precursor
+    u0Prec = np.max(uMeanPrec)
 
-    if not flip:
-        uMean = uMean[:int(totalPointsY*0.5)]
-    else:
-        uMean = uMean[int(totalPointsY*0.5)+1:]
-
-    u0Prec = np.max(uMean)
-
-    nPointsY = uMean.size
+    nPointsY = uMeanPrec.size
 
 # SET UP GEOMETRY
 # Read grid for the recycling plane
+
+    totalPointsY = 2*nPointsY + 2
+    times = get_times(reader, readPath)
+
     if reader == "foamFile":
+        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
         pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
                                       "faceCentres")
-        if not flip:
+        if not flipPrec:
             [pointsY, pointsZ, yInd, zInd] = \
                 read_points_from_foamfile(pointsReadPath, addValBot=0,
                                           addValTop=2,
@@ -232,7 +267,7 @@ def main():
                                           exchangeValBot=1.0)
     elif reader == "hdf5":
 
-        if not flip:
+        if not flipPrec:
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
                                       excludeTop=totalPointsY-nPointsY,
@@ -249,8 +284,8 @@ def main():
 
 # Read grid for the inflow plane
     if inflowReader == "foamFile":
-        [pointsYInfl, pointsZInfl, yIndInfl, zIndInfl] =\
-            read_points_from_foamfile(os.path.join(inflowGeometryPath))
+        [pointsYInfl, pointsZInfl] =\
+            read_points_from_foamfile(os.path.join(inflowGeometryPath))[:2]
     else:
         raise ValueError("Unknown inflow reader: "+inflowReader)
 
@@ -258,38 +293,34 @@ def main():
 
 # Get the grid points along y as 1d arrays for convenience
     yPrec = pointsY[:, 0]
+    if not flipPrec:
+        yPrec = np.abs(yPrec - yPrec[0])
+    else:
+        yPrec = np.abs(yPrec - yPrec[-1])
+
     yInfl = pointsYInfl[:, 0]
     yInfl = np.abs(yInfl - yOrigin)
 
-# Outer scale coordinates
-    if not flip:
-        yOriginPrec = 0
-        deltaPrec = delta_99(yPrec, uMean)
-        deltaStarPrec = delta_star(yPrec, uMean)
-        thetaPrec = momentum_thickness(yPrec, uMean)
-        uTauPrec = np.sqrt(nuPrec*uMean[1]/yPrec[1])
+    if yInfl[0] > yInfl[1]:
+        flipInfl = False
     else:
-    # TODO should be generic with respect to precursor channel height
-        yOriginPrec = 2
-        deltaPrec = delta_99(np.flipud(np.abs(yPrec - yOriginPrec)),
-                             np.flipud(uMean))
-        deltaStarPrec = delta_star(np.flipud(np.abs(yPrec - yOriginPrec)),
-                                  np.flipud(uMean))
-        thetaPrec = theta(np.flipud(np.abs(yPrec - yOriginPrec)),
-                          np.flipud(uMean))
-        uTauPrec = np.sqrt(nuPrec*np.abs(uMean[-2]/(yOriginPrec-yPrec[-2])))
+        flipInfl = True
+
+# Outer scale coordinates
+    [thetaPrec, deltaStarPrec, deltaPrec, uTauPrec, u0Prec] =\
+        compute_tbl_properties(yPrec, uMeanPrec, nuPrec, flipPrec)
 
     if "delta99" in configDict:
-        etaPrec = np.abs(yPrec - yOriginPrec)/deltaPrec
+        etaPrec = yPrec/deltaPrec
         etaInfl = yInfl/deltaInfl
-    elif "theta" in configDict:
-        etaPrec = np.abs(yPrec - yOriginPrec)/thetaPrec
+    else:
+        etaPrec = yPrec/thetaPrec
         etaInfl = yInfl/thetaInfl
 
 
 # Inner scale coordinates
     gamma = uTauInfl/uTauPrec
-    yPlusPrec = np.abs(yPrec - yOriginPrec)*uTauPrec/nuPrec
+    yPlusPrec = yPrec*uTauPrec/nuPrec
     yPlusInfl = yInfl*uTauInfl/nuInfl
 
 # Points containing the boundary layer at the inflow plane
@@ -298,7 +329,8 @@ def main():
 
 # Create the reader functions
     if reader == "foamFile":
-        if not flip:
+        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
+        if not flipPrec:
             readerFunc = read_velocity_from_foamfile(
                             dataDir,
                             sampleSurfaceName,
@@ -315,7 +347,7 @@ def main():
                             excludeBot=totalPointsY-nPointsY,
                             interpValBot=True)
     elif reader == "hdf5":
-        if not flip:
+        if not flipPrec:
             readerFunc = read_velocity_from_hdf5(
                             readPath,
                             excludeTop=totalPointsY-nPointsY,
@@ -331,37 +363,20 @@ def main():
 
 # SET UP WRITERS
 
-# Write points and modify writePath appropriately
-    if writer == "tvmfv":
-        writePath = os.path.join(writePath, "constant", "boundaryData",
-                                 inletPatchName)
-        if rank == 0:
-            if not os.path.exists(writePath):
-                os.makedirs(writePath)
+    # Get the write path appropriate for the reader
+    writePath = set_write_path(configDict)
 
-        write_points_to_tvmfv(os.path.join(writePath, "points"), pointsYInfl,
-                              pointsZInfl, xOrigin)
-
-    elif writer == "hdf5":
-        writePath = os.path.join(writePath, hdf5FileName)
-# If the hdf5 file exists, delete it.
-        if rank == 0 and os.path.isfile(writePath):
-            print("HDF5 database already exists. It it will be overwritten.")
-            os.remove(writePath)
-
-        if rank == 0:
+    if rank == 0:
+        if writer == "tvmfv":
+            write_points_to_tvmfv(os.path.join(writePath, "points"), pointsYInfl,
+                                  pointsZInfl, xOrigin)
+        elif writer == "hdf5":
+            writePath.create_dataset("time", data=t0*np.ones((size, 1)))
+            writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
+                                     dtype=np.float64)
             write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
-# We change the writePath to be the hdf5 file itself
-        writePath = h5py.File(writePath, 'a', driver='mpio',
-                              comm=MPI.COMM_WORLD)
-        writePath.create_dataset("time", data=t0*np.ones((size, 1)))
-        writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
-                                 dtype=np.float64)
-    else:
-        raise ValueError("Unknown writer: "+writer)
-
-    uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMean,
+    uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
                                            nInfl, nInner,
                                            etaInfl, yPlusInfl, nPointsZInfl,
                                            u0Infl, u0Prec, gamma,
@@ -370,7 +385,7 @@ def main():
     if rank == 0:
         print("Precursor properties:")
         print_tbl_properties(thetaPrec, deltaStarPrec, deltaPrec, uTauPrec, u0Prec, nuPrec,
-                                uMean, yPlusPrec)
+                                uMeanPrec, yPlusPrec)
 
 # Generate the inflow fields
     if rank == 0:
@@ -379,7 +394,7 @@ def main():
     lund_generate(readerFunc,
                   writer, writePath,
                   dt, t0, tEnd, timePrecision,
-                  uMean, uMeanInfl,
+                  uMeanPrec, uMeanInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   nInfl, nInner, gamma,
@@ -393,13 +408,13 @@ def main():
     if rank == 0:
         print("Done\n")
 
-    [thetaInfl, deltaStarInfl, deltaInfl, uTauInfl, u0Infl] = compute_tbl_properties(etaInfl, yInfl,
-                                                                                     uMeanInfl, nuInfl) 
+    [thetaInfl, deltaStarInfl, deltaInfl, uTauInfl, u0Infl] =\
+        compute_tbl_properties(yInfl, uMeanInfl, nuInfl, flipInfl)
 
-    if rank  == 0:
+    if rank == 0:
         print("Inflow boundary properties")
-        print_tbl_properties(thetaInfl, deltaStarInfl, deltaInfl, uTauInfl, u0Infl, nuInfl,
-                                uMeanInfl, yPlusInfl)
+        print_tbl_properties(thetaInfl, deltaStarInfl, deltaInfl, uTauInfl,
+                             u0Infl, nuInfl, uMeanInfl, yPlusInfl)
 
 if __name__ == "__main__":
     main()
