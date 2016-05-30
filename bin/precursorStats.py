@@ -18,7 +18,7 @@ def main():
                 description="A script for calculating the statistics \
                              of a precursor database.")
 
-    parser.add_argument('--readPath',
+    parser.add_argument('--database',
                         type=str,
                         help='The HDF5 file with the database.',
                         required=True)

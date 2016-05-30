@@ -18,6 +18,13 @@ from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
 
 
 def set_write_path(config):
+    """Sets the writePath variable in concordance with the writer.
+
+    For the tvmfv writer: the path to constant/boundaryData directory.
+    For the hdf5 writer: the hdf5 file itself.
+
+    """
+
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     writer = config["writer"]
@@ -48,6 +55,8 @@ def set_write_path(config):
 
 
 def get_times(reader, readPath):
+    """Read the time values associated with the precursor database."""
+
     # Grab the existing times and sort them
     if reader == "foamFile":
         dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
@@ -64,6 +73,8 @@ def get_times(reader, readPath):
 
 
 def get_umean_prec(reader, readPath, flip):
+    """Reed the mean velocity profile of the precursor."""
+
     if reader == "foamFile":
         uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
                                              "collapsedFields"))
@@ -89,6 +100,7 @@ def get_umean_prec(reader, readPath, flip):
 
 
 def compute_tbl_properties(y, uMean, nu, flip):
+    """Compute various parameters of a TBL."""
 
     y = y[np.nonzero(y)]
     uMean = uMean[np.nonzero(uMean)]
@@ -110,6 +122,8 @@ def compute_tbl_properties(y, uMean, nu, flip):
 
 
 def compute_ninfl(etaInfl, etaPrec):
+    """Compute the number of elements that constitute the TBL."""
+
     nInfl = 0
     for i in range(etaInfl.size):
         if etaInfl[0] < etaInfl[-1]:
@@ -122,6 +136,7 @@ def compute_ninfl(etaInfl, etaPrec):
 
 def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
                          uMean, yPlus1):
+    """Print out various parameters of a TBL."""
 
     reTheta = theta*u0/nu
     reDelta99 = delta*u0/nu
@@ -143,7 +158,8 @@ def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
 
 
 def config_to_dict(configFile):
-    # Read the config file into a dictionary
+    """Parse a config file to a dictionary."""
+
     configDict = {}
 
     for line in configFile:
@@ -208,7 +224,7 @@ def main():
     elif "theta" in configDict:
         thetaInfl = float(configDict["theta"])
         blendingFunction = blending_function_theta
-        cfInfl = 0.013435*(nuInfl/(thetaInfl*u0Infl) - 373.83)**(-2/11)
+        cfInfl = 0.013435*(thetaInfl*u0Infl/nuInfl - 373.83)**(-2/11)
     else:
         raise ValueError("The config file should provide delta99 or theta")
 
@@ -241,9 +257,6 @@ def main():
 
     # Get the mean velocity for the precursor
     uMeanPrec = get_umean_prec(reader, readPath, flipPrec)
-
-    # Get the centerline velocity for the precursor
-    u0Prec = np.max(uMeanPrec)
 
     nPointsY = uMeanPrec.size
 
@@ -305,14 +318,16 @@ def main():
     yInfl = pointsYInfl[:, 0]
     yInfl = np.abs(yInfl - yOrigin)
 
+# See whether the inflow TBL is up side down or not
     if yInfl[0] < yInfl[1]:
         flipInfl = False
     else:
         flipInfl = True
 
 # Outer scale coordinates
-    [thetaPrec, deltaStarPrec, deltaPrec, uTauPrec, u0Prec, yPlus1Prec] =\
-        compute_tbl_properties(yPrec, uMeanPrec, nuPrec, flipPrec)
+    [thetaPrec, deltaStarPrec, deltaPrec,
+     uTauPrec, u0Prec, yPlus1Prec] = compute_tbl_properties(yPrec, uMeanPrec,
+                                                            nuPrec, flipPrec)
 
     if "delta99" in configDict:
         etaPrec = yPrec/deltaPrec
@@ -320,7 +335,6 @@ def main():
     else:
         etaPrec = yPrec/thetaPrec
         etaInfl = yInfl/thetaInfl
-
 
 # Inner scale coordinates
     gamma = uTauInfl/uTauPrec
@@ -369,8 +383,8 @@ def main():
 
     if writer == "tvmfv":
         if rank == 0:
-            write_points_to_tvmfv(os.path.join(writePath, "points"), pointsYInfl,
-                                  pointsZInfl, xOrigin)
+            write_points_to_tvmfv(os.path.join(writePath, "points"),
+                                  pointsYInfl, pointsZInfl, xOrigin)
     elif writer == "hdf5":
         writePath.create_dataset("time", data=t0*np.ones((size, 1)))
         writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
@@ -385,8 +399,8 @@ def main():
 
     if rank == 0:
         print("Precursor properties:")
-        print_tbl_properties(thetaPrec, deltaStarPrec, deltaPrec, uTauPrec, u0Prec, nuPrec,
-                                uMeanPrec, yPlus1Prec)
+        print_tbl_properties(thetaPrec, deltaStarPrec, deltaPrec, uTauPrec,
+                             u0Prec, nuPrec, uMeanPrec, yPlus1Prec)
 
 # Generate the inflow fields
     if rank == 0:
@@ -411,8 +425,11 @@ def main():
     if rank == 0:
         print("Done\n")
 
-    [thetaInfl, deltaStarInfl, deltaInfl, uTauInfl, u0Infl, yPlus1Infl] =\
-            compute_tbl_properties(yInfl, uMeanInfl[:, 0], nuInfl, flipInfl)
+    [thetaInfl, deltaStarInfl, deltaInfl,
+     uTauInfl, u0Infl, yPlus1Infl] = compute_tbl_properties(yInfl,
+                                                            uMeanInfl[:, 0],
+                                                            nuInfl,
+                                                            flipInfl)
 
     if rank == 0:
         print("Inflow boundary properties")

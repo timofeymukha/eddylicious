@@ -19,7 +19,7 @@ def main():
                 description="A utility for calculating statistics \
                         of a inflow field database stored in hdf5 format.")
 
-    parser.add_argument('--readPath',
+    parser.add_argument('--database',
                         type=str,
                         help='The HDF5 file with the database.',
                         required=True)

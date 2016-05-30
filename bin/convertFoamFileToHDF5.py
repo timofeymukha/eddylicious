@@ -30,7 +30,7 @@ def main():
                             nPoints are added to the root of the file."
                                     )
 
-    parser.add_argument('--precursorPath',
+    parser.add_argument('--precursor',
                         type=str,
                         help='The location of the precusor case',
                         required=True)
