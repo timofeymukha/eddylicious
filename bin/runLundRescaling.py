@@ -85,6 +85,7 @@ def get_umean_prec(reader, readPath, flip):
         uMean = np.append(np.zeros((1, 1)), uMean)
         uMean = np.append(uMean, np.zeros((1, 1)))
     elif reader == "hdf5":
+        readPath = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
         uMean = readPath["velocity"]["uMean"]
     else:
         raise ValueError("Unknown reader: "+reader)
