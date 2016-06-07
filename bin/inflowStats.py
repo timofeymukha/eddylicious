@@ -26,7 +26,7 @@ def main():
     parser.add_argument('--writePath',
                         type=str,
                         help='The location where to write the \
-                            produced plots.',
+                            computed results.',
                         required=True)
 
     args = parser.parse_args()

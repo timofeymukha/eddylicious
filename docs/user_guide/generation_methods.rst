@@ -147,7 +147,7 @@ where :math:`\alpha =4` and :math:`b=0.2`.
 Usage
 _____
 
-The `runLundRescaling.py` script should be used to generate the fields.
+The `runLundRescaling` script should be used to generate the fields.
 The script is paralleled using MPI, so it is possible to take advantage of all
 the available cores present on the machine.
 

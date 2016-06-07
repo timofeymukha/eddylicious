@@ -17,6 +17,8 @@ from a file.
 
 Internally the geometry is represented as a
 
+.. _foamfile_format:
+
 The foamFile format
 -------------------
 
@@ -65,6 +67,8 @@ face centres are written to ``faceCentres``.
     This offering is not approved or endorsed by OpenCFD Limited, producer
     and distributor of the OpenFOAM software and owner of the OPENFOAM®  and
     OpenCFD®  trade marks.
+
+.. _input_hdf5_file_format:
 
 The HDF5 format
 ---------------

@@ -9,8 +9,8 @@ The choice of the file format is usually dictated by the CFD solver.
 
 .. _hdf5_file_format:
 
-HDF5 file format
-----------------
+The HDF5 file format
+--------------------
 
 HDF5 is a file format specifically developed for storing large scientific
 datasets.
@@ -39,3 +39,7 @@ Eddylicious creates the following datasets inside the HDF5 file.
       points and the third one with the components of the velocity field.
       Same order as in ``points`` applies.
 
+.. _of_native_format:
+
+OpenFOAM native format
+----------------------
