@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import division
 import os
 import numpy as np
+import sys
 import argparse
 from mpi4py import MPI
 import h5py as h5py
@@ -100,15 +101,15 @@ def get_umean_prec(reader, readPath, flip):
     else:
         raise ValueError("Unknown reader: "+reader)
 
-
-    center = (y[0] + y[-1])/2
+    center = (y[2] + y[-2])/2
 
     totalPointsY = uMean.size
 
     indY = np.argmin(abs(y - center))
 
     if not flip:
-        uMean = uMean[:indY+1]
+        #uMean = uMean[:indY+1]
+        uMean = uMean
     else:
         uMean = uMean[indY+1:]
 
@@ -126,14 +127,15 @@ def compute_tbl_properties(y, uMean, nu, flip):
         delta = delta_99(y, uMean)
         deltaStar = delta_star(y, uMean)
         uTau = np.sqrt(nu*uMean[0]/y[0])
+        u0 = uMean[-1]
     else:
         theta = momentum_thickness(np.flipud(y), uMean[::-1])
         delta = delta_99(np.flipud(y), uMean[::-1])
         deltaStar = delta_star(np.flipud(y), uMean[::-1])
         uTau = np.sqrt(nu*uMean[-1]/y[-1])
+        u0 = uMean[0]
 
     yPlus1 = np.min(y)*uTau/nu
-    u0 = np.max(uMean)
     return theta, deltaStar, delta, uTau, u0, yPlus1
 
 
@@ -168,7 +170,7 @@ def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
     print("    delta* "+str(deltaStar))
     print("    delta99 "+str(delta))
     print("    u_tau "+str(uTau))
-    print("    U0 "+str(np.max(uMean)))
+    print("    U0 "+str(u0))
     print("    cf "+str(0.5*(uTau/u0)**2))
     print("    y+_1 "+str(yPlus1))
 
@@ -301,7 +303,7 @@ def main():
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
                                       excludeTop=totalPointsY-nPointsY,
-                                      exchangeValTop=1.0)
+                                      exchangeValTop=8.0) #VALUE SHOULD BE ASSIGNED FROM DICT
         else:
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
