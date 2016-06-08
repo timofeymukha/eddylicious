@@ -31,7 +31,7 @@ def main():
 
     args = parser.parse_args()
 
-    readPath = args.readPath
+    readPath = args.database
     writeDir = args.writePath
 
 # Open the hdf5 database

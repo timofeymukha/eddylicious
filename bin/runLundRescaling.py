@@ -24,7 +24,6 @@ def set_write_path(config):
     For the hdf5 writer: the hdf5 file itself.
 
     """
-
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     writer = config["writer"]
@@ -65,7 +64,8 @@ def get_times(reader, readPath):
     elif reader == "hdf5":
         # Set the readPath to the file itself
         readPath = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
-        times = readPath["velocity"]["times"]
+        times = readPath["velocity"]["times"][:]
+        readPath.close()
     else:
         raise ValueError("Unknown reader: "+reader)
 
@@ -73,8 +73,10 @@ def get_times(reader, readPath):
 
 
 def get_umean_prec(reader, readPath, flip):
-    """Reed the mean velocity profile of the precursor."""
+    """Reed the mean velocity profile of the precursor
+       and the total number of points in the y direction.
 
+    """
     if reader == "foamFile":
         uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
                                              "collapsedFields"))
@@ -82,22 +84,35 @@ def get_umean_prec(reader, readPath, flip):
                                            "collapsedFields",
                                            uMeanTimes[-1],
                                            "UMean_X.xy"))[:, 1]
+        y = np.genfromtxt(os.path.join(readPath, "postProcessing",
+                                           "collapsedFields",
+                                           uMeanTimes[-1],
+                                           "UMean_X.xy"))[:, 0]
         uMean = np.append(np.zeros((1, 1)), uMean)
         uMean = np.append(uMean, np.zeros((1, 1)))
+        y = np.append(np.zeros((1, 1)), y)
+        y = np.append(y, np.zeros((1, 1)))
     elif reader == "hdf5":
         readPath = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
-        uMean = readPath["velocity"]["uMean"]
+        uMean = readPath["velocity"]["uMean"][:]
+        y = readPath["points"]["pointsY"][:, 0]
+        readPath.close()
     else:
         raise ValueError("Unknown reader: "+reader)
 
+
+    center = (y[0] + y[-1])/2
+
     totalPointsY = uMean.size
 
-    if not flip:
-        uMean = uMean[:int(totalPointsY*0.5)]
-    else:
-        uMean = uMean[int(totalPointsY*0.5):]
+    indY = np.argmin(abs(y - center))
 
-    return uMean
+    if not flip:
+        uMean = uMean[:indY+1]
+    else:
+        uMean = uMean[indY+1:]
+
+    return uMean, totalPointsY
 
 
 def compute_tbl_properties(y, uMean, nu, flip):
@@ -196,8 +211,6 @@ def main():
     readPath = configDict["readPath"]
     inflowGeometryPath = configDict["inflowGeometryPath"]
 
-    sampleSurfaceName = configDict["sampleSurfaceName"]
-
     reader = configDict["reader"]
     inflowReader = configDict["inflowGeometryReader"]
     writer = configDict["writer"]
@@ -257,17 +270,16 @@ def main():
         print("Reading from database with "+str(len(times)) + " time-steps.")
 
     # Get the mean velocity for the precursor
-    uMeanPrec = get_umean_prec(reader, readPath, flipPrec)
-
+    uMeanPrec, totalPointsY = get_umean_prec(reader, readPath, flipPrec)
     nPointsY = uMeanPrec.size
 
 # SET UP GEOMETRY
 # Read grid for the recycling plane
 
-    totalPointsY = 2*nPointsY
     times = get_times(reader, readPath)
 # TODO: should be agnostic of precursor height
     if reader == "foamFile":
+        sampleSurfaceName = configDict["sampleSurfaceName"]
         dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
         pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
                                       "faceCentres")
