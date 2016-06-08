@@ -30,7 +30,7 @@ def main():
 
     args = parser.parse_args()
 
-    readPath = args.readPath
+    readPath = args.database
     writeDir = args.writePath
 
 
@@ -40,7 +40,7 @@ def main():
         print("Opening the database")
     dbFile = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
 
-    pointsY = dbFile["points"]["pointsY"]
+    pointsY = dbFile["points"]["pointsY"][:,:]
 
     size = dbFile["velocity"]["uX"].shape[0]
     nPointsY = pointsY.shape[0]
@@ -55,7 +55,8 @@ def main():
     [chunks, offsets] = chunks_and_offsets(nProcs, size)
 
     for i in range(chunks[rank]):
-        print("Computed about "+str(int(i/chunks[rank]*100))+"%")
+        if rank == 0 and (np.mod(i, int(chunks[rank]/10)) == 0):
+            print("Computed about "+str(int(i/chunks[rank]*100))+"%")
 
         position = offsets[rank] + i
 
@@ -66,6 +67,8 @@ def main():
         uSquaredMean[:, :, 1] += dbFile["velocity"]["uY"][position, :, :]**2
         uSquaredMean[:, :, 2] += dbFile["velocity"]["uZ"][position, :, :]**2
 
+    comm.Barrier()
+    dbFile.close()
     uMean = comm.gather(uMean, root=0)
     uSquaredMean = comm.gather(uSquaredMean, root=0)
 
