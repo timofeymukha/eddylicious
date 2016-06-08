@@ -10,7 +10,7 @@ __all__ = ["read_points_from_hdf5", "read_velocity_from_hdf5"]
 def read_points_from_hdf5(readPath, addValBot=float('nan'),
                           addValTop=float('nan'), excludeBot=0,
                           excludeTop=0, exchangeValBot=float('nan'),
-                              exchangeValTop=float('nan')):
+                          exchangeValTop=float('nan')):
     """Read the coordinates of the points from a hdf5 file.
 
 

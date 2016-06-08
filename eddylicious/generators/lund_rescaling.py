@@ -20,10 +20,11 @@ __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
            "lund_generate"]
 
 
-def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
-                               nInfl, nInner,
-                               etaInfl, yPlusInfl, nPointsZInfl,
-                               u0Infl, u0Prec, gamma, blendingFunction):
+def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
+                               uMeanXPrec, uMeanYPrec,
+                               nInfl, etaInfl, yPlusInfl, nPointsZInfl,
+                               u0Infl, u0Prec,
+                               gamma, blendingFunction):
     """Rescale the mean velocity profile using Lunds rescaling.
 
     This function rescales the mean velocity profile taken from the
@@ -37,17 +38,15 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     yPlusPrec : ndarray
         The values of y+ for the corresponding values of the mean
         velocity from the precursor.
-    uMeanPrec : 1d ndarray
-        The values of the mean velocity from the precursor.
+    uMeanXPrec : 1d ndarray
+        The values of the mean streamwise velocity from the precursor.
+    uMeanYPrec : 1d ndarray
+        The values of the mean wall-normal velocity from the precursor.
     nInfl : int
         The amount of points in the wall-normal direction that contain
         the boundary layer at the inflow boundary. That is, for points
         beyond nInfl, Ue will
         be prescribed.
-    nInner : int
-        The amount of points where inner rescaling should be considered.
-        For points beyond nInner, the outer rescaling only we be
-        computed. The relaxes the demand on Re_tau for the precursor.
     etaInfl : ndarray
         The values of eta for the mesh points at the inflow boundary.
     yPlusInfl : ndarray
@@ -73,7 +72,6 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
 
     """
     assert nInfl > 0
-    assert nInner > 0
     assert nPointsZInfl > 0
     assert u0Infl > 0
     assert u0Prec > 0
@@ -82,8 +80,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
     assert np.all(etaPrec >= 0)
     assert np.all(yPlusInfl >= 0)
     assert np.all(yPlusPrec >= 0)
-    assert np.all(uMeanPrec >= 0)
-    assert nInner <= nInfl
+    assert np.all(uMeanXPrec >= 0)
+    assert np.all(uMeanYPrec >= 0)
 
     # Check if the wall is at the top, if so flip
     flip = False
@@ -91,32 +89,43 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
         etaInfl = np.flipud(etaInfl)
         yPlusInfl = np.flipud(yPlusInfl)
         flip = True
-        
-    uMeanInterp = interp1d(etaPrec, uMeanPrec)
-    uMeanInterpPlus = interp1d(yPlusPrec, uMeanPrec)
 
-    uMeanInner = gamma*uMeanInterpPlus(yPlusInfl[:nInner])
-    uMeanOuter = gamma*uMeanInterp(etaInfl[:nInfl]) + u0Infl - gamma*u0Prec
+    # The streamwise component
+    uMeanXInterp = interp1d(etaPrec, uMeanXPrec)
+    uMeanXInterpPlus = interp1d(yPlusPrec, uMeanXPrec)
 
-    uMeanInfl = np.zeros(etaInfl.shape)
-    uMeanInfl[:nInner] = uMeanInner*(1-blendingFunction(etaInfl[:nInner])) + \
-        uMeanOuter[:nInner]*blendingFunction(etaInfl[:nInner])
-    uMeanInfl[nInner:nInfl] = uMeanOuter[nInner:nInfl]
-    uMeanInfl[nInfl:] = u0Infl
-    uMeanInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanInfl[:, np.newaxis]
+    uMeanXInner = gamma*uMeanXInterpPlus(yPlusInfl[:nInfl])
+    uMeanXOuter = gamma*uMeanXInterp(etaInfl[:nInfl]) + u0Infl - gamma*u0Prec
+ 
+    uMeanXInfl = np.zeros(etaInfl.shape)
+    uMeanXInfl[:nInfl] = uMeanXInner*(1-blendingFunction(etaInfl[:nInfl])) + \
+        uMeanXOuter[:nInfl]*blendingFunction(etaInfl[:nInfl])
+    uMeanXInfl[nInfl:] = u0Infl
+    uMeanXInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanXInfl[:, np.newaxis]
 
-    assert np.all(uMeanInfl >= 0)
+    # The wall-normal component
+    uMeanYInterp = interp1d(etaPrec, uMeanYPrec)
+    uMeanYInterpPlus = interp1d(yPlusPrec, uMeanYPrec)
+    uMeanYInner = uMeanYInterpPlus(yPlusInfl[:nInfl])
+    uMeanYOuter = uMeanYInterp(etaInfl[:nInfl])
+
+    uMeanYInfl = np.zeros(etaInfl.shape)
+    uMeanYInfl[:nInfl] = uMeanYInner*(1-blendingFunction(etaInfl[:nInfl])) + \
+                         uMeanYOuter[:nInfl]*blendingFunction(etaInfl[:nInfl])
+
+    assert np.all(uMeanXInfl >= 0)
+    assert np.all(uMeanYInfl >= 0)
 
     if flip: 
-        return np.flipud(uMeanInfl)
+        return np.flipud(uMeanXInfl), np.flipud(uMeanYInfl)
     else:
-        return uMeanInfl
+        return uMeanXInfl, uMeanYInfl
 
 
 def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
                               uPrimeX, uPrimeY, uPrimeZ, gamma,
                               etaInfl, yPlusInfl, pointsZInfl,
-                              nInfl, nInner, blendingFunction):
+                              nInfl, blendingFunction):
     """Rescale the fluctuations of velocity using Lund et al's
     rescaling.
 
@@ -158,10 +167,6 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
         The amount of points in the wall-normal direction that contain
         the boundary layer at the inflow boundary. That is, for points
         beyound nInfl, 0 will be prescribed.
-    nInner : int
-        The amount of points where inner rescaling should be considered.
-        For points beyound nInner, the outer rescaling only we be
-        computed. The relaxes the demand on Re_tau for the precursor.
     blendingFunction : function
         The function for blending the inner and outer profiles.
 
@@ -172,8 +177,8 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
         array contains the rescaled fluctuations of the x component of
         velocity. The second -- of the y component of velocity. The
         third -- of the z component of velocity.
-    """
 
+    """
     assert np.all(etaPrec >= 0)
     assert np.all(yPlusPrec >= 0)
     assert np.all(etaInfl >= 0)
@@ -238,7 +243,8 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
 def lund_generate(readerFunction,
                   writer, writePath,
                   dt, t0, tEnd, timePrecision,
-                  uMeanPrec, uMeanInfl,
+                  uMeanXPrec, uMeanXInfl,
+                  uMeanYPrec, uMeanYInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   nInfl, nInner, gamma,
@@ -272,11 +278,16 @@ def lund_generate(readerFunction,
         Number of points after the decimal to keep for the time value.
     tEnd : float
         The ending time for the simulation.
-    uMeanPrec : ndarray
-        The values of the mean velocity from the precursor.
-    uMeanInfl : ndarray
-        The values of the mean velocity for the inflow boundary
+    uMeanXPrec : ndarray
+        The values of the mean streamwise velocity from the precursor.
+    uMeanXInfl : ndarray
+        The values of the mean streamwise velocity for the inflow boundary
         layer.
+    uMeanYPrec : ndarray
+        The values of the mean wall-normal velocity from the precursor.
+    uMeanYInfl : ndarray
+        The values of the mean wall-normal velocity for the inflow
+        boundary layer.
     etaPrec : ndarray
         The values of eta for the corresponding values of the mean
         velocity from the precursor.
@@ -285,7 +296,7 @@ def lund_generate(readerFunction,
         velocity from the precursor.
     pointsZ : ndarray
         A 2d array containing the values of z for the points of the
-        precuror mesh.
+        precursor mesh.
     etaInfl : ndarray
         The values of eta for the mesh points at the inflow boundary.
     yPlusInfl : ndarray
@@ -342,7 +353,8 @@ def lund_generate(readerFunction,
             raise ValueError("Unknown reader")
 
         # Subtract mean
-        uPrimeX -= uMeanPrec[:, np.newaxis]
+        uPrimeX -= uMeanXPrec[:, np.newaxis]
+        uPrimeY -= uMeanYPrec[:, np.newaxis]
 
         [uXInfl, uYInfl, uZInfl] = lund_rescale_fluctuations(etaPrec,
                                                              yPlusPrec,
@@ -359,7 +371,8 @@ def lund_generate(readerFunction,
                                                              blendingFunction)
 
         # Add mean
-        uXInfl += uMeanInfl
+        uXInfl += uMeanXInfl
+        uYInfl += uMeanYInfl
 
         # Write
         if writer == "tvmfv":

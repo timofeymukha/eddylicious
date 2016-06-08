@@ -3,7 +3,6 @@ from __future__ import print_function
 from __future__ import division
 import os
 import numpy as np
-import sys
 import argparse
 from mpi4py import MPI
 import h5py as h5py
@@ -84,36 +83,43 @@ def get_umean_prec(reader, readPath, flip):
         uMean = np.genfromtxt(os.path.join(readPath, "postProcessing",
                                            "collapsedFields",
                                            uMeanTimes[-1],
-                                           "UMean_X.xy"))[:, 1]
-        y = np.genfromtxt(os.path.join(readPath, "postProcessing",
-                                           "collapsedFields",
-                                           uMeanTimes[-1],
-                                           "UMean_X.xy"))[:, 0]
-        uMean = np.append(np.zeros((1, 1)), uMean)
-        uMean = np.append(uMean, np.zeros((1, 1)))
-        y = np.append(np.zeros((1, 1)), y)
-        y = np.append(y, np.zeros((1, 1)))
+                                           "UMean_X.xy"))
+        uMeanX = uMean[:, 1]
+        if uMean.shape[1] == 3:
+            uMeanY = uMean[:, 2]
+        else:
+            uMeanY = np.zeros(uMeanX.shape)
     elif reader == "hdf5":
         readPath = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
-        uMean = readPath["velocity"]["uMean"][:]
+        uMeanX = readPath["velocity"]["uMeanX"][:]
+        uMeanY = readPath["velocity"]["uMeanY"][:]
+        readPath.close()
+    else:
+        raise ValueError("Unknown reader: "+reader)
+
+    return uMeanX, uMeanY
+
+
+def get_y_prec(reader, readPath):
+    """Reed the mean velocity profile of the precursor
+       and the total number of points in the y direction.
+
+    """
+    if reader == "foamFile":
+        uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
+                                             "collapsedFields"))
+        y = np.genfromtxt(os.path.join(readPath, "postProcessing",
+                                       "collapsedFields",
+                                       uMeanTimes[-1],
+                                       "UMean_X.xy"))[:, 0]
+    elif reader == "hdf5":
+        readPath = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
         y = readPath["points"]["pointsY"][:, 0]
         readPath.close()
     else:
         raise ValueError("Unknown reader: "+reader)
 
-    center = (y[2] + y[-2])/2
-
-    totalPointsY = uMean.size
-
-    indY = np.argmin(abs(y - center))
-
-    if not flip:
-        #uMean = uMean[:indY+1]
-        uMean = uMean
-    else:
-        uMean = uMean[indY+1:]
-
-    return uMean, totalPointsY
+    return y
 
 
 def compute_tbl_properties(y, uMean, nu, flip):
@@ -127,15 +133,14 @@ def compute_tbl_properties(y, uMean, nu, flip):
         delta = delta_99(y, uMean)
         deltaStar = delta_star(y, uMean)
         uTau = np.sqrt(nu*uMean[0]/y[0])
-        u0 = uMean[-1]
     else:
         theta = momentum_thickness(np.flipud(y), uMean[::-1])
         delta = delta_99(np.flipud(y), uMean[::-1])
         deltaStar = delta_star(np.flipud(y), uMean[::-1])
         uTau = np.sqrt(nu*uMean[-1]/y[-1])
-        u0 = uMean[0]
 
     yPlus1 = np.min(y)*uTau/nu
+    u0 = np.max(uMean)
     return theta, deltaStar, delta, uTau, u0, yPlus1
 
 
@@ -170,7 +175,7 @@ def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
     print("    delta* "+str(deltaStar))
     print("    delta99 "+str(delta))
     print("    u_tau "+str(uTau))
-    print("    U0 "+str(u0))
+    print("    U0 "+str(np.max(uMean)))
     print("    cf "+str(0.5*(uTau/u0)**2))
     print("    y+_1 "+str(yPlus1))
 
@@ -272,14 +277,25 @@ def main():
         print("Reading from database with "+str(len(times)) + " time-steps.")
 
     # Get the mean velocity for the precursor
-    uMeanPrec, totalPointsY = get_umean_prec(reader, readPath, flipPrec)
-    nPointsY = uMeanPrec.size
+    uMeanXPrec, uMeanYPrec = get_umean_prec(reader, readPath, flipPrec)
+
+    yPrec = get_y_prec(reader, readPath)
+    centerY = (yPrec[0] + yPrec[-1])/2
+    totalPointsY = yPrec.size
+
+    indY = np.argmin(abs(yPrec - centerY))
+
+    if not flipPrec:
+        uMeanXPrec = uMeanXPrec[:indY+1]
+    else:
+        uMeanXPrec = uMeanXPrec[indY+1:]
+
+    nPointsY = uMeanXPrec.size()
 
 # SET UP GEOMETRY
 # Read grid for the recycling plane
 
     times = get_times(reader, readPath)
-# TODO: should be agnostic of precursor height
     if reader == "foamFile":
         sampleSurfaceName = configDict["sampleSurfaceName"]
         dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
@@ -287,28 +303,28 @@ def main():
                                       "faceCentres")
         if not flipPrec:
             [pointsY, pointsZ, yInd, zInd] = \
-                read_points_from_foamfile(pointsReadPath, addValBot=0,
-                                          addValTop=2,
+                read_points_from_foamfile(pointsReadPath, addValBot=yPrec[0],
+                                          addValTop=yPrec[-1],
                                           excludeTop=totalPointsY-nPointsY,
-                                          exchangeValTop=1.0)
+                                          exchangeValTop=centerY)
         else:
             [pointsY, pointsZ, yInd, zInd] = \
-                read_points_from_foamfile(pointsReadPath, addValBot=0,
-                                          addValTop=2,
+                read_points_from_foamfile(pointsReadPath, addValBot=yPrec[0],
+                                          addValTop=yPrec[-1],
                                           excludeBot=totalPointsY-nPointsY,
-                                          exchangeValBot=1.0)
+                                          exchangeValBot=centerY)
     elif reader == "hdf5":
 
         if not flipPrec:
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
                                       excludeTop=totalPointsY-nPointsY,
-                                      exchangeValTop=8.0) #VALUE SHOULD BE ASSIGNED FROM DICT
+                                      exchangeValTop=centerY)
         else:
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
                                       excludeBot=totalPointsY-nPointsY,
-                                      exchangeValBot=1.0)
+                                      exchangeValBot=centerY)
     else:
         raise ValueError("Unknown reader: "+reader)
 
@@ -341,7 +357,7 @@ def main():
 
 # Outer scale coordinates
     [thetaPrec, deltaStarPrec, deltaPrec,
-     uTauPrec, u0Prec, yPlus1Prec] = compute_tbl_properties(yPrec, uMeanPrec,
+     uTauPrec, u0Prec, yPlus1Prec] = compute_tbl_properties(yPrec, uMeanXPrec,
                                                             nuPrec, flipPrec)
 
     if "delta99" in configDict:
@@ -406,16 +422,19 @@ def main():
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
-    uMeanInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec, uMeanPrec,
-                                           nInfl, nInner,
-                                           etaInfl, yPlusInfl, nPointsZInfl,
-                                           u0Infl, u0Prec, gamma,
-                                           blendingFunction)
+    uMeanXInfl, uMeanYInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec,
+                                                        uMeanXPrec, uMeanYPrec,
+                                                        nInfl,
+                                                        etaInfl, yPlusInfl,
+                                                        nPointsZInfl,
+                                                        u0Infl, u0Prec,
+                                                        gamma,
+                                                        blendingFunction)
 
     if rank == 0:
         print("Precursor properties:")
         print_tbl_properties(thetaPrec, deltaStarPrec, deltaPrec, uTauPrec,
-                             u0Prec, nuPrec, uMeanPrec, yPlus1Prec)
+                             u0Prec, nuPrec, uMeanXPrec, yPlus1Prec)
 
 # Generate the inflow fields
     if rank == 0:
@@ -426,7 +445,8 @@ def main():
     lund_generate(readerFunc,
                   writer, writePath,
                   dt, t0, tEnd, timePrecision,
-                  uMeanPrec, uMeanInfl,
+                  uMeanXPrec, uMeanXInfl,
+                  uMeanYPrec, uMeanYInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   nInfl, nInner, gamma,
@@ -442,14 +462,14 @@ def main():
 
     [thetaInfl, deltaStarInfl, deltaInfl,
      uTauInfl, u0Infl, yPlus1Infl] = compute_tbl_properties(yInfl,
-                                                            uMeanInfl[:, 0],
+                                                            uMeanXInfl[:, 0],
                                                             nuInfl,
                                                             flipInfl)
 
     if rank == 0:
         print("Inflow boundary properties")
         print_tbl_properties(thetaInfl, deltaStarInfl, deltaInfl, uTauInfl,
-                             u0Infl, nuInfl, uMeanInfl, yPlus1Infl)
+                             u0Infl, nuInfl, uMeanXInfl, yPlus1Infl)
 
 if __name__ == "__main__":
     main()
