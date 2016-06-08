@@ -266,7 +266,7 @@ def main():
 
     totalPointsY = 2*nPointsY
     times = get_times(reader, readPath)
-
+# TODO: should be agnostic of precursor height
     if reader == "foamFile":
         dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
         pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,

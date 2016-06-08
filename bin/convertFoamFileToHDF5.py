@@ -81,7 +81,7 @@ def main():
 # Allocate arrays for the fluctuations
     if rank == 0:
         if os.path.isfile(fileName):
-            print("HDF5 file already exsists. It it will be overwritten.")
+            print("HDF5 file already exists. It it will be overwritten.")
             os.remove(fileName)
 
     dbFile = h5py.File(fileName, 'a', driver='mpio', comm=MPI.COMM_WORLD)
