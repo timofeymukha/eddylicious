@@ -7,15 +7,14 @@ Some of the methods for inflow generation require input.
 Typically these are precursor-based methods, such as the one based on the
 rescaling procedure presented in :cite:`Lund1998`.
 
-Also, the geometry of the inlet is define via reading the appropriate data
+Also, the geometry of the inlet is defined via reading the appropriate data
 from a file.
 
 .. warning::
-    At this point eddylicious only supports rectangular inlets.
+    At this point eddylicious only supports rectangular inlets meshed with
+    a rectilinear grid.
     The inlet plane is assumed to be perpendicular to the flow direction,
     which, in turn, is assummed to be aligned with the :math:`x` axis.
-
-Internally the geometry is represented as a
 
 .. _foamfile_format:
 
@@ -24,7 +23,7 @@ The foamFile format
 
 This file format is associated with the CFD solver OpenFOAM.
 Data from a user-defined sampling surface can be saved in this format.
-OpenFoam creates a catalog each time the data is output, named with the value
+OpenFOAM creates a catalog each time the data is output, named with the value
 of the simulation time.
 Inside this catalog yet another folder is created, named identically to the
 name of the sample-surface as defined by the user.
@@ -36,7 +35,6 @@ represent the geometry of the surface.
 A folder ``vectorField`` is created to store field with vector-valued data.
 In particular, the field ``U`` which represents the velocity field, will be
 located there.
-
 
 Let :math:`N_p` be the total number of face centres.
 The file containing the face centres, called ``faceCentres``, has the following
@@ -61,6 +59,27 @@ the vector.
 
 The order in which the data is written corresponds to the order in which the
 face centres are written to ``faceCentres``.
+
+In order for eddylicious to read in the geometry of the inlet stores as a list
+of face centres in the foamFile format the following should be added to the
+configuration file. ::
+
+    inflowGeometryReader    foamFile
+    inflowGeometryPath      /path/to/the/faceCentres/file
+    xOrigin                 the coordinate of the inlet on the axis parallel to
+                            the main streamwise direction
+
+In order for eddylicious to read in previously sampled velocity fields stored
+in the foamFile format the following should be added to the
+configuration file. ::
+
+    reader                  foamFile
+    readPath                /path/to/OpenFOAM/case
+    sampleSurfaceName       name of sample surface as defined in controlDict
+
+Eddylicious will search for the catalogs containing the data for different
+time steps in
+``readPath/postProcessing/sampledSurface/*time_value*/sampleSurfaceName``.
 
 .. important::
 
@@ -118,7 +137,9 @@ the point with coordinates (``pointsY[i, j]``, ``pointsZ[i,j]``).
 Also, the following one-dimensional arrays are stored in the ``velocity``
 group:
 
-    * ``uMean``, :math:`N_y` --- the values of the mean streamwise velocity.
+    * ``uMeanX``, :math:`N_y` --- the values of the mean streamwise velocity.
+
+    * ``uMeanY``, :math:`N_y` --- the values of the mean wall-normal velocity.
 
     * ``times``, :math:`N_t` --- the time values associated with the velocity
       fields.
@@ -134,7 +155,9 @@ Since solvers will not typically support output in this particular format,
 utilities for converting a precursor database saved in an different format
 into the HDF5 format are part of eddylicious.
 
+In order for eddylicious to read in previously generated velocity fields stored
+as an HDF5 file, the following should be added to the configuration file. ::
 
-
-
+    reader                  hdf5
+    readPath                /path/to/hdf5/file
 

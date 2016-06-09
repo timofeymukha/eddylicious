@@ -5,7 +5,7 @@ Common notation
 
 Here we define the notation for several important physical quantities.
 
-    * :math:`U_e` --- the edge, or freestream, velocity.
+    * :math:`U_0` --- the freestream streamwise velocity.
 
     * :math:`u_\tau` --- the friction velocity.
 
@@ -14,7 +14,7 @@ Here we define the notation for several important physical quantities.
 
     * Measures of the thickness of a boundary layer.
         * :math:`\delta_{99}` --- the location where the mean velocity is equal
-          to :math:`0.99U_e`.
+          to :math:`0.99U_0`.
 
         * :math:`\delta_*` --- the displacement thickness.
 

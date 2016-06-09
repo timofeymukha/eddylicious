@@ -39,14 +39,18 @@ Eddylicious creates the following datasets inside the HDF5 file.
       points and the third one with the components of the velocity field.
       Same order as in ``points`` applies.
 
+The following parameters need to be provided in the configuration file in
+order to output the velocity fields in the HDF5 file format. ::
+
+    writer          hdf5
+    writePath       /the/hdf5/file.hdf5
+
 .. _of_native_format:
 
 OpenFOAM native format
 ----------------------
 
-This writer makes it possible to output the inflow velocity field in a format
-that is natively supported by OpenFOAM.
-
+This is natively supported by OpenFOAM.
 In order to read in boundary data from the hard-drive OpenFOAM has a special
 boundary conidtion called ``timeVaryingMappedFixedValue``.
 This boundary condition expects a folder called ``boundaryData/\<patchname\>``
@@ -62,7 +66,7 @@ The format of each such file is quite similar to the :ref:`foamfile_format`
 but has some additional headers.
 
 The following parameters need to be provided in the configuration file in
-order to output the velocity fields in the OpenFOAM native format:
+order to output the velocity fields in the OpenFOAM native format ::
 
     writer          ofnative
     writePath       /path/to/OpenFOAM/case

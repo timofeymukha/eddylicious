@@ -10,7 +10,7 @@ inflowStats
 
 This utility allows to compute mean velocity and the diagonal components of the
 Reynolds stress tensor of a database of inflow fields.
-The database should be stored as an hdf5 file, see :ref:`hdf5_file_format` in
+The database should be stored as an HDF5 file, see :ref:`hdf5_file_format` in
 :ref:`output_formats`.
 
 The utility accepts two command line arguments.
@@ -40,7 +40,7 @@ precursorStats
 
 This utility allows to compute mean velocity and the diagonal components of the
 Reynolds stress tensor of a precursor database.
-The database should be stored as an hdf5 file, see
+The database should be stored as an HDF5 file, see
 :ref:`input_hdf5_file_format` in :ref:`input_formats`.
 
 The utility accepts two command line arguments.

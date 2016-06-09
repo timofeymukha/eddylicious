@@ -153,24 +153,11 @@ the available cores present on the machine.
 
 The configuration file should define the following parameters.
 
-   * ``reader`` --- the file format that is used to store the precursor
-     database, see :ref:`input_formats` for available options.
-
-   * ``inflowGeometryReader`` --- the file format that is used to store the
-     points defining the inflow surface, see :ref:`input_formats` for available
-     options.
-
-   * Other parameters that are needed for the ``reader`` and
-     ``inflowGeometryReader``, this depends on the formats you use.
-
-   * ``writer`` --- the file format that will be used to store the generated
-     fields, see :ref:`output_formats` for available options.
+   * All parameters associated with the chosen input and output formats.
+     Refer to the associated parts of the User guide for information.
 
    * Other parameters that are needed for the ``writer``, this depends on the
      format you use.
-
-   * ``xOrigin`` --- the x-coordinate of the origin of the inflow plane.
-     This value will be used as the x-coordinate of the inlet.
 
    * ``yOrigin`` --- the wall-normal coordinate of the origin of the inflow
      plane.
@@ -189,7 +176,7 @@ The configuration file should define the following parameters.
    * ``theta`` --- desired momentum thickness  at the inlet of the main
      simulation. If used, ``delta99`` should not be prescribed.
 
-   * ``Ue`` --- desired freestream velocity at the inlet of the main simulation.
+   * ``U0`` --- desired freestream velocity at the inlet of the main simulation.
 
    * ``dt``--- the time-step in the main simulation.
 

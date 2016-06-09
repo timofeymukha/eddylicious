@@ -125,7 +125,7 @@ Then the following entry should be found in the ``U`` file. ::
 Setting ``perturb`` to 0 is important, since this option perturbs the location
 of the points.
 
-In order to generate the inflow fields the :ref:`of_native_fomat` should be
+In order to generate the inflow fields the :ref:`of_native_format` should be
 used for writing the velocity fields to the hard drive.
 
 Note, that for a large time-span the amount of files written to disk become
