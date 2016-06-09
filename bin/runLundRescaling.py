@@ -11,7 +11,7 @@ from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile
 from eddylicious.readers.hdf5_readers import read_points_from_hdf5
 from eddylicious.readers.hdf5_readers import read_velocity_from_hdf5
-from eddylicious.writers.tvmfv_writers import write_points_to_tvmfv
+from eddylicious.writers.ofnative_writers import write_points_to_ofnative
 from eddylicious.writers.hdf5_writers import write_points_to_hdf5
 from eddylicious.generators.lund_rescaling import lund_generate
 from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
@@ -20,7 +20,7 @@ from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
 def set_write_path(config):
     """Sets the writePath variable in concordance with the writer.
 
-    For the tvmfv writer: the path to constant/boundaryData directory.
+    For the ofnative writer: the path to constant/boundaryData directory.
     For the hdf5 writer: the hdf5 file itself.
 
     """
@@ -29,7 +29,7 @@ def set_write_path(config):
     writer = config["writer"]
     writePath = config["writePath"]
 
-    if writer == "tvmfv":
+    if writer == "ofnative":
         inletPatchName = config["inletPatchName"]
         writePath = os.path.join(writePath, "constant", "boundaryData",
                                  inletPatchName)
@@ -412,10 +412,10 @@ def main():
     # Get the write path appropriate for the reader
     writePath = set_write_path(configDict)
 
-    if writer == "tvmfv":
+    if writer == "ofnative":
         if rank == 0:
-            write_points_to_tvmfv(os.path.join(writePath, "points"),
-                                  pointsYInfl, pointsZInfl, xOrigin)
+            write_points_to_ofnative(os.path.join(writePath, "points"),
+                                     pointsYInfl, pointsZInfl, xOrigin)
     elif writer == "hdf5":
         writePath.create_dataset("time", data=t0*np.ones((size, 1)))
         writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),

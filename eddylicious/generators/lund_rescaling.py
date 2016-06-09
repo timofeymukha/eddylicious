@@ -13,7 +13,7 @@ from mpi4py import MPI
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from .helper_functions import chunks_and_offsets
-from ..writers.tvmfv_writers import write_velocity_to_tvmfv
+from ..writers.ofnative_writers import write_velocity_to_ofnative
 from ..writers.hdf5_writers import write_velocity_to_hdf5
 
 __all__ = ["lund_rescale_mean_velocity", "lund_rescale_fluctuations",
@@ -375,8 +375,8 @@ def lund_generate(readerFunction,
         uYInfl += uMeanYInfl
 
         # Write
-        if writer == "tvmfv":
-            write_velocity_to_tvmfv(writePath, t, uXInfl, uYInfl, uZInfl)
+        if writer == "ofnative":
+            write_velocity_to_ofnative(writePath, t, uXInfl, uYInfl, uZInfl)
         elif writer == "hdf5":
             write_velocity_to_hdf5(writePath, t, uXInfl, uYInfl, uZInfl,
                                    position)

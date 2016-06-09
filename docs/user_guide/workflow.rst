@@ -28,6 +28,8 @@ Using eddylicious with OpenFOAM
     and distributor of the OpenFOAM software and owner of the OPENFOAM®  and
     OpenCFD®  trade marks.
 
+.. _inlet_geometry_openfoam:
+
 Specifying the geometry of the inlet
 ____________________________________
 
@@ -91,21 +93,13 @@ inflow generation script. ::
     inflowGeometryReader    foamFile
     inflowGeometryPath      "/path/to/faceCenters/file"
 
+.. _reading_fileds_openfoam:
+
 Reading the inflow fields from OpenFOAM
 _______________________________________
 
 OpenFOAM has a special boundary condition that allows reading boundary data
 from a file, it is called ``timeVaryingMappedFixedValue``.
-
-This boundary condition expects a folder called ``boundaryData/\<patchname\>``
-to be located in the ``constant`` directory.
-Inside the folder a file named ``points`` should reside.
-This file provides a list of the points where the boundary data is available.
-The boundary data itself resides in folders named as the time-value associated
-with the data.
-The data for each available field is stored in its own file named identically
-to the internal name of the field in OpenFOAM (for instance ``U`` for the
-velocity field).
 A tutorial, which takes advantage of this boundary condition, is shipped
 with OpenFOAM.
 It can be found under
@@ -131,12 +125,8 @@ Then the following entry should be found in the ``U`` file. ::
 Setting ``perturb`` to 0 is important, since this option perturbs the location
 of the points.
 
-In order to output the inflow fields in the format required by
-``timeVaryingMappedFixedValue``, the following lines should be present
-in the configuration file for the inflow generation script. ::
-
-    writer          tvmfv
-    writePath       /path/to/OpenFOAM/case
+In order to generate the inflow fields the :ref:`of_native_fomat` should be
+used for writing the velocity fields to the hard drive.
 
 Note, that for a large time-span the amount of files written to disk become
 extremely large.
@@ -162,7 +152,6 @@ as follows. ::
         hdf5PointsDatasetName    points;
         hdf5SampleTimesDatasetName    time;
         hdf5FieldValuesDatasetName    velocity;
-
     }
 
 In order to generate the field the following lines should be present in the

@@ -43,3 +43,24 @@ Eddylicious creates the following datasets inside the HDF5 file.
 
 OpenFOAM native format
 ----------------------
+
+This writer makes it possible to output the inflow velocity field in a format
+that is natively supported by OpenFOAM.
+
+In order to read in boundary data from the hard-drive OpenFOAM has a special
+boundary conidtion called ``timeVaryingMappedFixedValue``.
+This boundary condition expects a folder called ``boundaryData/\<patchname\>``
+to be located in the ``constant`` directory of the case.
+Inside the folder a file named ``points`` should reside.
+This file provides a list of the points where the boundary data is available.
+The boundary data itself resides in folders named as the time-value associated
+with the data.
+The data for each available field is stored in its own file named identically
+to the internal name of the field in OpenFOAM (for instance ``U`` for the
+velocity field).
+The format of each such file is quite similar to the :ref:`foamfile_format`
+but has some additional headers.
+
+
+    writer          ofnative
+    writePath       /path/to/OpenFOAM/case

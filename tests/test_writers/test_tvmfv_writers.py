@@ -1,5 +1,5 @@
 import eddylicious
-from eddylicious.writers.tvmfv_writers import *
+from eddylicious.writers.ofnative_writers import *
 import numpy as np
 from os import path
 
@@ -13,7 +13,7 @@ def test_point_writer(tmpdir):
     xVal = 0.0
     writeFile = tmpdir.join("points")
     writePath = writeFile.strpath
-    write_points_to_tvmfv(writePath, pointsY, pointsZ, xVal)
+    write_points_to_ofnative(writePath, pointsY, pointsZ, xVal)
 
     with file(writePath) as pointsFile:
         writtenPoints = [line.rstrip(')\n') for line in pointsFile]
@@ -41,7 +41,7 @@ def test_velocity_writer(tmpdir):
 
     writeFile = tmpdir.mkdir("u")
     writePath = writeFile.strpath
-    write_velocity_to_tvmfv(writePath, "0.1", uX, uY, uZ)
+    write_velocity_to_ofnative(writePath, "0.1", uX, uY, uZ)
 
     with file(path.join(writePath, "0.1", "U")) as uFile:
         writtenU= [line.rstrip(')\n') for line in uFile]
