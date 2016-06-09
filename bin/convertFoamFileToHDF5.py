@@ -75,8 +75,6 @@ def main():
 
     y = np.genfromtxt(uMeanFile[:, 0])
 
-
-
 # Read in the points
     [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
         os.path.join(dataDir, times[0], surfaceName, "faceCentres"),
@@ -127,8 +125,9 @@ def main():
 
     readFunc = read_velocity_from_foamfile(dataDir, surfaceName,
                                            nPointsZ, yInd, zInd,
-                                           addValBot=uMeanX[0],
-                                           addValTop=uMeanX[-1])
+                                           addValBot=(uMeanX[0], uMeanY[0], 0),
+                                           addValTop=(uMeanX[-1], uMeanY[-1],
+                                                      0))
 
 # Read in the fluctuations
     for i in range(chunks[rank]):

@@ -384,7 +384,7 @@ def main():
                             dataDir,
                             sampleSurfaceName,
                             nPointsZ, yInd, zInd,
-                            addValBot=0, addValTop=0,
+                            addValBot=(0, 0, 0), addValTop=(0, 0, 0),
                             excludeTop=totalPointsY-nPointsY,
                             interpValTop=True)
         else:
@@ -392,7 +392,7 @@ def main():
                             dataDir,
                             sampleSurfaceName,
                             nPointsZ, yInd, zInd,
-                            addValBot=0, addValTop=0,
+                            addValBot=(0, 0, 0), addValTop=(0, 0, 0),
                             excludeBot=totalPointsY-nPointsY,
                             interpValBot=True)
     elif reader == "hdf5":

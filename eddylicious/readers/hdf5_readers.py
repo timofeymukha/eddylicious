@@ -96,8 +96,10 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
     return [pointsY, pointsZ]
 
 
-def read_velocity_from_hdf5(readPath, addValBot=float('nan'),
-                            addValTop=float('nan'),
+def read_velocity_from_hdf5(readPath, addValBot=(float('nan'), float('nan'),
+                                                 float('nan')),
+                            addValTop=(float('nan'), float('nan'),
+                                       float('nan')),
                             excludeBot=0, excludeTop=0,
                             interpValBot=False, interpValTop=False):
     """ Read the values of the velocity field from a foamFile-format
@@ -110,9 +112,9 @@ def read_velocity_from_hdf5(readPath, addValBot=float('nan'),
     ---------
     readPath : str
         The path to the file containing the velocity field.
-    addValBot : float, optional
+    addValBot : tuple of three floats, optional
         Append a row of values from below.
-    addValTop : float, optional
+    addValTop : tuple of three floats, optional
         Append a row of values from above.
     excludeBot : int, optional
         How many points to remove from the bottom in the y direction.
@@ -160,15 +162,16 @@ def read_velocity_from_hdf5(readPath, addValBot=float('nan'),
 
         nPointsZ = uX.shape[1]
 
-        if not np.isnan(addValBot):
-            uX = np.append(addValBot*np.ones((1, nPointsZ)), uX, axis=0)
-            uY = np.append(addValBot*np.ones((1, nPointsZ)), uY, axis=0)
-            uZ = np.append(addValBot*np.ones((1, nPointsZ)), uZ, axis=0)
+        # SAME VALUE FOR ALL COMPONENTS?! Change to list..
+        if not np.isnan(addValBot[0]):
+            uX = np.append(addValBot[0]*np.ones((1, nPointsZ)), uX, axis=0)
+            uY = np.append(addValBot[1]*np.ones((1, nPointsZ)), uY, axis=0)
+            uZ = np.append(addValBot[2]*np.ones((1, nPointsZ)), uZ, axis=0)
 
-        if not np.isnan(addValTop):
-            uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
-            uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
-            uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
+        if not np.isnan(addValTop[0]):
+            uX = np.append(uX, addValTop[0]*np.ones((1, nPointsZ)), axis=0)
+            uY = np.append(uY, addValTop[1]*np.ones((1, nPointsZ)), axis=0)
+            uZ = np.append(uZ, addValTop[2]*np.ones((1, nPointsZ)), axis=0)
 
         nPointsY = uX.shape[0]
         topmostPoint = nPointsY-excludeTop

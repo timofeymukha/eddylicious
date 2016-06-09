@@ -133,7 +133,10 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
 
 def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
                                 yInd, zInd,
-                                addValBot=float('nan'), addValTop=float('nan'),
+                                addValBot=(float('nan'), float('nan'),
+                                           float('nan')),
+                                addValTop=(float('nan'), float('nan'),
+                                           float('nan')),
                                 excludeBot=0, excludeTop=0,
                                 interpValBot=False, interpValTop=False):
     """Read the values of the velocity field from a foamFile-format file.
@@ -157,10 +160,10 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
         The sorting indices for sorting in the wall-normal direction.
     zInd : ndarray
         The sorting indices for sorting in the spanwise direction.
-    addValBot : float, optional
-        Append a row of values from below, nothing added by default.
-    addValTop : float, optional
-        Append a row of values from above, nothing added by default.
+    addValBot : tuple of three floats, optional
+        Append a row of values from below.
+    addValTop : tuple of three floats, optional
+        Append a row of values from above.
     excludeBot : int, optional
         How many points to remove from the bottom in the y direction.
         (default 0).
@@ -223,15 +226,15 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
             uY[i, :] = uY[i, zInd[i, :]]
             uZ[i, :] = uZ[i, zInd[i, :]]
 
-        if not np.isnan(addValBot):
-            uX = np.append(addValBot*np.ones((1, nPointsZ)), uX, axis=0)
-            uY = np.append(addValBot*np.ones((1, nPointsZ)), uY, axis=0)
-            uZ = np.append(addValBot*np.ones((1, nPointsZ)), uZ, axis=0)
+        if not np.isnan(addValBot[0]):
+            uX = np.append(addValBot[0]*np.ones((1, nPointsZ)), uX, axis=0)
+            uY = np.append(addValBot[1]*np.ones((1, nPointsZ)), uY, axis=0)
+            uZ = np.append(addValBot[2]*np.ones((1, nPointsZ)), uZ, axis=0)
 
-        if not np.isnan(addValTop):
-            uX = np.append(uX, addValTop*np.ones((1, nPointsZ)), axis=0)
-            uY = np.append(uY, addValTop*np.ones((1, nPointsZ)), axis=0)
-            uZ = np.append(uZ, addValTop*np.ones((1, nPointsZ)), axis=0)
+        if not np.isnan(addValTop[0]):
+            uX = np.append(uX, addValTop[0]*np.ones((1, nPointsZ)), axis=0)
+            uY = np.append(uY, addValTop[1]*np.ones((1, nPointsZ)), axis=0)
+            uZ = np.append(uZ, addValTop[2]*np.ones((1, nPointsZ)), axis=0)
 
         nPointsY = uX.shape[0]
         topmostPoint = nPointsY-excludeTop
