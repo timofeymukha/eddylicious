@@ -30,7 +30,7 @@ def main():
                             nPoints are added to the root of the file."
                                     )
 
-    parser.add_argument('--precursor',
+    parser.add_argument('--precursorPath',
                         type=str,
                         help='The location of the precusor case',
                         required=True)
@@ -66,8 +66,12 @@ def main():
     times = np.sort(times)
 
 # Get the mean profile and append zeros
-    uMean = np.append(np.zeros((1, 1)), np.genfromtxt(uMeanFile)[:, 1])
-    uMean = np.append(uMean, np.zeros((1, 1)))
+    uMean = np.genfromtxt(uMeanFile)
+    uMeanX = uMean[:, 1]
+    if uMean.shape[1] == 2:
+        uMeanY = uMean[:, 2]
+    else:
+        uMeanY = np.zeros(uMeanX.shape)
 
     y = np.genfromtxt(uMeanFile[:, 0])
 
@@ -96,7 +100,8 @@ def main():
     pointsGroup.create_dataset("pointsY", data=pointsY)
     pointsGroup.create_dataset("pointsZ", data=pointsZ)
 
-    velocityGroup.create_dataset("uMean", data=uMean)
+    velocityGroup.create_dataset("uMeanX", data=uMeanX)
+    velocityGroup.create_dataset("uMeanY", data=uMeanY)
 
     velocityGroup.create_dataset("times", data=[float(times[i])
                                                 for i in range(times.size)])
@@ -122,8 +127,8 @@ def main():
 
     readFunc = read_velocity_from_foamfile(dataDir, surfaceName,
                                            nPointsZ, yInd, zInd,
-                                           addValBot=uMean[0],
-                                           addValTop=uMean[-1])
+                                           addValBot=uMeanX[0],
+                                           addValTop=uMeanX[-1])
 
 # Read in the fluctuations
     for i in range(chunks[rank]):
