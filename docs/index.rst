@@ -12,12 +12,13 @@ This includes a user guide and tutorials, a guide for developers,
 and source-code documentation.
 
 .. toctree::
-   :caption: Table of Contents
+    :caption: Table of Contents
 
-   user_guide/index
-   tutorials/index
-   developer_guide/index
-   code_reference/index
-   zzreferences
+    user_guide/index
+    tutorials/index
+    developer_guide/index
+    code_reference/index
+    zzreferences
+
 
 

@@ -32,8 +32,8 @@ Here we define the notation for several important physical quantities.
         * :math:`x, \: y, \:, z` --- axes aligned with the streamwise,
           wall-normal, and spanwise directions.
 
-        * :math:`\eta` --- the wall normal coordinate scaled with
-          :math:`\delta_{99}`.
+        * :math:`\eta` --- the wall normal coordinate scaled with the 'outer
+          scale', commonly :math:`\delta_{99}`.
 
         * :math:`y^+` --- the wall normal coordinate scaled with the viscous
           lengthscale :math:`\delta_\nu`.

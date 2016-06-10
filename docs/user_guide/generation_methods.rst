@@ -60,7 +60,7 @@ The plane located downstream is referred to as the recycling plane.
 .. _fig-lund-rescaling:
 
 .. figure:: /figures/lund_rescaling.*
-   :align: center
+    :align: center
 
    Schematic of the rescaling from a plane located downstream proposed by
    Lund et al :cite:`Lund1998`.
@@ -80,7 +80,7 @@ The whole processes is schematicaly illustrated in
 .. _fig-lund-rescaling-eddylicious:
 
 .. figure:: /figures/lund_rescaling_eddylicious.*
-   :align: center
+    :align: center
 
    Schematic showing how the rescaling proposed in :cite:`Lund1998` is
    implemented in eddylicious.
@@ -97,8 +97,8 @@ The following relationships stem from this assumption.
 
 .. math::
 
-   & U^{\text{inner}}(y^+) = u_\tau f_1(y^+),\\
-   & U_e - U^{\text{outer}}(\eta) = u_\tau f_2(\eta).
+    & U^{\text{inner}}(y^+) = u_\tau f_1(y^+),\\
+    & U_e - U^{\text{outer}}(\eta) = u_\tau f_2(\eta).
 
 Another assumption, that is fulfilled automatically in the setting proposed
 by Lund et al, but not within the framework of eddylicious, is that the
@@ -114,35 +114,47 @@ streamwise velocity is
 
 .. math::
 
-   &  U^\text{inner}_\text{infl}(y^+) =
-   \gamma U^\text{inner}_\text{prec}(y^+),\\
-   &  U^\text{outer}_\text{infl}(\eta) =
-   \gamma U^\text{outer}_\text{prec}(\eta) + U_{e, \text{infl}} -
-   \gamma U_{e, \text{prec}}.
+    &  U^\text{inner}_\text{infl}(y^+) =
+    \gamma U^\text{inner}_\text{prec}(y^+),\\
+    &  U^\text{outer}_\text{infl}(\eta) =
+    \gamma U^\text{outer}_\text{prec}(\eta) + U_{e, \text{infl}} -
+    \gamma U_{e, \text{prec}}.
+
+The rescaling for the mean wall-normal velocity is defined simpler, and is
+not as rigorously based on any physical assumption.
+
+.. math::
+
+    &  V^\text{inner}_\text{infl}(y^+) =
+    V^\text{inner}_\text{prec}(y^+),\\
+    &  V^\text{outer}_\text{infl}(\eta) =
+    V^\text{outer}_\text{prec}(\eta).
 
 The rescaling for the fluctuations is defined as
 
 .. math::
 
-   & (u'_i)^\text{inner}_\text{infl}(y^+) =
-   \gamma (u'_i)^\text{inner}(y^+),\\
-   & (u'_i)^\text{outer}\text{infl}(\eta) =
-   \gamma (u'_i)^\text{outer}(\eta).
+    & (u'_i)^\text{inner}_\text{infl}(y^+) =
+    \gamma (u'_i)^\text{inner}(y^+),\\
+    & (u'_i)^\text{outer}\text{infl}(\eta) =
+    \gamma (u'_i)^\text{outer}(\eta).
 
 The inner and outer components are blended together using a weighted average:
 
 .. math::
 
-   u_{i, \text{infl}} = u_{i, \text{infl}}^\text{inner}[1-W(\eta)] +
-   u_{i, \text{infl}}^\text{outer}W(\eta).
+    u_{i, \text{infl}} = u_{i, \text{infl}}^\text{inner}[1-W(\eta)] +
+    u_{i, \text{infl}}^\text{outer}W(\eta).
 
 The weight function :math:`W(\eta)` is defined as
 
 .. math::
 
-   W(\eta) = \frac{1}{2} \left\{ 1+ \dfrac{\tanh \left( \frac{\alpha(\eta - b)}{(1-2b)\eta +b}\right)}{\tan(\alpha)} \right\},
+    W(\eta) = \frac{1}{2} \left\{ 1+ \dfrac{\tanh \left( \frac{\alpha(\eta - b)}{(1-2b)\eta +b}\right)}{\tan(\alpha)} \right\},
 
 where :math:`\alpha =4` and :math:`b=0.2`.
+
+
 
 Usage
 _____
@@ -151,40 +163,67 @@ The `runLundRescaling` script should be used to generate the fields.
 The script is paralleled using MPI, so it is possible to take advantage of all
 the available cores present on the machine.
 
+Depending on what data is available for the TBL desired at the inlet it may
+be convinient to either use :math:`\delta_{99}` or :math:`\theta` as the outer
+scale (that is the length used to normalize :math:`y` to obtain :math:`\eta`).
+Eddylicous can work with both and will use the scale which is provided in the
+config file, i.e. one of the two should be present:
+
+    * ``delta99`` --- desired :math:`\delta_{99}` at the inlet of the main
+      simulation.
+
+    * ``theta`` --- desired momentum thickness  at the inlet of the main
+      simulation.
+
+Note that using :math:`\theta` requires a reformulation of the weighting
+function :math:`W(\eta)`.
+A function of similar form is used, but stretched to cover the interval
+from 0 to 10 instead of from 0 to 1.
+This is based on the fact that :math:`\theta` is around 8 time less than
+:math:`\delta_{99}` for a wide range of Reynolds numbers.
+
+As evident from the equations defining the resaling procedure,
+the value of the friction velocity at the inlet, :math:`u_{\tau, \text{infl}}`,
+is needed for the procedure.
+To this end two options are availble to the user.
+One is to simply provide the value of the friction velocity.
+The other is to let eddylicious compute it using the skin friction coefficient
+and the
+
 The configuration file should define the following parameters.
 
-   * All parameters associated with the chosen input and output formats.
-     Refer to the associated parts of the User guide for information.
+    * All parameters associated with the chosen input and output formats.
+      Refer to the associated parts of the User guide for information.
 
-   * Other parameters that are needed for the ``writer``, this depends on the
-     format you use.
+    * Other parameters that are needed for the ``writer``, this depends on the
+      format you use.
 
-   * ``yOrigin`` --- the wall-normal coordinate of the origin of the inflow
-     plane.
-     This is used when evaluating non-dimensional coordinates like :math:`y^+`.
+    * ``yOrigin`` --- the wall-normal coordinate of the origin of the inflow
+      plane.
+      This is used when evaluating non-dimensional coordinates like :math:`y^+`.
 
-   * ``nuInflow`` --- the viscosity value in the main simulation.
+    * ``nuInflow`` --- the viscosity value in the main simulation.
 
-   * ``nuPrecursor`` --- the viscosity value in the precursor simulation.
+    * ``nuPrecursor`` --- the viscosity value in the precursor simulation.
 
-   * ``uTauInflow`` --- the friction velocity at he inlet of the main
-     simulation, at the inlet.
+    * ``uTauInflow`` --- the friction velocity at he inlet of the main
+      simulation, at the inlet.
 
-   * ``delta99`` --- desired :math:`\delta_{99}` at the inlet of the main
-     simulation. If used, ``theta`` should not be prescribed.
+    * ``delta99`` --- desired :math:`\delta_{99}` at the inlet of the main
+      simulation. If used, ``theta`` should not be prescribed.
 
-   * ``theta`` --- desired momentum thickness  at the inlet of the main
-     simulation. If used, ``delta99`` should not be prescribed.
+    * ``theta`` --- desired momentum thickness  at the inlet of the main
+      simulation. If used, ``delta99`` should not be prescribed.
 
-   * ``U0`` --- desired freestream velocity at the inlet of the main simulation.
+    * ``U0`` --- desired freestream velocity at the inlet of the main simulation.
 
-   * ``dt``--- the time-step in the main simulation.
+    * ``dt``--- the time-step in the main simulation.
 
-   * ``t0`` --- the start-time of the main simulation.
+    * ``t0`` --- the start-time of the main simulation.
 
-   * ``tEnd`` --- the end-time of the simulation.
+    * ``tEnd`` --- the end-time of the simulation.
 
-   * ``tPrecision`` --- write precision for time values.
-     Should be chosen according to dt.
+    * ``tPrecision`` --- write precision for time values.
+      Should be chosen according to dt.
 
 Example config files can be found in the tutorial :ref:`tut_of_channel_lund`.
