@@ -285,10 +285,12 @@ def main():
 
     if not flipPrec:
         uMeanXPrec = uMeanXPrec[:indY+1]
+        uMeanYPrec = uMeanYPrec[:indY+1]
     else:
         uMeanXPrec = uMeanXPrec[indY+1:]
+        uMeanYPrec = uMeanYPrec[indY+1:]
 
-    nPointsY = uMeanXPrec.size()
+    nPointsY = uMeanXPrec.size
 
 # SET UP GEOMETRY
 # Read grid for the recycling plane

@@ -99,7 +99,7 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
  
     uMeanXInfl = np.zeros(etaInfl.shape)
     uMeanXInfl[:nInfl] = uMeanXInner*(1 - blending[:nInfl]) + \
-        uMeanXOuter[:nInfl]*blending[:nInfl]
+        uMeanXOuter*blending[:nInfl]
     uMeanXInfl[nInfl:] = u0Infl
     uMeanXInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanXInfl[:, np.newaxis]
 
@@ -111,10 +111,12 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
 
     uMeanYInfl = np.zeros(etaInfl.shape)
     uMeanYInfl[:nInfl] = uMeanYInner*(1 - blending[:nInfl]) + \
-                         uMeanYOuter[:nInfl]*blending[:nInfl]
+                         uMeanYOuter*blending[:nInfl]
+    uMeanYInfl[nInfl:] = uMeanYInfl[nInfl-1]
+
+    uMeanYInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanYInfl[:, np.newaxis]
 
     assert np.all(uMeanXInfl >= 0)
-    assert np.all(uMeanYInfl >= 0)
 
     if flip: 
         return np.flipud(uMeanXInfl), np.flipud(uMeanYInfl)
@@ -367,7 +369,6 @@ def lund_generate(readerFunction,
                                                              yPlusInfl,
                                                              pointsZInfl,
                                                              nInfl,
-                                                             nInner,
                                                              blending)
 
         # Add mean
