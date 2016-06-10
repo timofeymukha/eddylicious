@@ -240,11 +240,9 @@ def main():
 
     if "delta99" in configDict:
         deltaInfl = float(configDict["delta99"])
-        blendingFunction = blending_function
         cfInfl = 0.02*pow(nuInfl/(u0Infl*deltaInfl), 1.0/6)
     elif "theta" in configDict:
         thetaInfl = float(configDict["theta"])
-        blendingFunction = blending_function_theta
         cfInfl = 0.013435*(thetaInfl*u0Infl/nuInfl - 373.83)**(-2/11)
     else:
         raise ValueError("The config file should provide delta99 or theta")
@@ -363,9 +361,11 @@ def main():
     if "delta99" in configDict:
         etaPrec = yPrec/deltaPrec
         etaInfl = yInfl/deltaInfl
+        blending = blending_function(etaInfl)
     else:
         etaPrec = yPrec/thetaPrec
         etaInfl = yInfl/thetaInfl
+        blending = blending_function(etaInfl/8)
 
 # Inner scale coordinates
     gamma = uTauInfl/uTauPrec
@@ -450,7 +450,7 @@ def main():
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   nInfl, nInner, gamma,
-                  times, blendingFunction)
+                  times, blending)
 
     if rank == 0:
         print("Process 0 done, waiting for the others...")

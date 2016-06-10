@@ -24,7 +24,7 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
                                uMeanXPrec, uMeanYPrec,
                                nInfl, etaInfl, yPlusInfl, nPointsZInfl,
                                u0Infl, u0Prec,
-                               gamma, blendingFunction):
+                               gamma, blending):
     """Rescale the mean velocity profile using Lunds rescaling.
 
     This function rescales the mean velocity profile taken from the
@@ -61,8 +61,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
     gamma : float
         The ration of the friction velocities in the inflow boundary
         layer and the precursor.
-    blendingFunction : function
-        The function for blending the inner and outer profiles.
+    blending : ndarray
+        The weights for blending the inner and outer profiles.
 
     Returns
     -------
@@ -98,8 +98,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
     uMeanXOuter = gamma*uMeanXInterp(etaInfl[:nInfl]) + u0Infl - gamma*u0Prec
  
     uMeanXInfl = np.zeros(etaInfl.shape)
-    uMeanXInfl[:nInfl] = uMeanXInner*(1-blendingFunction(etaInfl[:nInfl])) + \
-        uMeanXOuter[:nInfl]*blendingFunction(etaInfl[:nInfl])
+    uMeanXInfl[:nInfl] = uMeanXInner*(1 - blending(etaInfl[:nInfl])) + \
+        uMeanXOuter[:nInfl]*blending(etaInfl[:nInfl])
     uMeanXInfl[nInfl:] = u0Infl
     uMeanXInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanXInfl[:, np.newaxis]
 
@@ -110,8 +110,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
     uMeanYOuter = uMeanYInterp(etaInfl[:nInfl])
 
     uMeanYInfl = np.zeros(etaInfl.shape)
-    uMeanYInfl[:nInfl] = uMeanYInner*(1-blendingFunction(etaInfl[:nInfl])) + \
-                         uMeanYOuter[:nInfl]*blendingFunction(etaInfl[:nInfl])
+    uMeanYInfl[:nInfl] = uMeanYInner*(1 - blending[:nInfl]) + \
+                         uMeanYOuter[:nInfl]*blending[:nInfl]
 
     assert np.all(uMeanXInfl >= 0)
     assert np.all(uMeanYInfl >= 0)
@@ -125,7 +125,7 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
 def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
                               uPrimeX, uPrimeY, uPrimeZ, gamma,
                               etaInfl, yPlusInfl, pointsZInfl,
-                              nInfl, blendingFunction):
+                              nInfl, blending):
     """Rescale the fluctuations of velocity using Lund et al's
     rescaling.
 
@@ -167,8 +167,8 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
         The amount of points in the wall-normal direction that contain
         the boundary layer at the inflow boundary. That is, for points
         beyound nInfl, 0 will be prescribed.
-    blendingFunction : function
-        The function for blending the inner and outer profiles.
+    blending : ndarray
+        The weights for blending the inner and outer profiles.
 
     Returns
     -------
@@ -226,14 +226,14 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
                                        etaInfl[:nInfl])
 
     uPrimeXInfl[:nInfl] = \
-        uPrimeXInner*(1-blendingFunction(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeXOuter*blendingFunction(etaInfl[0:nInfl])[:, np.newaxis]
+        uPrimeXInner*(1 - blending[0:nInfl])[:, np.newaxis] + \
+        uPrimeXOuter*blending[0:nInfl][:, np.newaxis]
     uPrimeYInfl[:nInfl] = \
-        uPrimeYInner*(1-blendingFunction(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeYOuter*blendingFunction(etaInfl[0:nInfl])[:, np.newaxis]
+        uPrimeYInner*(1 - blending[0:nInfl])[:, np.newaxis] + \
+        uPrimeYOuter*blending(etaInfl[0:nInfl])[:, np.newaxis]
     uPrimeZInfl[:nInfl] = \
-        uPrimeZInner*(1-blendingFunction(etaInfl[0:nInfl]))[:, np.newaxis] + \
-        uPrimeZOuter*blendingFunction(etaInfl[0:nInfl])[:, np.newaxis]
+        uPrimeZInner*(1 - blending[0:nInfl])[:, np.newaxis] + \
+        uPrimeZOuter*blending[0:nInfl][:, np.newaxis]
     if flip:
         return map(np.flipud, [uPrimeXInfl, uPrimeYInfl, uPrimeZInfl])
     else:
@@ -248,7 +248,7 @@ def lund_generate(readerFunction,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
                   nInfl, nInner, gamma,
-                  times, blendingFunction):
+                  times, blending):
     """Generate the files with the inflow velocity using Lund's
     rescaling, in parallel.
 
@@ -318,8 +318,8 @@ def lund_generate(readerFunction,
     times : list of floats or strings
         The times for which the velocity field was sampled in the
         precursor simulation.
-    blendingFunction : function
-        The function for blending the inner and outer profiles.
+    blending : ndarray
+        The weights for blending the inner and outer profiles.
 
     """
     # Grab info regarding parallelization
@@ -368,7 +368,7 @@ def lund_generate(readerFunction,
                                                              pointsZInfl,
                                                              nInfl,
                                                              nInner,
-                                                             blendingFunction)
+                                                             blending)
 
         # Add mean
         uXInfl += uMeanXInfl
