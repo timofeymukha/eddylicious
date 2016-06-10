@@ -1,4 +1,3 @@
-#!/pdc/vol/anaconda/2.1/py27/bin/python
 from __future__ import print_function
 from __future__ import division
 import os
@@ -175,7 +174,7 @@ def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
     print("    delta* "+str(deltaStar))
     print("    delta99 "+str(delta))
     print("    u_tau "+str(uTau))
-    print("    U0 "+str(np.max(uMean)))
+    print("    U0 "+str(u0))
     print("    cf "+str(0.5*(uTau/u0)**2))
     print("    y+_1 "+str(yPlus1))
 
@@ -283,12 +282,12 @@ def main():
 
     indY = np.argmin(abs(yPrec - centerY))
 
-    if not flipPrec:
-        uMeanXPrec = uMeanXPrec[:indY+1]
-        uMeanYPrec = uMeanYPrec[:indY+1]
-    else:
-        uMeanXPrec = uMeanXPrec[indY+1:]
-        uMeanYPrec = uMeanYPrec[indY+1:]
+    #if not flipPrec:
+    #    uMeanXPrec = uMeanXPrec[:indY+1]
+    #    uMeanYPrec = uMeanYPrec[:indY+1]
+    #else:
+    #    uMeanXPrec = uMeanXPrec[indY+1:]
+    #    uMeanYPrec = uMeanYPrec[indY+1:]
 
     nPointsY = uMeanXPrec.size
 
@@ -306,7 +305,7 @@ def main():
                 read_points_from_foamfile(pointsReadPath, addValBot=yPrec[0],
                                           addValTop=yPrec[-1],
                                           excludeTop=totalPointsY-nPointsY,
-                                          exchangeValTop=centerY)
+                                          exchangeValTop=8.0) #!!
         else:
             [pointsY, pointsZ, yInd, zInd] = \
                 read_points_from_foamfile(pointsReadPath, addValBot=yPrec[0],

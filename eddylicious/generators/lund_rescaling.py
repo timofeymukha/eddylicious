@@ -66,9 +66,10 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
 
     Returns
     -------
-    ndarray
-        A 2d ndarray with the values of the mean velocity. As expected,
-        the values only vary in the y direction.
+    uX, ndarray
+        The values of the mean streamwise velocity.
+    uY, ndarray
+        The values of the mean wall-normal velocity.
 
     """
     assert nInfl > 0
