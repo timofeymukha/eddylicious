@@ -429,7 +429,7 @@ def main():
                                                         nPointsZInfl,
                                                         u0Infl, u0Prec,
                                                         gamma,
-                                                        blendingFunction)
+                                                        blending)
 
     if rank == 0:
         print("Precursor properties:")

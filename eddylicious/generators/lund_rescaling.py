@@ -98,8 +98,8 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
     uMeanXOuter = gamma*uMeanXInterp(etaInfl[:nInfl]) + u0Infl - gamma*u0Prec
  
     uMeanXInfl = np.zeros(etaInfl.shape)
-    uMeanXInfl[:nInfl] = uMeanXInner*(1 - blending(etaInfl[:nInfl])) + \
-        uMeanXOuter[:nInfl]*blending(etaInfl[:nInfl])
+    uMeanXInfl[:nInfl] = uMeanXInner*(1 - blending[:nInfl]) + \
+        uMeanXOuter[:nInfl]*blending[:nInfl]
     uMeanXInfl[nInfl:] = u0Infl
     uMeanXInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanXInfl[:, np.newaxis]
 
@@ -230,7 +230,7 @@ def lund_rescale_fluctuations(etaPrec, yPlusPrec, pointsZ,
         uPrimeXOuter*blending[0:nInfl][:, np.newaxis]
     uPrimeYInfl[:nInfl] = \
         uPrimeYInner*(1 - blending[0:nInfl])[:, np.newaxis] + \
-        uPrimeYOuter*blending(etaInfl[0:nInfl])[:, np.newaxis]
+        uPrimeYOuter*blending[0:nInfl][:, np.newaxis]
     uPrimeZInfl[:nInfl] = \
         uPrimeZInner*(1 - blending[0:nInfl])[:, np.newaxis] + \
         uPrimeZOuter*blending[0:nInfl][:, np.newaxis]
