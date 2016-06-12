@@ -4,7 +4,7 @@ import os
 import numpy as np
 import argparse
 from mpi4py import MPI
-import h5py as h5py
+import h5py
 from eddylicious.generators.helper_functions import *
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile

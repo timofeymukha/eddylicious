@@ -15,23 +15,26 @@ def main():
 
 # Define the command-line arguments
     parser = argparse.ArgumentParser(
-                description="A script for calculating the statistics \
-                             of a precursor database.")
+                description="A utility for calculating the statistics of a \ 
+                             precursor database stored in the HDF5 format. \
+                             Outputs files with the components of mean \
+                             velocity and the diagonal components of the \ 
+                             Reynolds stress tensor.")
 
-    parser.add_argument('--database',
+    parser.add_argument('--database', '-d',
                         type=str,
                         help='The HDF5 file with the database.',
                         required=True)
-    parser.add_argument('--writePath',
+    parser.add_argument('--writepath', '-w',
                         type=str,
                         help='The location where to write the \
-                             produced plots.',
+                             produced files.',
                         required=True)
 
     args = parser.parse_args()
 
     readPath = args.database
-    writeDir = args.writePath
+    writeDir = args.writepath
 
 
 # Open the hdf5 database

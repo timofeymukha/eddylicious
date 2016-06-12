@@ -2,7 +2,7 @@ from __future__ import print_function
 from __future__ import division
 import os
 import numpy as np
-import h5py as h5py
+import h5py
 from mpi4py import MPI
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
 from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile
@@ -18,44 +18,34 @@ def main():
 
 # Define the command-line arguments
     parser = argparse.ArgumentParser(
-                description="A script for converting a database stored \
+                description="A utility for converting a database stored \
                             as a collection of foamFile-formatted files to \
-                            a single hdf5 file. \
-                            The file contains two groups: points and velocity.\
-                            The points group contains the datasets pointsY and\
-                            pointsZ. \
-                            The velocity group contains the datasets: \
-                            uMean, uX, uY and uZ. \
-                            Also, the attributes nPointsY, nPointsZ and\
-                            nPoints are added to the root of the file."
+                            a single HDF5 file."
                                     )
 
-    parser.add_argument('--precursorPath',
+    parser.add_argument('--precursor',
                         type=str,
                         help='The location of the precusor case',
                         required=True)
-    parser.add_argument('--surfaceName',
+    parser.add_argument('--surface',
                         type=str,
                         help='The name of the surface that contains the data.',
                         required=True)
-    parser.add_argument('--fileName',
+    parser.add_argument('--filename',
                         type=str,
-                        help='The location where to write the \
-                            produced hdf5 file.',
+                        help='The name hdf5 file to create.',
                         required=True)
-    parser.add_argument('--uMeanFile',
+
+    parser.add_argument('--umean',
                         type=str,
-                        help='The file containing the mean velocity profile. \
-                            The file is assumed to have two columns, \
-                            one with y coordinates, and the other one \
-                            with the values of mean velocity.',
+                        help='The file containing the mean velocity profile.',
                         required=True)
 
     args = parser.parse_args()
 
-    precursorCaseDir = args.precursorPath
-    surfaceName = args.surfaceName
-    uMeanFile = args.uMeanFile
+    precursorCaseDir = args.precursor
+    surfaceName = args.surface
+    uMeanFile = args.umean
     fileName = args.fileName
 
     dataDir = os.path.join(precursorCaseDir, "postProcessing",
