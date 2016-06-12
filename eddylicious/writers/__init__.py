@@ -1,4 +1,4 @@
-"""Module containing functions for writing out the inflow field in various
+"""Module containing functions for writing out the inflow fields in various
 file formats.
 
 """

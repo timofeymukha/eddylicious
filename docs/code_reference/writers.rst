@@ -2,4 +2,4 @@ Writers
 =======
 
 .. automodule:: eddylicious.writers
-    :members:
+   :members:

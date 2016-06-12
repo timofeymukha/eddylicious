@@ -25,25 +25,25 @@ generated and :math:`N_t` the amount of time-values for which the inflow fields
 are generated.
 Eddylicious creates the following datasets inside the HDF5 file.
 
-    * ``points``, :math:`N_p \times 3` --- the points associated with the
-      values of the inflow fields.
-      The three columns represent the :math:`x`, :math:`y`, and :math:`z`
-      coordinates respectively.
+   * ``points``, :math:`N_p \times 3` --- the points associated with the
+     values of the inflow fields.
+     The three columns represent the :math:`x`, :math:`y`, and :math:`z`
+     coordinates respectively.
 
-    * ``times``, :math:`N_t \times 1` --- the time values associated with the
-      inflow fields.
+   * ``times``, :math:`N_t \times 1` --- the time values associated with the
+     inflow fields.
 
-    * ``velocity``, :math:`N_t \times N_p \times 3` --- the values of the
-      velocity field.
-      The first index is associated with time, the second with the available
-      points and the third one with the components of the velocity field.
-      Same order as in ``points`` applies.
+   * ``velocity``, :math:`N_t \times N_p \times 3` --- the values of the
+     velocity field.
+     The first index is associated with time, the second with the available
+     points and the third one with the components of the velocity field.
+     Same order as in ``points`` applies.
 
 The following parameters need to be provided in the configuration file in
 order to output the velocity fields in the HDF5 file format. ::
 
-    writer          hdf5
-    writePath       /the/hdf5/file.hdf5
+   writer          hdf5
+   writePath       /the/hdf5/file.hdf5
 
 .. _of_native_format:
 
@@ -68,6 +68,6 @@ but has some additional headers.
 The following parameters need to be provided in the configuration file in
 order to output the velocity fields in the OpenFOAM native format ::
 
-    writer          ofnative
-    writePath       /path/to/OpenFOAM/case
-    inletPatchName  nameOftheInletPatch
+   writer          ofnative
+   writePath       /path/to/OpenFOAM/case
+   inletPatchName  name of the inlet patch

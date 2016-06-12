@@ -8,14 +8,14 @@ Here the suggested workflows for using eddylicious in conduction with various
 solvers are presented.
 Basically, whatever solver is used, the following steps have to be performed.
 
-    * Specifying the geometry of the inlet for eddylicious.
+   * Specifying the geometry of the inlet for eddylicious.
 
-    * Choosing an output format that is compatible with the used solver.
+   * Choosing an output format that is compatible with the used solver.
 
-    * Generating the inflow fields by running the python script associated
-      with the chosen inflow generation method.
+   * Generating the inflow fields by running the python script associated
+     with the chosen inflow generation method.
 
-    * Setting up the solver to read in boundary data from the hard drive.
+   * Setting up the solver to read in boundary data from the hard drive.
 
 .. _workflow_openfoam:
 
@@ -24,9 +24,9 @@ Using eddylicious with OpenFOAM
 
 .. important::
 
-    This offering is not approved or endorsed by OpenCFD Limited, producer
-    and distributor of the OpenFOAM software and owner of the OPENFOAM®  and
-    OpenCFD®  trade marks.
+   This offering is not approved or endorsed by OpenCFD Limited, producer
+   and distributor of the OpenFOAM software and owner of the OPENFOAM®  and
+   OpenCFD®  trade marks.
 
 .. _inlet_geometry_openfoam:
 
@@ -52,46 +52,46 @@ and, since we didn't generate it yet, the field-values simply don't exist yet.
 A ``sampleDict`` for a case with the inlet patch named ``inlet`` might look
 something like this. ::
 
-    *--------------------------------*- C++ -*----------------------------------*\
-    | =========                 |                                                 |
-    | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-    |  \\    /   O peration     | Version:  2.3.1                                 |
-    |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
-    |    \\/     M anipulation  |                                                 |
-    \*---------------------------------------------------------------------------*/
-    FoamFile
-    {
-        version     2.0;
-        format      ascii;
-        class       dictionary;
-        object      sampleDict;
-    }
-    surfaceFormat foamFile;
+   *--------------------------------*- C++ -*----------------------------------*\
+   | =========                 |                                                 |
+   | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+   |  \\    /   O peration     | Version:  2.3.1                                 |
+   |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+   |    \\/     M anipulation  |                                                 |
+   \*---------------------------------------------------------------------------*/
+   FoamFile
+   {
+       version     2.0;
+       format      ascii;
+       class       dictionary;
+       object      sampleDict;
+   }
+   surfaceFormat foamFile;
 
-    fields
-    (
-       p
-    );
+   fields
+   (
+      p
+   );
 
-    surfaces
-    (
-        inlet
-        {
-            type patch;
-            patches (inlet);
-            interpolate false;
-            triangulate false;
-        }
+   surfaces
+   (
+       inlet
+       {
+           type patch;
+           patches (inlet);
+           interpolate false;
+           triangulate false;
+       }
 
-    );
+   );
 
 The produced file can be read using the ``foamFile`` inflow geometry reader.
 The path to the ``faceCenters`` file should also be also provided.
 This is done by adding the following lines to the configuration file for the
 inflow generation script. ::
 
-    inflowGeometryReader    foamFile
-    inflowGeometryPath      "/path/to/faceCenters/file"
+   inflowGeometryReader    foamFile
+   inflowGeometryPath      "/path/to/faceCenters/file"
 
 .. _reading_fileds_openfoam:
 
@@ -114,13 +114,13 @@ Let ``inlet`` be the name of the patch for which the inflow fields are
 generated.
 Then the following entry should be found in the ``U`` file. ::
 
-    inlet
-    {
-        type            timeVaryingMappedFixedValue;
-        offset          (0 0 0);
-        setAverage      off;
-        perturb         0;
-    }
+   inlet
+   {
+       type            timeVaryingMappedFixedValue;
+       offset          (0 0 0);
+       setAverage      off;
+       perturb         0;
+   }
 
 Setting ``perturb`` to 0 is important, since this option perturbs the location
 of the points.
@@ -142,21 +142,21 @@ https://bitbucket.org/lesituu/timevaryingmappedhdf5fixedvalue
 If this boundary condition is used the entry in the ``U`` file should look
 as follows. ::
 
-    inlet
-    {
-        type            timeVaryingMappedHDF5FixedValue;
-        setAverage      false;
-        perturb         0;
-        offset          (0 0 0);
-        hdf5FileName    nameofthehdf5file.hdf5;
-        hdf5PointsDatasetName    points;
-        hdf5SampleTimesDatasetName    time;
-        hdf5FieldValuesDatasetName    velocity;
-    }
+   inlet
+   {
+       type            timeVaryingMappedHDF5FixedValue;
+       setAverage      false;
+       perturb         0;
+       offset          (0 0 0);
+       hdf5FileName    nameofthehdf5file.hdf5;
+       hdf5PointsDatasetName    points;
+       hdf5SampleTimesDatasetName    time;
+       hdf5FieldValuesDatasetName    velocity;
+   }
 
 In order to generate the field the following lines should be present in the
 configuration file. ::
 
-    writer          hdf5
-    writePath       /path/to/OpenFOAM/case
-    hdf5FileName    nameofthehdf5file.hdf5
+   writer          hdf5
+   writePath       /path/to/OpenFOAM/case
+   hdf5FileName    nameofthehdf5file.hdf5
