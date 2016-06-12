@@ -15,9 +15,9 @@ The database should be stored as an HDF5 file, see :ref:`hdf5_file_format` in
 
 The utility accepts two command line arguments.
 
-    * ``--database`` --- the HDF5 file containing the inflow fields.
+   * ``--database, -d`` --- the HDF5 file containing the inflow fields.
 
-    * ``--writePath`` --- the location where to write the files containing the
+   * ``--writepath, -w`` --- the location where to write the files containing the
       computed results.
 
 It is possible to run it in parallel using MPI.
@@ -25,13 +25,13 @@ It is possible to run it in parallel using MPI.
 The utility will create the following files in the location specified by
 ``writePath``
 
-    * ``uMeanX``, ``uMeanY``, ``uMeanZ`` --- contain the corresponding
-      component of the mean velocity field.
+   * ``uMeanX``, ``uMeanY``, ``uMeanZ`` --- contain the corresponding
+     component of the mean velocity field.
 
-    * ``uPrime2MeanXX``, ``uPrime2MeanYY``, ``uPrime2MeanZZ`` --- contain the
-      corresponding diagonal component of the Reynolds stress tensor.
+   * ``uPrime2MeanXX``, ``uPrime2MeanYY``, ``uPrime2MeanZZ`` --- contain the
+     corresponding diagonal component of the Reynolds stress tensor.
 
-    * ``y`` --- the locations of the datapoints.
+   * ``y`` --- the locations of the datapoints.
 
 .. _precursorstats:
 
@@ -45,23 +45,23 @@ The database should be stored as an HDF5 file, see
 
 The utility accepts two command line arguments.
 
-    * ``--database`` --- the HDF5 file containing the inflow fields.
+   * ``--database, -d`` --- the HDF5 file containing the inflow fields.
 
-    * ``--writePath`` --- the location where to write the files containing the
-      computed results.
+   * ``--writepath, -w`` --- the location where to write the files containing the
+     computed results.
 
 It is possible to run it in parallel using MPI.
 
 The utility will create the following files in the location specified by
 ``writePath``
 
-    * ``uMeanX``, ``uMeanY``, ``uMeanZ`` --- contain the corresponding
-      component of the mean velocity field.
+   * ``uMeanX``, ``uMeanY``, ``uMeanZ`` --- contain the corresponding
+     component of the mean velocity field.
 
-    * ``uPrime2MeanXX``, ``uPrime2MeanYY``, ``uPrime2MeanZZ`` --- contain the
-      corresponding diagonal component of the Reynolds stress tensor.
+   * ``uPrime2MeanXX``, ``uPrime2MeanYY``, ``uPrime2MeanZZ`` --- contain the
+     corresponding diagonal component of the Reynolds stress tensor.
 
-    * ``y`` --- the locations of the datapoints.
+   * ``y`` --- the locations of the datapoints.
 
 
 
@@ -77,17 +77,21 @@ see :ref:`hdf5_file_format`.
 
 The utility accepts the following command line arguments.
 
-    * ``--precursor`` --- The location of the precusor case.
-      This path will be used in order to locate the folder with the sampled velocity values.
+   * ``--precursor`` --- The location of the precusor OpenFOAM case.
+     This path will be used in order to locate the folder with the sampled
+     velocity values.
 
-    * ``--surfaceName`` --- The name of the surface that was used for sampling
-      the values.
-      The name is chosen in the ``cotrolDict`` of the case.
+   * ``--surface`` --- The name of the surface that was used for sampling
+     the values.
+     The name is chosen in the ``cotrolDict`` of the case.
 
-    * ``--fileName`` --- the name of the HDF5 file that will be produced.
+   * ``--filename`` --- the name of the HDF5 file that will be produced.
 
-    * ``--uMeanFile`` --- The file containing the mean velocity profile.
-      The file is assumed to have two columns, one with wall-normal coordinate,
-      and the other one with the values of mean streamwise velocity.
+   * ``--umean`` --- The file containing the mean velocity profile.
+     The file is assumed to have two or three columns, one with wall-normal
+     coordinate, the second one with the values of mean streamwise velocity,
+     and optionally a third one with the mean wall-normal velocity.
+     If only two columns are present the mean wall-normal velocity is assumed
+     to be zero.
 
 It is possible to run the utility in parallel using MPI.

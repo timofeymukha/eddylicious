@@ -3,8 +3,8 @@
 Introduction
 ============
 
-Developing inflow boundary field for scale-resolving simulations of fluid flow
-has received significant attention from the CFD community.
+Generation of inflow boundary fields for scale-resolving simulations of fluid
+flow has received significant attention from the CFD community.
 A review of existing methods can be found in :cite:`Tabor2010` and
 :cite:`Jarrin2008`.
 
@@ -39,25 +39,25 @@ available to the CFD community.
 
 The package consists of the following components.
 
-    * The source code of the library, which implements the available
-      functionality.
-      If you are interested in contributing to the library, take a look at the
-      :ref:`developer_guide`.
-      The :ref:`code_reference` can be used as help when using the already
-      existing modules and functions in your own code.
+   * The source code of the library, which implements the available
+     functionality.
+     If you are interested in contributing to the library, take a look at the
+     :ref:`developer_guide`.
+     The :ref:`code_reference` can be used as help when using the already
+     existing modules and functions in your own code.
 
-    * Executable python scripts that are used to drive the inflow field
-      generation, see :ref:`generation_methods`.
+   * Executable python scripts that are used to drive the inflow field
+     generation, see :ref:`generation_methods`.
 
-    * Utilities, which are also executable python scripts, that provide extra
-      functionality, like computing statistical data or conversion between
-      different file formats.
-      See :ref:`utilities` for more information.
+   * Utilities, which are also executable python scripts, that provide extra
+     functionality, like computing statistical data or conversion between
+     different file formats.
+     See :ref:`utilities` for more information.
 
-    * Documentation, which includes this :ref:`user_guide`, the
-      :ref:`developer_guide`, and the :ref:`code_reference`.
+   * Documentation, which includes this :ref:`user_guide`, the
+     :ref:`developer_guide`, and the :ref:`code_reference`.
 
-    * :ref:`tutorials` which provide examples on how the package can be used.
+   * :ref:`tutorials` which provide examples of how the package can be used.
 
 
 

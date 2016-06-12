@@ -2,4 +2,4 @@ Readers
 =======
 
 .. automodule:: eddylicious.readers
-    :members:
+   :members:
