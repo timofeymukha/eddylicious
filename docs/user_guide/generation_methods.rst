@@ -190,29 +190,30 @@ The other is to let eddylicious compute it using the skin friction coefficient,
 :math:`\text{Re}_{\delta_{99}}` or :math:`\text{Re}_\theta`.
 
 .. math::
-   c_f = 0.02 \text{Re}^{-1/6}_\delta_{99}, \\
-   c_f = 0.013435(\text{Re}_\theta - 373.83)^{-2/11}.
+   & c_f = 0.02 \text{Re}^{-1/6}_\delta_{99}, \\
+   & c_f = 0.013435(\text{Re}_\theta - 373.83)^{-2/11}.
 
 The friction velocity is then obtained as :math:`U_0 \sqrt{c_f/2}`.
 The related parameter in the configuration file is
 
-   * ``uTauInflow`` --- the friction velocity at he inlet of the main
+   * ``uTauInflow`` --- the friction velocity at the inlet of the main
      simulation. Either the value of the velocity or ``compute``, which
      tells eddylicious to use one of the correlations above.
 
-Another important feature is that eddylicious will always use half of the
-velocity data from precursor in the wall-normal direction.
-This is an obvious choice when the precursor is channel flow, but is
-in fact unnecessary when it comes to rescaling from another TBL simulation.
-Basically demands that the boundary layer used as a precusor does not
+Another important feature is that eddylicious will always use only half of the
+datapoints in the wall-normal direction available from the precursor
+simulation.
+This is an natural the precursor is channel flow, but is in fact unnecessary
+when it comes to rescaling from another TBL simulation.
+Basically, this demands that the boundary layer used as a precusor does not
 occupy more than half of the computational domain in the wall-normal direction.
 
 It is possible to choose which half of the precursor plane to consider, the
 bottom or the top.
 The following parameter in the configuration file controls this choice.
 
-   * ``half`` --- which half of the precursor plane to consider. Either
-     ``bottom`` or ``top``.
+   * ``half`` --- which half of the precursor plane to grab the data from.
+     Either ``bottom`` or ``top``.
 
 Note, that this means that a single channel flow precursor actually contains
 two independent precursor datasets.
@@ -231,16 +232,15 @@ In the current implementation, eddylicious will compute the highest value of
 :math:`\eta` available for the precursor simulation.
 Then it will pick the points in the main simulation for which :math:`\eta` is
 lower than this computed value.
-This ensures that interpolation is possible for the outer part of the profile
-is possible.
-These chosen points will define the inflow TBL.
-In all points above the freestream velocity will be prescribed.
+This ensures that interpolation is possible for the outer part of the profile.
+These chosen points will be considered as containing the inflow TBL.
+In all points above, the freestream velocity will be prescribed.
 If the range of :math:`\eta` in the precusor is not suffiecient to cover the
 whole inflow TBL a jump in the mean streamwise velocity will be observed.
 
 Note, that no similar procedure is performed for :math:`y+`.
 Therefore, if the range of :math:`y+` in the precursor does not cover that in
-the inflow TBL eddylicious will simply crash.
+the inflow TBL, eddylicious will simply crash.
 
 Besides for the parameters mentioned above, the configuration file should also
 define the following parameters.
@@ -269,4 +269,4 @@ define the following parameters.
    * ``tPrecision`` --- write precision for time values.
      Should be chosen according to ``dt``.
 
-Example config files can be found in the tutorial :ref:`tut_of_channel_lund`.
+Example configuration files can be found in the tutorial :ref:`tut_of_channel_lund`.
