@@ -101,7 +101,7 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
     uMeanXInfl = np.zeros(etaInfl.shape)
     uMeanXInfl[:nInfl] = uMeanXInner*(1 - blending[:nInfl]) + \
         uMeanXOuter*blending[:nInfl]
-    uMeanXInfl[nInfl:] = u0Infl
+    uMeanXInfl[nInfl:] = uMeanXInfl[nInfl-1]
     uMeanXInfl = np.ones((etaInfl.size, nPointsZInfl))*uMeanXInfl[:, np.newaxis]
 
     # The wall-normal component

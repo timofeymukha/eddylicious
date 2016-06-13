@@ -132,14 +132,15 @@ def compute_tbl_properties(y, uMean, nu, flip):
         delta = delta_99(y, uMean)
         deltaStar = delta_star(y, uMean)
         uTau = np.sqrt(nu*uMean[0]/y[0])
+        u0 = uMean[-1]
     else:
         theta = momentum_thickness(np.flipud(y), uMean[::-1])
         delta = delta_99(np.flipud(y), uMean[::-1])
         deltaStar = delta_star(np.flipud(y), uMean[::-1])
         uTau = np.sqrt(nu*uMean[-1]/y[-1])
+        u0 = uMean[0]
 
     yPlus1 = np.min(y)*uTau/nu
-    u0 = np.max(uMean)
     return theta, deltaStar, delta, uTau, u0, yPlus1
 
 
@@ -157,7 +158,7 @@ def compute_ninfl(etaInfl, etaPrec):
 
 
 def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
-                         uMean, yPlus1):
+                         yPlus1):
     """Print out various parameters of a TBL."""
 
     reTheta = theta*u0/nu
@@ -318,7 +319,7 @@ def main():
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
                                       excludeTop=totalPointsY-nPointsY,
-                                      exchangeValTop=centerY)
+                                      exchangeValTop=8.0) #!!
         else:
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
@@ -358,7 +359,6 @@ def main():
     [thetaPrec, deltaStarPrec, deltaPrec,
      uTauPrec, u0Prec, yPlus1Prec] = compute_tbl_properties(yPrec, uMeanXPrec,
                                                             nuPrec, flipPrec)
-
     if "delta99" in configDict:
         etaPrec = yPrec/deltaPrec
         etaInfl = yInfl/deltaInfl
@@ -435,7 +435,7 @@ def main():
     if rank == 0:
         print("Precursor properties:")
         print_tbl_properties(thetaPrec, deltaStarPrec, deltaPrec, uTauPrec,
-                             u0Prec, nuPrec, uMeanXPrec, yPlus1Prec)
+                             u0Prec, nuPrec, yPlus1Prec)
 
 # Generate the inflow fields
     if rank == 0:
@@ -470,7 +470,7 @@ def main():
     if rank == 0:
         print("Inflow boundary properties")
         print_tbl_properties(thetaInfl, deltaStarInfl, deltaInfl, uTauInfl,
-                             u0Infl, nuInfl, uMeanXInfl, yPlus1Infl)
+                             u0Infl, nuInfl, yPlus1Infl)
 
 if __name__ == "__main__":
     main()

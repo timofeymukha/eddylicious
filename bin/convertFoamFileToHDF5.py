@@ -46,7 +46,7 @@ def main():
     precursorCaseDir = args.precursor
     surfaceName = args.surface
     uMeanFile = args.umean
-    fileName = args.fileName
+    fileName = args.filename
 
     dataDir = os.path.join(precursorCaseDir, "postProcessing",
                            "sampledSurface")
@@ -58,12 +58,13 @@ def main():
 # Get the mean profile and append zeros
     uMean = np.genfromtxt(uMeanFile)
     uMeanX = uMean[:, 1]
-    if uMean.shape[1] == 2:
+    if uMean.shape[1] == 3:
         uMeanY = uMean[:, 2]
     else:
         uMeanY = np.zeros(uMeanX.shape)
 
-    y = np.genfromtxt(uMeanFile[:, 0])
+    y = uMean[:, 0]
+
 
 # Read in the points
     [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
@@ -72,7 +73,7 @@ def main():
 
     [nPointsY, nPointsZ] = pointsY.shape
 
-    assert nPointsY == uMean.size
+    assert nPointsY == uMean.shape[0]
 
 # Allocate arrays for the fluctuations
     if rank == 0:
