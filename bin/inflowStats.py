@@ -23,7 +23,7 @@ def main():
                              velocity and the diagonal components of the \
                              Reynolds stress tensor.")
 
-    parser.add_argument('--database', '-d'
+    parser.add_argument('--database', '-d',
                         type=str,
                         help='The HDF5 file with the database.',
                         required=True)
