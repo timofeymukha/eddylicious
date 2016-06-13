@@ -100,7 +100,7 @@ def get_umean_prec(reader, readPath, flip):
 
 
 def get_y_prec(reader, readPath):
-    """Reed the mean velocity profile of the precursor
+    """Read the mean velocity profile of the precursor
        and the total number of points in the y direction.
 
     """
@@ -283,12 +283,12 @@ def main():
 
     indY = np.argmin(abs(yPrec - centerY))
 
-    #if not flipPrec:
-    #    uMeanXPrec = uMeanXPrec[:indY+1]
-    #    uMeanYPrec = uMeanYPrec[:indY+1]
-    #else:
-    #    uMeanXPrec = uMeanXPrec[indY+1:]
-    #    uMeanYPrec = uMeanYPrec[indY+1:]
+    if not flipPrec:
+        uMeanXPrec = uMeanXPrec[:indY+1]
+        uMeanYPrec = uMeanYPrec[:indY+1]
+    else:
+        uMeanXPrec = uMeanXPrec[indY+1:]
+        uMeanYPrec = uMeanYPrec[indY+1:]
 
     nPointsY = uMeanXPrec.size
 
@@ -306,7 +306,7 @@ def main():
                 read_points_from_foamfile(pointsReadPath, addValBot=yPrec[0],
                                           addValTop=yPrec[-1],
                                           excludeTop=totalPointsY-nPointsY,
-                                          exchangeValTop=8.0) #!!
+                                          exchangeValTop=centerY) #!!
         else:
             [pointsY, pointsZ, yInd, zInd] = \
                 read_points_from_foamfile(pointsReadPath, addValBot=yPrec[0],
@@ -319,7 +319,7 @@ def main():
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
                                       excludeTop=totalPointsY-nPointsY,
-                                      exchangeValTop=8.0) #!!
+                                      exchangeValTop=centerY) #!!
         else:
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
@@ -375,7 +375,6 @@ def main():
 
 # Points containing the boundary layer at the inflow plane
     nInfl = compute_ninfl(etaInfl, etaPrec)
-    nInner = nInfl
 
 # Create the reader functions
     if reader == "foamFile":
@@ -450,7 +449,7 @@ def main():
                   uMeanYPrec, uMeanYInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
-                  nInfl, nInner, gamma,
+                  nInfl, gamma,
                   times, blending)
 
     if rank == 0:

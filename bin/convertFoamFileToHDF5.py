@@ -75,6 +75,7 @@ def main():
 
     assert nPointsY == uMean.shape[0]
 
+
 # Allocate arrays for the fluctuations
     if rank == 0:
         if os.path.isfile(fileName):

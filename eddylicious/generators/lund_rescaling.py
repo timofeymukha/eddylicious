@@ -250,7 +250,7 @@ def lund_generate(readerFunction,
                   uMeanYPrec, uMeanYInfl,
                   etaPrec, yPlusPrec, pointsZ,
                   etaInfl, yPlusInfl, pointsZInfl,
-                  nInfl, nInner, gamma,
+                  nInfl, gamma,
                   times, blending):
     """Generate the files with the inflow velocity using Lund's
     rescaling, in parallel.
@@ -311,10 +311,6 @@ def lund_generate(readerFunction,
         The amount of points in the wall-normal direction that contain
         the boundary layer at the inflow boundary. That is, for points
         beyond nInfl, 0 will be prescribed.
-    nInner : int
-        The amount of points where inner rescaling should be considered.
-        For points beyond nInner, the outer rescaling only we be
-        computed. The relaxes the demand on Re_tau for the precursor.
     gamma : float
         The ration of the friction velocities in the inflow boundary
         layer and the precursor.
