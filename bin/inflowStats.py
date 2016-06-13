@@ -20,7 +20,7 @@ def main():
                              of a inflow field database stored in the HDF5 \
                              format. \
                              Outputs files with the components of mean \
-                             velocity and the diagonal components of the \ 
+                             velocity and the diagonal components of the \
                              Reynolds stress tensor.")
 
     parser.add_argument('--database', '-d'

@@ -25,7 +25,7 @@ def main():
 
     parser.add_argument('--precursor',
                         type=str,
-                        help='The location of the precusor case',
+                        help='The location of the precusor case.',
                         required=True)
     parser.add_argument('--surface',
                         type=str,
