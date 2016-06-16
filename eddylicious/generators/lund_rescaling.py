@@ -81,8 +81,6 @@ def lund_rescale_mean_velocity(etaPrec, yPlusPrec,
     assert np.all(etaPrec >= 0)
     assert np.all(yPlusInfl >= 0)
     assert np.all(yPlusPrec >= 0)
-    assert np.all(uMeanXPrec >= 0)
-    assert np.all(uMeanYPrec >= 0)
 
     # Check if the wall is at the top, if so flip
     flip = False

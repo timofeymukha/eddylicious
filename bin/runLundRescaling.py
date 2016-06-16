@@ -279,6 +279,7 @@ def main():
 
     yPrec = get_y_prec(reader, readPath)
     centerY = (yPrec[0] + yPrec[-1])/2
+    centerY = 3
     totalPointsY = yPrec.size
 
     indY = np.argmin(abs(yPrec - centerY))
@@ -355,7 +356,7 @@ def main():
     else:
         flipInfl = True
 
-# Outer scale coordinates
+    # Outer scale coordinates
     [thetaPrec, deltaStarPrec, deltaPrec,
      uTauPrec, u0Prec, yPlus1Prec] = compute_tbl_properties(yPrec, uMeanXPrec,
                                                             nuPrec, flipPrec)
