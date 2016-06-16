@@ -35,34 +35,6 @@ def blending_function(eta, alpha=4, b=0.2):
     return val
 
 
-def blending_function_theta(eta, alpha=15, b=2):
-    """Return the value of the blending function for matching inner and
-    outer profiles.
-
-    Return the value of the blending function for inner and and outer
-    profiles produced by Lund's rescaling. Suitable for values of eta
-    obtained when momentum thickness is used as the outer scale. For
-    eta>10 the function returns 1.
-
-    Parameters
-    ----------
-    eta : ndarray
-        The values of the non-dimensionalized wall-normal
-        coordinate.
-    alpha : float, optional
-        The value of alpha (default 15.0).
-    b : float
-        The value of b (default 2).
-
-    """
-    val = np.zeros(eta.shape)
-
-    for i in range(eta.size):
-        val[i] = 0.5*(1+1/np.tanh(alpha)*np.tanh(alpha*(eta[i]-b) /
-                 ((10-2*b)*eta[i]+b)))
-    return val
-
-
 def delta_99(y, v):
     """Compute :math:`\delta_{99}`."""
 
