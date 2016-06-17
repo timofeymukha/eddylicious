@@ -2,7 +2,7 @@ import numpy as np
 from scipy.integrate import simps
 
 __all__ = ["blending_function", "delta_99", "delta_star", "momentum_thickness",
-           "chunks_and_offsets", "blending_function_theta"]
+           "chunks_and_offsets"]
 
 
 # Blending function for inner and outer scales as defined by Lund et al
@@ -39,7 +39,7 @@ def delta_99(y, v):
     """Compute :math:`\delta_{99}`."""
 
     for i in range(y.size):
-        if v[i] >= 0.99*np.max(v):
+        if v[i] > 0.99*v[-1]:
             delta99 = y[i-1]
             break
     return delta99

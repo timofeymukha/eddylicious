@@ -364,6 +364,7 @@ def main():
         etaPrec = yPrec/deltaPrec
         etaInfl = yInfl/deltaInfl
         blending = blending_function(etaInfl)
+        #blending = np.ones(blending.shape)
     else:
         etaPrec = yPrec/thetaPrec
         etaInfl = yInfl/thetaInfl
@@ -422,6 +423,7 @@ def main():
         writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
+
 
     uMeanXInfl, uMeanYInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec,
                                                         uMeanXPrec, uMeanYPrec,
