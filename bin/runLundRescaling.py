@@ -284,12 +284,12 @@ def main():
 
     indY = np.argmin(abs(yPrec - centerY))
 
-    if not flipPrec:
-        uMeanXPrec = uMeanXPrec[:indY+1]
-        uMeanYPrec = uMeanYPrec[:indY+1]
-    else:
-        uMeanXPrec = uMeanXPrec[indY+1:]
-        uMeanYPrec = uMeanYPrec[indY+1:]
+    #if not flipPrec:
+    #    uMeanXPrec = uMeanXPrec[:indY+1]
+    #    uMeanYPrec = uMeanYPrec[:indY+1]
+    #else:
+    #    uMeanXPrec = uMeanXPrec[indY+1:]
+    #    uMeanYPrec = uMeanYPrec[indY+1:]
 
     nPointsY = uMeanXPrec.size
 
@@ -307,7 +307,7 @@ def main():
                 read_points_from_foamfile(pointsReadPath, addValBot=yPrec[0],
                                           addValTop=yPrec[-1],
                                           excludeTop=totalPointsY-nPointsY,
-                                          exchangeValTop=centerY) #!!
+                                          exchangeValTop=centerY) 
         else:
             [pointsY, pointsZ, yInd, zInd] = \
                 read_points_from_foamfile(pointsReadPath, addValBot=yPrec[0],
@@ -320,7 +320,7 @@ def main():
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
                                       excludeTop=totalPointsY-nPointsY,
-                                      exchangeValTop=centerY) #!!
+                                      exchangeValTop=centerY)
         else:
             [pointsY, pointsZ] = \
                 read_points_from_hdf5(readPath,
@@ -423,7 +423,6 @@ def main():
         writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
-
 
     uMeanXInfl, uMeanYInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec,
                                                         uMeanXPrec, uMeanYPrec,
