@@ -43,7 +43,8 @@ The following parameters need to be provided in the configuration file in
 order to output the velocity fields in the HDF5 file format. ::
 
    writer          hdf5
-   writePath       /the/hdf5/file.hdf5
+   writePath       path to the where the database will be stored
+   hdf5FileName    name of the hdf5 file
 
 .. _of_native_format:
 

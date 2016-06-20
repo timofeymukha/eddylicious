@@ -190,7 +190,8 @@ The other is to let eddylicious compute it using the skin friction coefficient,
 :math:`\text{Re}_{\delta_{99}}` or :math:`\text{Re}_\theta`.
 
 .. math::
-   & c_f = 0.02 \text{Re}^{-1/6}_\delta_{99}, \\
+
+   & c_f = 0.02 \text{Re}^{-1/6}_{\delta_{99}}, \\
    & c_f = 0.013435(\text{Re}_\theta - 373.83)^{-2/11}.
 
 The friction velocity is then obtained as :math:`U_0 \sqrt{c_f/2}`.

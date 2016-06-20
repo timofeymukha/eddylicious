@@ -105,7 +105,7 @@ Please follow the following steps.
 
    2. Let us explore the case.
       Data for time 1000 is available, that is the case has been pre-run to
-      get rid of transients, therefore can proceed with saving the velocity
+      get rid of transients, therefore one can proceed with saving the velocity
       fields needed for the rescaling procedure directly.
 
       Opening ``1000/U`` verifies that cycling boundary conditions are applied
@@ -201,8 +201,12 @@ Please follow the following steps.
       (https://bitbucket.org/lesituu/postchannelflow)
       to get the mean velocity and the components of the Reynolds stress tensor
       averaged along the streamwise and spanwise directions.
+      The setting to the utility are provided in the
+      ``constant/postChannelDict`` file.
+      One-dimensional profiles are output in the
+      ``postProcessing/collapsedFields`` directory.
 
-   7. Compare result to DNS, see scripts in
+   7. If you wish, you can compare result to the DNS, see scripts in
       ``postProcessing/collapsedFields``.
 
    8. Compute :math:`u_\tau` and :math:`\delta_{99}`, see scripts in
@@ -210,21 +214,67 @@ Please follow the following steps.
 
 The main simulation
 -------------------
+   Now we can proceed with the main simulation that will use the velocity
+   fields sampled in the precursor.
+   The inlet of the main simulation is divided into two patches: ``inletBot``
+   and ``inletTop``.
 
-   1. Go to the case ``main``. Run ``blockMesh``. Run ``sample``.
+   In ``0/U`` the boundary condition for velocity at the inlets is defined as
+   ``timeVaryingMappedFixedValue`` ::
 
-   2. The inlet is divided into two patches, ``inletBot`` and ``inletTop``.
-      Velocity fields are generated for each patch separately.
+      inletBot
+      {
+         type            timeVaryingMappedFixedValue;
+         setAverage      false;
+         perturb         0;
+         offset          (0 0 0);
+      }
+      inletTop
+      {
+         type            timeVaryingMappedFixedValue;
+         setAverage      false;
+         perturb         0;
+         offset          (0 0 0);
+      }
 
-   3. The generation procedure is controlled by a configuration script.
-       One for each inlet patch, ``rescalingConfigBot`` and
-       ``rescalingConfigTop``.
+   This allows to read in the velocity values from files located in
+   ``constant/boundaryData``, see :ref:`of_native_format`.
 
-   4. Explore the options in the config.
 
-   5. Run ``runLundRescaling --config=rescalingConfigTop/Bot``.
+   1. Go to the case ``main``. Run ``blockMesh`` to create the mesh.
 
-   6. Run the case.
+   2. In order to provide eddylicious the cooridantes of the face centres at
+      the inlet plane we use ``sample``utility.
+      In the ``system/sampleDict`` file two surfaces coinciding with the inlet
+      patches are defined.
+      Run the utility.
+      This will create a ``faceCentres`` file for each inlet patch in the
+      ``postProcessing/psurfaces/0/*patchname*`` directories.
+
+   3. Inflow velocity fields are generated for each inlet patch separately.
+      The generation procedure for each patch is controlled by a configuration
+      script.
+      One for each inlet patch, ``rescalingConfigBot`` and
+      ``rescalingConfigTop``.
+      Explore the config files.
+      See :ref:`lund_rescaling` and other relative parts of the User guide
+      to make sure you understand what each option stands for.
+
+   4. Run ``runLundRescaling --config=rescalingConfigBot``.
+      The script will write out some integral properties of the precursor,
+      perform the rescaling and then write out similar properties for the
+      generated inflow fields.
+      The properties of the precursor and the main simulation are almost
+      identical, as is intended.
+      Run ``runLundRescaling --config=rescalingConfigTop``.
+      Note that the ``constant/boundaryData`` now contains two directories
+      corresponding to the two inlet pathes.
+      Inside the generated inflow fields are stored.
+
+   6. If possible, decompose the case using ``decomposePar``.
+      Run it using ``pimpleFoam``.
+
+   7. Explore the case using you favorite post procesisng software!
 
 
 
