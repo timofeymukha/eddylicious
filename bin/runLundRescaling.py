@@ -279,17 +279,16 @@ def main():
 
     yPrec = get_y_prec(reader, readPath)
     centerY = (yPrec[0] + yPrec[-1])/2
-    centerY = 3
     totalPointsY = yPrec.size
 
     indY = np.argmin(abs(yPrec - centerY))
 
-    #if not flipPrec:
-    #    uMeanXPrec = uMeanXPrec[:indY+1]
-    #    uMeanYPrec = uMeanYPrec[:indY+1]
-    #else:
-    #    uMeanXPrec = uMeanXPrec[indY+1:]
-    #    uMeanYPrec = uMeanYPrec[indY+1:]
+    if not flipPrec:
+        uMeanXPrec = uMeanXPrec[:indY+1]
+        uMeanYPrec = uMeanYPrec[:indY+1]
+    else:
+        uMeanXPrec = uMeanXPrec[indY+1:]
+        uMeanYPrec = uMeanYPrec[indY+1:]
 
     nPointsY = uMeanXPrec.size
 
