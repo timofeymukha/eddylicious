@@ -55,8 +55,7 @@ def write_velocity_to_ofnative(writePath, t, uX, uY, uZ):
         field.
     uY : ndarray
         A 2d ndarray containing the wall-normal component of the
-        velocity
-        field.
+        velocity field.
     uZ : ndarray
         A 2d ndarray containing the spanwise component of the velocity
         field.

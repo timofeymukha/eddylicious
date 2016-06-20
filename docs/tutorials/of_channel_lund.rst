@@ -206,11 +206,15 @@ Please follow the following steps.
       One-dimensional profiles are output in the
       ``postProcessing/collapsedFields`` directory.
 
-   7. If you wish, you can compare result to the DNS, see scripts in
-      ``postProcessing/collapsedFields``.
+   7. If you wish, you can compare the results to the DNS :cite:`Lee2015`.
+      The DNS data can be found inside the ``postProcessing`` directory, and
+      also at the following address
+      http://turbulence.ices.utexas.edu/channel2015/content/Data_2015_0180.html
 
-   8. Compute :math:`u_\tau` and :math:`\delta_{99}`, see scripts in
-      ``postProcessing/collapsedFields``.
+      Some simple python scripts are  provided in
+      ``postProcessing/collapsedFields``, but feel free to use your favorite
+      software.
+
 
 The main simulation
 -------------------
@@ -274,10 +278,7 @@ The main simulation
    6. If possible, decompose the case using ``decomposePar``.
       Run it using ``pimpleFoam``.
 
-   7. Explore the case using you favorite post procesisng software!
-
-
-
+   7. Explore the case using you favorite post processing software!
 
 .. important::
 

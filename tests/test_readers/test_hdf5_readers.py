@@ -159,7 +159,7 @@ def test_read_velocity_add_zeros_bot_exclude_top_interp_top(load_vel,
     uZ = uZ[:nPointsY, :]
 
     readFunc = \
-        read_velocity_from_hdf5(create_hdf5, addValBot=0,
+        read_velocity_from_hdf5(create_hdf5, addValBot=(0, 0, 0),
                                 excludeTop=load_vel[1].shape[0]-nPointsY+1,
                                 interpValTop=1)
     [uXR, uYR, uZR] = readFunc(0)
@@ -185,7 +185,7 @@ def test_read_velocity_add_zeros_top_exclude_bot_interp_bot(load_vel,
     uY = uY[nPointsY:, :]
     uZ = uZ[nPointsY:, :]
 
-    readFunc = read_velocity_from_hdf5(create_hdf5, addValTop=0,
+    readFunc = read_velocity_from_hdf5(create_hdf5, addValTop=(0, 0, 0),
                                        excludeBot=nPointsY, interpValBot=1)
 
     [uXR, uYR, uZR] = readFunc(0)

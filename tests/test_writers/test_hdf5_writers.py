@@ -8,16 +8,16 @@ from os import path
 
 def test_point_writer(tmpdir):
     dsvDir = path.join(eddylicious.__path__[0], "..", "tests", "datasets",
-                     "channel_flow_180", "dsv_output")
+                       "channel_flow_180", "dsv_output")
 
     pointsY = np.load(path.join(dsvDir, "pointsY.npy"))
     pointsZ = np.load(path.join(dsvDir, "pointsZ.npy"))
     xVal = 0.0
     writeFile = tmpdir.join("test.hdf5")
     writePath = writeFile.strpath
-    write_points_to_hdf5(writePath, pointsY, pointsZ, xVal)
+    dbFile = h5py.File(writePath, 'a')
+    write_points_to_hdf5(dbFile, pointsY, pointsZ, xVal)
 
-    dbFile = h5py.File(writePath, 'r')
     writtenPoints = dbFile["points"]
 
     assert np.all(writtenPoints[:, 0] ==

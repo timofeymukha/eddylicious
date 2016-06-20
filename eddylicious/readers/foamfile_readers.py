@@ -22,16 +22,8 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
     along y, then reshaped into a 2d array and then sorted along z for
     each value of z.
 
-    The function supports considering only a number of points in the
-    wall-normal direction and exchanging the last wall-normal position
-    with the value of the half-width of the channel. Also, adding a row
-    of zeros as the first wall-normal position is possible.
-
-    This is convenient when rescaling from channel flow is performed
-    using Lund et al's method, which requires a liner interpolant across
-    the domain half-width. Adding the value at the center of the channel
-    and at the wall, which are otherwise absent on a finite volume grid,
-    insures that the interpolant will cover the whole interval :math:`[0, \delta]`.
+    The function supports manipulating the points in certain ways, see
+    the parameter list below.
 
     Parameters
     ----------
@@ -141,11 +133,14 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
                                 interpValBot=False, interpValTop=False):
     """Read the values of the velocity field from a foamFile-format file.
 
-    Reads in the values of the velocity components stored in the foamFile
-    file-format. The velocity field is read and the transformed into a
-    2d ndarray, where the array's axes correspond to wall-normal and
-    spanwise directions. To achieve this, the sorting indices obtained
-    when reordering the mesh points are used.
+    Reads in the values of the velocity components stored in the
+    foamFile file-format. The velocity field is read and the transformed
+    into a 2d ndarray, where the array's axes correspond to wall-normal
+    and spanwise directions. To achieve this, the sorting indices
+    obtained when reordering the mesh points are used.
+
+    Some manipulation with the read-in data is also available via the
+    optional parameters.
 
     Parameters
     ----------

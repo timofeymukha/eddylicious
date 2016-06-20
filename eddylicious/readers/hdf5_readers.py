@@ -16,17 +16,8 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
 
     Reads in the locations of the face centers, stored in  a hdf5 file.
 
-    The function supports considering only a number of points in the
-    wall-normal direction and exchanging the last wall-normal position
-    with the value of the half-width of the channel. Also, adding a row
-    of zeros as the first wall-normal position is possible.
-
-    This is convenient when rescaling from channel flow is performed
-    using Lund et al's method, which requires a liner interpolant across
-    the domain half-width. Adding the value at the center of the channel
-    and at the wall, which are otherwise absent on a finite volume grid,
-    insures that the interpolant will cover the whole interval
-    [0, delta].
+    The function supports manipulating the points in certain ways, see
+    the parameter list below.
 
 
     Parameters
@@ -107,6 +98,9 @@ def read_velocity_from_hdf5(readPath, addValBot=(float('nan'), float('nan'),
 
     Reads in the values of the velocity components stored as in hdf5
     file format.
+
+    Some manipulation with the read-in data is also available via the
+    optional parameters.
 
     Parameters
     ---------

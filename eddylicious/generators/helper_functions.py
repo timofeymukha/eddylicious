@@ -1,3 +1,5 @@
+""" Various helper functions used by the generators."""
+
 import numpy as np
 from scipy.integrate import simps
 
@@ -9,7 +11,7 @@ __all__ = ["blending_function", "delta_99", "delta_star", "momentum_thickness",
 def blending_function(eta, alpha=4, b=0.2):
     """Return the value of the blending function W for Lund's rescaling.
 
-    Return the value of the blending function for inner and
+    Return the value of the blending function for the inner and
     and outer profiles produced by Lund's rescaling.
     For eta>1 the function returns 1.
 
@@ -38,16 +40,20 @@ def blending_function(eta, alpha=4, b=0.2):
 def delta_99(y, v):
     """Compute :math:`\delta_{99}`."""
 
+    delta99 = 0.0
     for i in range(y.size):
         if v[i] > 0.99*v[-1]:
             delta99 = y[i-1]
             break
+
+    if delta99 == 0:
+        raise ValueError("Error while computing delta99.")
+
     return delta99
 
 
 def delta_star(y, v):
-    """Compute the displacement thickness :math:`\delta^*` using
-    Simpson's method."""
+    """Compute the displacement thickness using Simpson's method."""
 
     return simps((1-v/v[-1]), x=y)
 
@@ -59,10 +65,9 @@ def momentum_thickness(y, v):
 
 
 def chunks_and_offsets(nProcs, size):
-    """Given the size of a 1d array and the number of
-    processors, compute chunk-sizes for each processor
-    and the starting indices (offsets) for each 
-    processor.
+    """Given the size of a 1d array and the number of processors,
+    compute chunk-sizes for each processor and the starting indices
+    (offsets) for each processor.
 
     Parameters
     ----------
@@ -73,11 +78,9 @@ def chunks_and_offsets(nProcs, size):
 
     Returns
     -------
-        List of two 1d ndarrays of size nProcs.
-        The first array contains the chunk-size for each
-        processor.
-        The second array contains the offset (starting 
-        index) for each processor.
+        List of two 1d ndarrays of size nProcs. The first array contains
+        the chunk-size for each processor. The second array contains the
+        offset (starting index) for each processor.
     """
 
     # To ensure integer division later
@@ -112,6 +115,5 @@ def chunks_and_offsets(nProcs, size):
         assert np.sum(chunks) == size
     except AssertionError as e:
         raise AssertionError(e.message + "Chunks don't sum up to array size.")
-
 
     return [chunks, offsets]

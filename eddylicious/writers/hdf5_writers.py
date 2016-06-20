@@ -11,25 +11,22 @@ __all__ = ["write_points_to_hdf5", "write_velocity_to_hdf5"]
 def write_points_to_hdf5(hdf5File, pointsY, pointsZ, xVal):
     """Write the points into a HDF5 file.
 
-    This function will save the points into a HDF5 file. The points will
-    be transformed into 1d arrays. The resulting dataset is called
-    points and lies in the root of the file.
+    Savs the points into a HDF5 file. The points will be transformed
+    into 1d arrays. The resulting dataset is called points and lies in
+    the root of the file.
 
     Parameters
     ----------
     hdf5File : h5py.File
         The path of the HDF5 file.
     pointsY : ndarray
-        A 2d array containing the values of y for the face
-        centres.
+        A 2d array containing the values of y for the face centres.
     pointsZ : ndarray
-        A 2d array containing the values of z for the face
-        centres.
+        A 2d array containing the values of z for the face centres.
     xVal : float
         The x-location of the inflow plane.
 
     """
-
     points = np.zeros((pointsY.size, 2))
     points[:, 0] = np.reshape(pointsY, (pointsY.size, -1), order='F')[:, 0]
     points[:, 1] = np.reshape(pointsZ, (pointsZ.size, -1), order='F')[:, 0]
@@ -66,6 +63,7 @@ def write_velocity_to_hdf5(hdf5File, t, uX, uY, uZ, iteration):
         field.
     iteration: int
         The position of along the time axis.
+
     """
 
     uX = np.reshape(uX, (uX.size, -1), order='F')
