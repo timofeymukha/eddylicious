@@ -1,13 +1,14 @@
 from setuptools import setup
+from setuptools import find_packages
 
 setup(name='eddylicious',
-      version='0.0.2',
+      version='0.0.3',
       description='A package for generating inflow fields for LES and DNS',
       url='https://github.com/timofeymukha/eddylicious',
-      download_url='https://github.com/timofeymukha/eddylicious/archive/0.0.2.tar.gz',
+#      download_url='https://github.com/timofeymukha/eddylicious/archive/0.0.2.tar.gz',
       author='Timofey Mukha',
       author_email='timofey.mukha@it.uu.se',
-      packages=['eddylicious'],
+      packages=find_packages(),
       entry_points = {
           'console_scripts':['inflowStats=bin.inflowStats:main',
                              'precursorStats=bin.precursorStats:main',
