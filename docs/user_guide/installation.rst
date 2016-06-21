@@ -8,7 +8,7 @@ Installing the package
 Dependencies
 ------------
 Relatively new versionf of both python 2 and 3 should work, but the package has
-only been extensively tested with python 2.11.
+only been extensively tested with python 2.7.
 
 Some MPI compatable with ``mpi4py`` should be installed on your system.
 
