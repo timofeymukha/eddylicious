@@ -196,9 +196,11 @@ Please follow the following steps.
       ``-parallel`` flag and execute the solver with your MPI executable and
       the appropriate number of cores as an argument.
       Running the case will take a while.
+      After the execution is complete, run ``reconstructPar -latestTime`` if
+      you've run in parallel.
 
    6. Run ``postChannelFlow``
-      (https://bitbucket.org/lesituu/postchannelflow)
+      (available at https://bitbucket.org/lesituu/postchannelflow)
       to get the mean velocity and the components of the Reynolds stress tensor
       averaged along the streamwise and spanwise directions.
       The setting to the utility are provided in the
