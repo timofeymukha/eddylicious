@@ -186,7 +186,7 @@ is needed for the procedure.
 To this end, two options are availble to the user.
 One is to simply provide the value of the friction velocity directly.
 The other is to let eddylicious compute it using the skin friction coefficient,
-:math:`c_f`, and an empirical estimate connecting :math:`c_f` to either
+:math:`c_f`, and an empirical estimate connecting it to either
 :math:`\text{Re}_{\delta_{99}}` or :math:`\text{Re}_\theta`.
 
 .. math::
