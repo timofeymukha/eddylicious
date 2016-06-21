@@ -7,4 +7,4 @@ The goal of eddylicious is to serve as a central place-holder for existing inflo
 Currently, eddylicious is geared mostly towards working with OpenFOAM, but we hope to support other CFD solvers in the future.
 
 Intrested?
-Proceed to [readthedocs](eddylicious.readthedocs.io) for more information, documentation and a tutorial!
+Proceed to [readthedocs](http://eddylicious.readthedocs.io) for more information, documentation and a tutorial!
