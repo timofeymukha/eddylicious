@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 setup(name='eddylicious',
-      version='0.0.4',
+      version='0.0.5',
       description='A package for generating inflow fields for LES and DNS',
       url='https://github.com/timofeymukha/eddylicious',
 #      download_url='https://github.com/timofeymukha/eddylicious/archive/0.0.2.tar.gz',
@@ -10,10 +10,12 @@ setup(name='eddylicious',
       author_email='timofey.mukha@it.uu.se',
       packages=find_packages(),
       entry_points = {
-          'console_scripts':['inflowStats=eddylicious.bin.inflowStats:main',
-                             'precursorStats=eddylicious.bin.precursorStats:main',
-                             'runLundRescaling=eddylicious.bin.runLundRescaling:main',
-                             'convertFoamFileToHDF5=eddylicious.bin.convertFoamFileToHDF5:main']
+          'console_scripts':[
+              'inflowStats=eddylicious.bin.inflowStats:main',
+              'precursorStats=eddylicious.bin.precursorStats:main',
+              'runLundRescaling=eddylicious.bin.runLundRescaling:main',
+              'convertFoamFileToHDF5=eddylicious.bin.convertFoamFileToHDF5:main'
+                            ]
       },
       install_requires=[
                     'numpy',
