@@ -12,7 +12,7 @@ setup(name='eddylicious',
       entry_points = {
           'console_scripts':['inflowStats=eddylicious.bin.inflowStats:main',
                              'precursorStats=eddylicious.bin.precursorStats:main',
-                             'runLundRescaling=eddylicous.bin.runLundRescaling:main',
+                             'runLundRescaling=eddylicious.bin.runLundRescaling:main',
                              'convertFoamFileToHDF5=eddylicious.bin.convertFoamFileToHDF5:main']
       },
       install_requires=[
