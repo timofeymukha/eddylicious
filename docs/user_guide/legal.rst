@@ -4,7 +4,7 @@
 Legal information
 =================
 
-Eddylicious is free software and is provided provided under the `GNU GPL
+Eddylicious is free software and is provided under the `GNU GPL
 Version 3 <http://www.gnu.org/licenses/gpl-3.0.en.html>`_.
 
 Please take notice of the following disclaimers.

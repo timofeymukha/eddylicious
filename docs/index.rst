@@ -1,4 +1,4 @@
-eddylicious
+Eddylicious
 ===========
 
 Eddylicious is a python library for generating inflow boundary fields for
@@ -9,7 +9,7 @@ inflow generation methods and make them easily accessible to the CFD community.
 
 Here, all the documentation for the library is collected.
 This includes a user guide and tutorials, a guide for developers,
-and source-code documentation.
+and source code documentation.
 
 .. toctree::
    :caption: Table of Contents

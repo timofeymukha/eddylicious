@@ -2,7 +2,7 @@ Contributing
 ============
 
 Your contributions to the project are most welocome!
-The best way to precede is open an issue on Bitbucket where you can describe
+The best way to precede is open an issue on Github where you can describe
 the contribution you have in mind.
 Then it can be discussed with the community.
 

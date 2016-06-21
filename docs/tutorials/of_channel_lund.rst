@@ -57,7 +57,6 @@ a reasonable time on a single workstation.
 
 .. figure:: figures/channel_flow.*
    :align: center
-   :width: 500px
 
    Channel flow domain.
 
@@ -199,8 +198,9 @@ Please follow the following steps.
       After the execution is complete, run ``reconstructPar -latestTime`` if
       you've run in parallel.
 
-   6. Run ``postChannelFlow``
-      (available at https://bitbucket.org/lesituu/postchannelflow)
+   6. This step and the next one are optional.
+      Run ``postChannelFlow``(available at
+      https://bitbucket.org/lesituu/postchannelflow)
       to get the mean velocity and the components of the Reynolds stress tensor
       averaged along the streamwise and spanwise directions.
       The setting to the utility are provided in the
@@ -209,13 +209,16 @@ Please follow the following steps.
       ``postProcessing/collapsedFields`` directory.
 
    7. If you wish, you can compare the results to the DNS :cite:`Lee2015`.
-      The DNS data can be found inside the ``postProcessing`` directory, and
-      also at the following address
+      The DNS data can be found inside the ``postProcessing`` directory, in
+      the files ``dns_mean.dat``  and ``dns_fluct.dat``.
+      The original archive can be found at the following address
       http://turbulence.ices.utexas.edu/channel2015/content/Data_2015_0180.html
 
-      Some simple python scripts are  provided in
-      ``postProcessing/collapsedFields``, but feel free to use your favorite
-      software.
+      The ``post_processing.py`` script contains simple code to plot various
+      quanties and compare the to the DNS.
+      The script is found in the ``postProcessing`` folder as well.
+      But feel free to use your own favorite software to post-process the
+      results.
 
 
 The main simulation
@@ -249,8 +252,8 @@ The main simulation
 
    1. Go to the case ``main``. Run ``blockMesh`` to create the mesh.
 
-   2. In order to provide eddylicious the cooridantes of the face centres at
-      the inlet plane we use ``sample``utility.
+   2. In order to provide eddylicious the coordinates of the face centres at
+      the inlet plane we use the ``sample`` utility.
       In the ``system/sampleDict`` file two surfaces coinciding with the inlet
       patches are defined.
       Run the utility.
@@ -259,12 +262,16 @@ The main simulation
 
    3. Inflow velocity fields are generated for each inlet patch separately.
       The generation procedure for each patch is controlled by a configuration
-      script.
-      One for each inlet patch, ``rescalingConfigBot`` and
-      ``rescalingConfigTop``.
+      file.
+      One file for each inlet patch, ``rescalingConfigBot`` and
+      ``rescalingConfigTop`` for th ``inletBot`` and ``inletTop`` patch
+      respectively.
       Explore the config files.
       See :ref:`lund_rescaling` and other relative parts of the User guide
       to make sure you understand what each option stands for.
+      Note that the chosen values of :math:`u_\tau`, :math:`\delta_{99}` and
+      :math:`\nu` are chosen coincide with the ones in the precursor
+      simulation.
 
    4. Run ``runLundRescaling --config=rescalingConfigBot``.
       The script will write out some integral properties of the precursor,
@@ -275,12 +282,16 @@ The main simulation
       Run ``runLundRescaling --config=rescalingConfigTop``.
       Note that the ``constant/boundaryData`` now contains two directories
       corresponding to the two inlet pathes.
-      Inside the generated inflow fields are stored.
+      Inside, the generated inflow fields are stored.
 
    6. If possible, decompose the case using ``decomposePar``.
       Run it using ``pimpleFoam``.
+      Reconstruct the fields using ``reconstructPar`` if you've run in
+      parallel.
 
-   7. Explore the case using you favorite post processing software!
+   7. Explore the solution using you favorite post processing software!
+      In particular, see if the soluton convreges to the one obtained in the
+      precursor.
 
 .. important::
 

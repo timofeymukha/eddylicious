@@ -14,5 +14,5 @@ Please use the following guidelines when extending eddylicious.
      Examples are available `here
      <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html>`_.
 
-   * In the restructuredText files used for dpocumentation, three spaces are
+   * In the restructuredText files used for documentation, three spaces are
      used for indenting.

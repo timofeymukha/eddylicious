@@ -98,7 +98,7 @@ The following relationships stem from this assumption.
 .. math::
 
    & U^{\text{inner}}(y^+) = u_\tau f_1(y^+),\\
-   & U_e - U^{\text{outer}}(\eta) = u_\tau f_2(\eta).
+   & U_0 - U^{\text{outer}}(\eta) = u_\tau f_2(\eta).
 
 Another assumption, that is fulfilled automatically in the setting proposed
 by Lund et al, but not within the framework of eddylicious, is that the
@@ -117,8 +117,8 @@ streamwise velocity is
    &  U^\text{inner}_\text{infl}(y^+_\text{infl}) =
    \gamma U^\text{inner}_\text{prec}(y^+_\text{infl}),\\
    &  U^\text{outer}_\text{infl}(\eta_\text{infl}) =
-   \gamma U^\text{outer}_\text{prec}(\eta_\text{infl}) + U_{e, \text{infl}} -
-   \gamma U_{e, \text{prec}}.
+   \gamma U^\text{outer}_\text{prec}(\eta_\text{infl}) + U_{0, \text{infl}} -
+   \gamma U_{0, \text{prec}}.
 
 The rescaling for the mean wall-normal velocity is defined simpler, and is
 not as rigorously based on any physical assumption.
@@ -204,7 +204,7 @@ The related parameter in the configuration file is
 Another important feature is that eddylicious will always use only half of the
 datapoints in the wall-normal direction available from the precursor
 simulation.
-This is an natural the precursor is channel flow, but is in fact unnecessary
+This is natural the precursor is channel flow, but is in fact unnecessary
 when it comes to rescaling from another TBL simulation.
 Basically, this demands that the boundary layer used as a precusor does not
 occupy more than half of the computational domain in the wall-normal direction.
@@ -270,4 +270,5 @@ define the following parameters.
    * ``tPrecision`` --- write precision for time values.
      Should be chosen according to ``dt``.
 
-Example configuration files can be found in the tutorial :ref:`tut_of_channel_lund`.
+Example configuration files can be found in the tutorial
+:ref:`tut_of_channel_lund`.
