@@ -199,7 +199,7 @@ Please follow the following steps.
       you've run in parallel.
 
    6. This step and the next one are optional.
-      Run ``postChannelFlow``(available at
+      Run ``postChannelFlow`` (available at
       https://bitbucket.org/lesituu/postchannelflow)
       to get the mean velocity and the components of the Reynolds stress tensor
       averaged along the streamwise and spanwise directions.

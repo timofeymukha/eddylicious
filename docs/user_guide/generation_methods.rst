@@ -27,7 +27,8 @@ layout ::
    parameterTwo    valueOfParameter2
 
 Which parameters should be present depends on the method that is being
-used and are described for each method individually below.
+used.
+They are therefore described for each method individually below.
 
 .. _lund_rescaling:
 
@@ -42,7 +43,7 @@ This method was presented in a paper by Lund, Wu and Squires
 The method is suitable for generating an accurate inflow field for a simulation
 which involves a turbulent boundary layer approaching from upstream.
 For example, it can be used in a simulation of flow around a smooth ramp or
-a backwards-facing step.
+a backward-facing step.
 
 In order to introduce the method, let us consider a zero-pressure flat plate
 turbulent boundary layer (TBL).
@@ -72,7 +73,7 @@ simulation, the proposed approach is to have a separate, precursor simulation
 dedicated to generating a database of two-dimensional velocity distributions.
 This database then serves as input for eddylicious, which applies the rescaling
 procedure as defined in :cite:`Lund1998`.
-The rescaled velocity fields are then saved to the hard-drive as serve as
+The rescaled velocity fields are then saved to the hard-drive and serve as
 inflow fields in the main simulation.
 The whole processes is schematicaly illustrated in
 :numref:`fig-lund-rescaling-eddylicious`
@@ -101,9 +102,9 @@ The following relationships stem from this assumption.
    & U_0 - U^{\text{outer}}(\eta) = u_\tau f_2(\eta).
 
 Another assumption, that is fulfilled automatically in the setting proposed
-by Lund et al, but not within the framework of eddylicious, is that the
-relationships above are valid for both the precursor simulation and the main
-simulation.
+by Lund et al :cite:`Lund1998`, but not within the framework of eddylicious, is
+that the relationships above are valid for both the precursor simulation and
+the main simulation.
 Strictly speaking, this requires the precursor simulation to be a TBL itself.
 However, a flow sufficiently similar to a TBL, like channel flow, can also be
 used with success.
@@ -136,7 +137,7 @@ The rescaling for the fluctuations is defined as
 
    & (u'_i)^\text{inner}_\text{infl}(y^+_\text{infl}) =
    \gamma (u'_i)^\text{inner}(y^+_\text{infl}),\\
-   & (u'_i)^\text{outer}\text{infl}(\eta_\text{infl}) =
+   & (u'_i)^\text{outer}_\text{infl}(\eta_\text{infl}) =
    \gamma (u'_i)^\text{outer}(\eta_\text{infl}).
 
 The inner and outer components are blended together using a weighted average:
@@ -177,13 +178,13 @@ config file, i.e. one of the two should be present:
 
 Note that using :math:`\theta` requires to scale :math:`\eta` before it can be
 plugged into function :math:`W(\eta)`.
-The value of 8 is used, based on the fact that :math:`\theta` is around 8 time
+The value of 8 is used, based on the fact that :math:`\theta` is around 8 times
 less than :math:`\delta_{99}` for a wide range of Reynolds numbers.
 
-As evident from the equations defining the resaling procedure,
+As evident from the equations, defining the rescaling procedure,
 the value of the friction velocity at the inlet, :math:`u_{\tau, \text{infl}}`,
 is needed for the procedure.
-To this end, two options are availble to the user.
+To this end, two options are available to the user.
 One is to simply provide the value of the friction velocity directly.
 The other is to let eddylicious compute it using the skin friction coefficient,
 :math:`c_f`, and an empirical estimate connecting it to either
@@ -204,7 +205,7 @@ The related parameter in the configuration file is
 Another important feature is that eddylicious will always use only half of the
 datapoints in the wall-normal direction available from the precursor
 simulation.
-This is natural the precursor is channel flow, but is in fact unnecessary
+This is natural if the precursor is channel flow, but is in fact unnecessary
 when it comes to rescaling from another TBL simulation.
 Basically, this demands that the boundary layer used as a precusor does not
 occupy more than half of the computational domain in the wall-normal direction.
@@ -236,11 +237,11 @@ lower than this computed value.
 This ensures that interpolation is possible for the outer part of the profile.
 These chosen points will be considered as containing the inflow TBL.
 In all points above, the freestream velocity will be prescribed.
-If the range of :math:`\eta` in the precusor is not suffiecient to cover the
-whole inflow TBL a jump in the mean streamwise velocity will be observed.
+If the range of :math:`\eta` in the precusor is not sufficient to cover the
+whole inflow TBL, a jump in the mean streamwise velocity will be observed.
 
-Note, that no similar procedure is performed for :math:`y+`.
-Therefore, if the range of :math:`y+` in the precursor does not cover that in
+Note, that no similar procedure is performed for :math:`y^+`.
+Therefore, if the range of :math:`y^+` in the precursor does not cover that in
 the inflow TBL, eddylicious will simply crash.
 
 Besides for the parameters mentioned above, the configuration file should also
@@ -255,9 +256,10 @@ define the following parameters.
      Also this is used to determine the "orientation" of the TBL with respect
      to the wall-normal coordinate.
 
-   * ``nuInflow`` --- the viscosity value in the main simulation.
+   * ``nuInflow`` --- the kinematic viscosity value in the main simulation.
 
-   * ``nuPrecursor`` --- the viscosity value in the precursor simulation.
+   * ``nuPrecursor`` --- the kinematic viscosity value in the precursor
+     simulation.
 
    * ``U0`` --- desired freestream velocity at the inlet of the main simulation.
 

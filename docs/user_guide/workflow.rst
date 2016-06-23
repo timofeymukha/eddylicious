@@ -86,7 +86,7 @@ something like this. ::
    );
 
 The produced file can be read using the ``foamFile`` inflow geometry reader.
-The path to the ``faceCenters`` file should also be also provided.
+The path to the ``faceCenters`` file should also be provided.
 This is done by adding the following lines to the configuration file for the
 inflow generation script. ::
 
@@ -128,7 +128,7 @@ of the points.
 In order to generate the inflow fields the :ref:`of_native_format` should be
 used for writing the velocity fields to the hard drive.
 
-Note, that for a large time-span the amount of files written to disk become
+Note that, for a large time-span, the amount of files written to disk become
 extremely large.
 To rectify this issue, a modified version of ``timeVaryingMappedFixedValue``
 that reads all the data from a single HDF5 file is available.
@@ -154,9 +154,3 @@ as follows. ::
        hdf5FieldValuesDatasetName    velocity;
    }
 
-In order to generate the field the following lines should be present in the
-configuration file. ::
-
-   writer          hdf5
-   writePath       /path/to/OpenFOAM/case
-   hdf5FileName    nameofthehdf5file.hdf5

@@ -17,8 +17,8 @@ The utility accepts two command line arguments.
 
    * ``--database, -d`` --- the HDF5 file containing the inflow fields.
 
-   * ``--writepath, -w`` --- the location where to write the files containing the
-      computed results.
+   * ``--writepath, -w`` --- the location where to write the files containing
+     the computed results.
 
 It is possible to run it in parallel using MPI.
 

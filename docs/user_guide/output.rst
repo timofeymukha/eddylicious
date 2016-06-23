@@ -67,7 +67,7 @@ The format of each such file is quite similar to the :ref:`foamfile_format`
 but has some additional headers.
 
 The following parameters need to be provided in the configuration file in
-order to output the velocity fields in the OpenFOAM native format ::
+order to output the velocity fields in the OpenFOAM native format. ::
 
    writer          ofnative
    writePath       /path/to/OpenFOAM/case

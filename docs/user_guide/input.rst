@@ -30,7 +30,7 @@ name of the sample-surface as defined by the user.
 At the root level of the catalog the data related to the mesh is stored.
 That includes the coordinates of the points, a list of faces each defined as
 list of points, and the coordinates of the face centres.
-Since the data resides in the faces centres, they are used in eddylicious to
+Since the data resides in the face centres, they are used in eddylicious to
 represent the geometry of the surface.
 A folder ``vectorField`` is created to store field with vector-valued data.
 In particular, the field ``U`` which represents the velocity field, will be
@@ -60,7 +60,7 @@ the vector.
 The order in which the data is written corresponds to the order in which the
 face centres are written to ``faceCentres``.
 
-In order for eddylicious to read in the geometry of the inlet stores as a list
+In order for eddylicious to read in the geometry of the inlet stored as a list
 of face centres in the foamFile format the following should be added to the
 configuration file. ::
 
@@ -96,7 +96,7 @@ HDF5 is a file format specifically developed for storing large scientific
 datasets.
 More details regarding HDF5 can be found `here <https://www.hdfgroup.org/>`_.
 
-In HDF5 data can be sorted into groups.
+In HDF5, data can be sorted into groups.
 The data itself is stored in the form of datasets.
 One can think of datasets as of multidimensional arrays.
 
@@ -117,7 +117,7 @@ The ``points`` group contains the following two-dimensional datasets:
 This structure implies, that all the columns of ``pointsY`` are identical, as
 well as all the rows of ``pointsZ``.
 
-Let :math:`N_t` be the amount of time-values for which velocity data is
+Let :math:`N_t` be the amount of time steps for which velocity data is
 available.
 
 The ``velocity`` group contains the following three-dimensional datasets:
@@ -152,7 +152,7 @@ Different processes can therefore read in the required data simultaneously.
 
 Therefore, this file format can be considered optimal.
 Since solvers will not typically support output in this particular format,
-utilities for converting a precursor database saved in an different format
+utilities for converting a precursor database saved in a different format
 into the HDF5 format are part of eddylicious.
 
 In order for eddylicious to read in previously generated velocity fields stored
