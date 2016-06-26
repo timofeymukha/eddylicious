@@ -30,14 +30,9 @@ The package depends on the following python packages:
 
 Make sure these are available before you install eddylicious.
 
-Using pip
----------
 
-Run ``pip install eddylicious``.
-This should install the package!
-
-Using git
----------
+Installing from git
+-------------------
 
 Clone the following repository to a location of your choice using ``git``
 https://github.com/timofeymukha/eddylicious
