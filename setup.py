@@ -15,6 +15,7 @@ setup(name='eddylicious',
               'precursorStats=eddylicious.bin.precursorStats:main',
               'runLundRescaling=eddylicious.bin.runLundRescaling:main',
               'convertFoamFileToHDF5=eddylicious.bin.convertFoamFileToHDF5:main'
+              'convertHDF5ToStarCCM=eddylicious.bin.convertHDF5ToStarCCM:main'
                             ]
       },
       install_requires=[
