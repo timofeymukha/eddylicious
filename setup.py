@@ -14,7 +14,7 @@ setup(name='eddylicious',
               'inflowStats=eddylicious.bin.inflowStats:main',
               'precursorStats=eddylicious.bin.precursorStats:main',
               'runLundRescaling=eddylicious.bin.runLundRescaling:main',
-              'convertFoamFileToHDF5=eddylicious.bin.convertFoamFileToHDF5:main'
+              'convertFoamFileToHDF5=eddylicious.bin.convertFoamFileToHDF5:main',
               'convertHDF5ToStarCCM=eddylicious.bin.convertHDF5ToStarCCM:main'
                             ]
       },

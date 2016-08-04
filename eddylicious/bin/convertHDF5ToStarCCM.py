@@ -40,23 +40,13 @@ def main():
     dbFile = h5py.File(database, 'r', driver='mpio', comm=MPI.COMM_WORLD)
 
 # Grab the existing times
-    times = dbFile["velocity"]["times"]
-
-# Get the mean profile and append zeros
-    uMeanX = dbFile["velocity"]["uMeanX"]
-    uMeanY = dbFile["velocity"]["uMeanY"]
+    times = dbFile["time"][:]
 
 # Read in the points
-    pointsY = dbFile["pointsY"]["pointsY"]
-    pointsZ = dbFile["pointsZ"]["pointsZ"]
-    np.reshape(pointsY, (pointsY.size, -1), order='F')
-    np.reshape(pointsZ, (pointsZ.size, -1), order='F')
+    points = dbFile["points"][:]
 
-    [nPointsY, nPointsZ] = pointsY.shape
 
-    assert nPointsY == uMean.shape[0]
-
-    fileHeader = "X Y Z uX uY uZ"
+    fileHeader = "X, Y, Z, uX, uY, uZ"
 
 # Distribute time frame between processors
     [chunks, offsets] = chunks_and_offsets(nProcs, len(times))
@@ -67,17 +57,10 @@ def main():
 
         position = offsets[rank] + i
         # Read in U
-        uX = dbFile["velocity"]["uX"][position, :, :]
-        uY = dbFile["velocity"]["uY"][position, :, :]
-        uZ = dbFile["velocity"]["uZ"][position, :, :]
-        np.reshape(uY, (uY.size, -1), order='F')
-        np.reshape(uX, (uX.size, -1), order='F')
-        np.reshape(uZ, (uY.size, -1), order='F')
+        u = dbFile["velocity"][position, :, :]
 
-        np.savetxt(str(position)+".csv",
-                   np.concatenate((np.zeros(pointsY.shape), pointsY, pointsZ,
-                                   uX, uY, uZ)),
-                   header=fileHeader)
+        np.savetxt(str(position)+".csv", np.column_stack((points, u)),
+                   header=fileHeader, delimiter=", ", comments="")
 
     if rank == 0:
         print("Process 0 done, waiting for the others...")

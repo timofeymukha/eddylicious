@@ -376,6 +376,7 @@ def main():
 
 # Points containing the boundary layer at the inflow plane
     nInfl = compute_ninfl(etaInfl, etaPrec)
+    
 
 # Create the reader functions
     if reader == "foamFile":
@@ -422,6 +423,9 @@ def main():
         writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
+
+    np.savetxt("debugInfl", np.column_stack((yInfl, etaInfl, yPlusInfl, blending)))
+    np.savetxt("debugPrec", np.column_stack((yPrec, etaPrec, yPlusPrec)))
 
     uMeanXInfl, uMeanYInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec,
                                                         uMeanXPrec, uMeanYPrec,
