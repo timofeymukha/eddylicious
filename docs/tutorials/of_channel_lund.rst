@@ -96,7 +96,7 @@ The first part of the tutorial will deal with setting up a precursor simulation
 that will be later used to generate the inflow fields for the main simulation.
 Please follow the following steps.
 
-   1. Unpack ``channel_flow_lund_rescaling.tar.gz`` found in
+   1. Unpack ``channel_flow_lund_rescaling.zip`` found in
       ``eddylicious/tutorials`` to a location of your preference (commonly
       ``run``).
       Two folders will be unpacked, ``precursor`` and ``main``.
