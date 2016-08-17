@@ -38,8 +38,21 @@ def blending_function(eta, alpha=4, b=0.2):
 
 
 def delta_99(y, v):
-    """Compute :math:`\delta_{99}`."""
+    """Compute :math:`\delta_{99}`.
 
+    Parameters
+    ----------
+    y : ndrray
+        The independent variable.
+    v : ndrray
+        The velocity values.
+
+    Returns
+    -------
+    float
+        The value of :math:`\delta_{99}`.
+
+    """
     delta99 = 0.0
     for i in range(y.size):
         if v[i] > 0.99*v[-1]:
@@ -53,14 +66,40 @@ def delta_99(y, v):
 
 
 def delta_star(y, v):
-    """Compute the displacement thickness using Simpson's method."""
+    """Compute the displacement thickness using Simpson's method.
 
+    Parameters
+    ----------
+    y : ndrray
+        The independent variable.
+    v : ndrray
+        The velocity values.
+
+    Returns
+    -------
+    float
+        The value of the displacement thickness.
+
+    """
     return simps((1-v/v[-1]), x=y)
 
 
 def momentum_thickness(y, v):
-    """Compute the momentum thickness using Simpson's method."""
+    """Compute the momentum thickness using Simpson's method.
 
+    Parameters
+    ----------
+    y : ndrray
+        The independent variable.
+    v : ndrray
+        The velocity values.
+
+    Returns
+    -------
+    float
+        The value of the displacement thickness.
+
+"""
     return simps(v/v[-1]*(1-v/v[-1]), x=y)
 
 
