@@ -42,9 +42,9 @@ def delta_99(y, v):
 
     Parameters
     ----------
-    y : ndrray
+    y : ndarray
         The independent variable.
-    v : ndrray
+    v : ndarray
         The velocity values.
 
     Returns
@@ -70,9 +70,9 @@ def delta_star(y, v):
 
     Parameters
     ----------
-    y : ndrray
+    y : ndarray
         The independent variable.
-    v : ndrray
+    v : ndarray
         The velocity values.
 
     Returns
@@ -89,15 +89,15 @@ def momentum_thickness(y, v):
 
     Parameters
     ----------
-    y : ndrray
+    y : ndarray
         The independent variable.
-    v : ndrray
+    v : ndarray
         The velocity values.
 
     Returns
     -------
     float
-        The value of the displacement thickness.
+        The value of the momentum thickness.
 
 """
     return simps(v/v[-1]*(1-v/v[-1]), x=y)
