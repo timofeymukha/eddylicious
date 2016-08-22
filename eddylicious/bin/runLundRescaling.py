@@ -4,6 +4,8 @@ import os
 import numpy as np
 import argparse
 from mpi4py import MPI
+from scipy.interpolate import interp1d
+from scipy.integrate import simps
 import h5py
 from eddylicious.generators.helper_functions import *
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile
@@ -124,23 +126,20 @@ def get_y_prec(reader, readPath):
 def compute_tbl_properties(y, uMean, nu, flip):
     """Compute various parameters of a TBL."""
 
-    y = y[np.nonzero(y)]
-    uMean = uMean[np.nonzero(uMean)]
+    #y = y[np.nonzero(y)]
+    #uMean = uMean[np.nonzero(uMean)]
 
-    if not flip:
-        theta = momentum_thickness(y, uMean)
-        delta = delta_99(y, uMean)
-        deltaStar = delta_star(y, uMean)
-        uTau = np.sqrt(nu*uMean[0]/y[0])
-        u0 = uMean[-1]
-    else:
-        theta = momentum_thickness(np.flipud(y), uMean[::-1])
-        delta = delta_99(np.flipud(y), uMean[::-1])
-        deltaStar = delta_star(np.flipud(y), uMean[::-1])
-        uTau = np.sqrt(nu*uMean[-1]/y[-1])
-        u0 = uMean[0]
+    if flip:
+        y = np.flipud(y)
+        uMean = np.flipud(uMean)
 
-    yPlus1 = np.min(y)*uTau/nu
+    theta = momentum_thickness(y, uMean)
+    delta = delta_99(y, uMean)
+    deltaStar = delta_star(y, uMean)
+    uTau = np.sqrt(nu*uMean[1]/y[1])
+    u0 = uMean[-1]
+    yPlus1 = y[1]*uTau/nu
+
     return theta, deltaStar, delta, uTau, u0, yPlus1
 
 
@@ -148,11 +147,11 @@ def compute_ninfl(etaInfl, etaPrec):
     """Compute the number of elements that constitute the TBL."""
 
     nInfl = 0
+    if etaInfl[0] > etaInfl[-1]:
+        etaInfl = np.flipud(etaInfl)
+
     for i in range(etaInfl.size):
-        if etaInfl[0] < etaInfl[-1]:
-            if etaInfl[i] <= np.max(etaPrec):
-                nInfl += 1
-        elif np.flipud(etaInfl)[i] <= np.max(etaPrec):
+        if etaInfl[i] <= np.max(etaPrec):
                 nInfl += 1
     return nInfl
 
@@ -283,12 +282,20 @@ def main():
 
     indY = np.argmin(abs(yPrec - centerY))
 
+    # Make sure we are in the correct position relative to the center
+    if yPrec[indY] > centerY and not flipPrec:
+        indY -= 1
+    elif yPrec[indY] < centerY and flipPrec:
+        indY += 1
+
+    # Add data at the center location
+
     if not flipPrec:
         uMeanXPrec = uMeanXPrec[:indY+1]
         uMeanYPrec = uMeanYPrec[:indY+1]
     else:
-        uMeanXPrec = uMeanXPrec[indY+1:]
-        uMeanYPrec = uMeanYPrec[indY+1:]
+        uMeanXPrec = uMeanXPrec[indY:]
+        uMeanYPrec = uMeanYPrec[indY:]
 
     nPointsY = uMeanXPrec.size
 
@@ -363,7 +370,6 @@ def main():
         etaPrec = yPrec/deltaPrec
         etaInfl = yInfl/deltaInfl
         blending = blending_function(etaInfl)
-        #blending = np.ones(blending.shape)
     else:
         etaPrec = yPrec/thetaPrec
         etaInfl = yInfl/thetaInfl
