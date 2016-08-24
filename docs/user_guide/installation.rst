@@ -22,7 +22,7 @@ The package depends on the following python packages:
 
    * ``mock``
 
-   * ``sphinxcontrib-bibtex``
+   * ``Spinx`` and ``sphinxcontrib-bibtex``
 
    * ``h5py`` with support for MPI I/O.
 

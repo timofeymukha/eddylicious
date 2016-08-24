@@ -4,8 +4,6 @@ import os
 import numpy as np
 import argparse
 from mpi4py import MPI
-from scipy.interpolate import interp1d
-from scipy.integrate import simps
 import h5py
 from eddylicious.generators.helper_functions import *
 from eddylicious.readers.foamfile_readers import read_points_from_foamfile

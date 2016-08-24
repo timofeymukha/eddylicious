@@ -117,9 +117,10 @@ def chunks_and_offsets(nProcs, size):
 
     Returns
     -------
-        List of two 1d ndarrays of size nProcs. The first array contains
-        the chunk-size for each processor. The second array contains the
-        offset (starting index) for each processor.
+    List of two ndarrays.
+        The first array contains the chunk-size for each processor.
+        The second array contains the offset (starting index) for
+        each processor.
     """
 
     # To ensure integer division later
