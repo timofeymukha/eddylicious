@@ -8,3 +8,7 @@ Currently, eddylicious is geared mostly towards working with OpenFOAM, but we ho
 
 Intrested?
 Proceed to  `readthedocs <http://eddylicious.readthedocs.io>`_ for more information, documentation and a tutorial!
+
+If you are using eddylicious in your work, please cite the following.
+
+Timofey Mukha. Inflow Generation for Scale-Resolving Simulations of Turbulent Boundary Layers. Licentiate thesis. Department of Information Technology, Uppsala University, 2016. DiVA: diva2:967753
