@@ -198,8 +198,7 @@ Please follow the following steps.
       After the execution is complete, run ``reconstructPar -latestTime`` if
       you've run in parallel.
 
-   6. This step and the next one are optional.
-      Run ``postChannelFlow`` (available at
+   6. Run ``postChannelFlow`` (available at
       https://bitbucket.org/lesituu/postchannelflow)
       to get the mean velocity and the components of the Reynolds stress tensor
       averaged along the streamwise and spanwise directions.
@@ -258,7 +257,7 @@ The main simulation
       patches are defined.
       Run the utility.
       This will create a ``faceCentres`` file for each inlet patch in the
-      ``postProcessing/psurfaces/0/*patchname*`` directories.
+      ``postProcessing/sampledSurfaces/0/*patchname*`` directories.
 
    3. Inflow velocity fields are generated for each inlet patch separately.
       The generation procedure for each patch is controlled by a configuration
