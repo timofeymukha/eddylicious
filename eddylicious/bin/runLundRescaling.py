@@ -124,8 +124,8 @@ def get_y_prec(reader, readPath):
 def compute_tbl_properties(y, uMean, nu, flip):
     """Compute various parameters of a TBL."""
 
-    #y = y[np.nonzero(y)]
-    #uMean = uMean[np.nonzero(uMean)]
+    y = y[np.nonzero(y)]
+    uMean = uMean[np.nonzero(uMean)]
 
     if flip:
         y = np.flipud(y)
@@ -173,7 +173,7 @@ def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
     print("    delta99 "+str(delta))
     print("    u_tau "+str(uTau))
     print("    U0 "+str(u0))
-    print("    cf "+str(0.5*(uTau/u0)**2))
+    print("    cf "+str(2*(uTau/u0)**2))
     print("    y+_1 "+str(yPlus1))
 
 

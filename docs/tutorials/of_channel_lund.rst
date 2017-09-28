@@ -263,7 +263,7 @@ The main simulation
       The generation procedure for each patch is controlled by a configuration
       file.
       One file for each inlet patch, ``rescalingConfigBot`` and
-      ``rescalingConfigTop`` for th ``inletBot`` and ``inletTop`` patch
+      ``rescalingConfigTop`` for the ``inletBot`` and ``inletTop`` patch
       respectively.
       Explore the config files.
       See :ref:`lund_rescaling` and other relative parts of the User guide

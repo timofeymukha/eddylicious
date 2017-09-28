@@ -7,7 +7,6 @@ __all__ = ["blending_function", "delta_99", "delta_star", "momentum_thickness",
            "chunks_and_offsets"]
 
 
-# Blending function for inner and outer scales as defined by Lund et al
 def blending_function(eta, alpha=4, b=0.2):
     """Return the value of the blending function W for Lund's rescaling.
 
