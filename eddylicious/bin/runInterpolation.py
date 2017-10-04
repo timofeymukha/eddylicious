@@ -210,11 +210,11 @@ def main():
 
 
     idxInfl = np.where((pointsYInfl >= minYInfl) & (pointsYInfl <= maxYInfl) &
-                       (pointsZInfl >= minZInfl) & (pointsYInfl <= maxZInfl))
+                       (pointsZInfl >= minZInfl) & (pointsZInfl <= maxZInfl))
+
 
     pointsYInfl = pointsYInfl[idxInfl]
     pointsZInfl = pointsZInfl[idxInfl]
-
 
 # Create the reader functions
     if reader == "foamFile":
@@ -249,8 +249,8 @@ def main():
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
     # Transform inflo points to square    
-    pointsYInfl = (pointsYInfl - minYPrec)/lYPrec
-    pointsZInfl = (pointsZInfl - minZPrec)/lZPrec
+    pointsYInfl = (pointsYInfl - minYInfl)/lYInfl
+    pointsZInfl = (pointsZInfl - minZInfl)/lZInfl
 
 
 # Generate the inflow fields
