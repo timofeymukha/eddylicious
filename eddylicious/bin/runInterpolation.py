@@ -5,6 +5,7 @@ import numpy as np
 import argparse
 from mpi4py import MPI
 import h5py
+from scipy.spatial import Delaunay
 from eddylicious.generators.helper_functions import *
 from eddylicious.readers.foamfile_readers import read_points_foamfile
 from eddylicious.readers.foamfile_readers import read_velocity_foamfile
@@ -194,9 +195,11 @@ def main():
     idxPrec = np.where((pointsY >= minYPrec) & (pointsY <= maxYPrec) &
                        (pointsZ >= minZPrec) & (pointsY <= maxZPrec))
 
+    # Normalize to unit square
     pointsY = (pointsY[idxPrec] - minYPrec)/lYPrec
     pointsZ = (pointsZ[idxPrec] - minZPrec)/lZPrec
 
+    triangulation = Delaunay(np.column_stack((pointsY, pointsZ)))
 
 # Read grid for the inflow plane
     if inflowReader == "foamFile":
@@ -204,6 +207,7 @@ def main():
             read_points_foamfile(os.path.join(inflowGeometryPath))
     else:
         raise ValueError("Unknown inflow reader: "+inflowReader)
+
 
     idxInfl = np.where((pointsYInfl >= minYInfl) & (pointsYInfl <= maxYInfl) &
                        (pointsZInfl >= minZInfl) & (pointsYInfl <= maxZInfl))
@@ -258,7 +262,7 @@ def main():
     interpolation_generate(readerFunc,
                            writer, writePath,
                            dt, t0, tEnd, timePrecision,
-                           np.column_stack((pointsY, pointsZ)),
+                           triangulation,
                            np.column_stack((pointsYInfl,pointsZInfl)),
 
                                                       idxPrec,
