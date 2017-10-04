@@ -20,7 +20,7 @@ def test_read_points_all_points(load_points):
 
     readPath = path.join(load_points[0], "foam_file_output", "1000.01",
                          "faceCentres")
-    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath)
+    [pY, pZ, yI, zI] = read_structured_points_foamfile(readPath)
 
     assert np.all(load_points[1] == pY)
     assert np.all(load_points[2] == pZ)
@@ -35,8 +35,8 @@ def test_read_points_exclude_top(load_points):
     readPath = path.join(load_points[0], "foam_file_output", "1000.01",
                          "faceCentres")
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath,
-                                                 excludeTop=nPointsY-n)
+    [pY, pZ, yI, zI] = read_structured_points_foamfile(readPath,
+                                                       excludeTop=nPointsY-n)
 
     assert np.all(load_points[1][:n, :] == pY)
     assert np.all(load_points[2][:n, :] == pZ)
@@ -50,8 +50,8 @@ def test_read_points_exclude_bot(load_points):
     readPath = path.join(load_points[0], "foam_file_output", "1000.01",
                          "faceCentres")
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath,
-                                                 excludeBot=n)
+    [pY, pZ, yI, zI] = read_structured_points_foamfile(readPath,
+                                                       excludeBot=n)
 
     assert np.all(load_points[1][n:, :] == pY)
     assert np.all(load_points[2][n:, :] == pZ)
@@ -70,8 +70,8 @@ def test_read_points_add_zeros_bot_top(load_points):
     readPath = path.join(load_points[0], "foam_file_output", "1000.01",
                          "faceCentres")
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath, addValBot=0,
-                                                 addValTop=0)
+    [pY, pZ, yI, zI] = read_structured_points_foamfile(readPath, addValBot=0,
+                                                       addValTop=0)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
@@ -91,9 +91,9 @@ def test_read_points_add_zeros_bot_exclude_top_interp_top(load_points):
 
     nPointsY = load_points[1].shape[0]+1
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath, addValBot=0,
-                                                 excludeTop=nPointsY-n,
-                                                 exchangeValTop=1)
+    [pY, pZ, yI, zI] = read_structured_points_foamfile(readPath, addValBot=0,
+                                                       excludeTop=nPointsY-n,
+                                                       exchangeValTop=1)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
@@ -113,9 +113,9 @@ def test_read_points_add_zeros_top_exclude_bot_interp_bot(load_points):
     readPath = path.join(load_points[0], "foam_file_output", "1000.01",
                          "faceCentres")
 
-    [pY, pZ, yI, zI] = read_points_from_foamfile(readPath, addValTop=0,
-                                                 excludeBot=n,
-                                                 exchangeValBot=1)
+    [pY, pZ, yI, zI] = read_structured_points_foamfile(readPath, addValTop=0,
+                                                       excludeBot=n,
+                                                       exchangeValBot=1)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
@@ -138,9 +138,9 @@ def load_vel(scope="module"):
 
 def test_read_velocity(load_vel):
 
-    readFunc = read_velocity_from_foamfile(path.join(load_vel[0],
+    readFunc = read_structured_velocity_foamfile(path.join(load_vel[0],
                                                      "foam_file_output"), "",
-                                           72, load_vel[4], load_vel[5])
+                                                 72, load_vel[4], load_vel[5])
     [uXR, uYR, uZR] = readFunc(1000.01)
 
     assert np.all(load_vel[1] == uXR)
@@ -165,12 +165,12 @@ def test_read_velocity_add_zeros_bot_exclude_top_interp_top(load_vel):
     uZ = uZ[:nPointsY, :]
 
     readFunc = \
-        read_velocity_from_foamfile(path.join(load_vel[0],
+        read_structured_velocity_foamfile(path.join(load_vel[0],
                                               "foam_file_output"), "",
-                                    72, load_vel[4], load_vel[5],
-                                    addValBot=(0, 0, 0),
-                                    excludeTop=load_vel[1].shape[0]-nPointsY+1,
-                                    interpValTop=1)
+                                          72, load_vel[4], load_vel[5],
+                                          addValBot=(0, 0, 0),
+                                          excludeTop=load_vel[1].shape[0]-nPointsY+1,
+                                          interpValTop=1)
     [uXR, uYR, uZR] = readFunc(1000.01)
 
     assert np.all(uX == uXR)
@@ -194,12 +194,12 @@ def test_read_velocity_add_zeros_top_exclude_bot_interp_bot(load_vel):
     uY = uY[nPointsY:, :]
     uZ = uZ[nPointsY:, :]
 
-    readFunc = read_velocity_from_foamfile(path.join(load_vel[0],
+    readFunc = read_structured_velocity_foamfile(path.join(load_vel[0],
                                                      "foam_file_output"), "",
-                                           72, load_vel[4], load_vel[5],
-                                           addValTop=(0, 0 , 0),
-                                           excludeBot=nPointsY,
-                                           interpValBot=1)
+                                                 72, load_vel[4], load_vel[5],
+                                                 addValTop=(0, 0 , 0),
+                                                 excludeBot=nPointsY,
+                                                 interpValBot=1)
     [uXR, uYR, uZR] = readFunc(1000.01)
 
     assert np.all(uX == uXR)

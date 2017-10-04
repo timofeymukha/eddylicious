@@ -4,13 +4,15 @@
 import numpy as np
 import os
 
-__all__ = ["read_points_from_foamfile", "read_velocity_from_foamfile"]
+__all__ = ["read_structured_points_foamfile",
+           "read_structured_velocity_foamfile",
+           "read_points_foamfile", "read_velocity_foamfile"]
 
 
-def read_points_from_foamfile(readPath, addValBot=float('nan'),
-                              addValTop=float('nan'), excludeBot=0,
-                              excludeTop=0, exchangeValBot=float('nan'),
-                              exchangeValTop=float('nan')):
+def read_structured_points_foamfile(readPath, addValBot=float('nan'),
+                                    addValTop=float('nan'), excludeBot=0,
+                                    excludeTop=0, exchangeValBot=float('nan'),
+                                    exchangeValTop=float('nan')):
     """Read the coordinates of the points from a foamFile-format file.
 
 
@@ -123,14 +125,14 @@ def read_points_from_foamfile(readPath, addValBot=float('nan'),
     return [pointsY, pointsZ, yInd, zInd]
 
 
-def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
-                                yInd, zInd,
-                                addValBot=(float('nan'), float('nan'),
+def read_structured_velocity_foamfile(baseReadPath, surfaceName, nPointsZ,
+                                      yInd, zInd,
+                                      addValBot=(float('nan'), float('nan'),
                                            float('nan')),
-                                addValTop=(float('nan'), float('nan'),
+                                      addValTop=(float('nan'), float('nan'),
                                            float('nan')),
-                                excludeBot=0, excludeTop=0,
-                                interpValBot=False, interpValTop=False):
+                                      excludeBot=0, excludeTop=0,
+                                      interpValBot=False, interpValTop=False):
     """Read the values of the velocity field from a foamFile-format file.
 
     Reads in the values of the velocity components stored in the
@@ -259,6 +261,87 @@ def read_velocity_from_foamfile(baseReadPath, surfaceName, nPointsZ,
             uX = uX[excludeBot:, :]
             uY = uY[excludeBot:, :]
             uZ = uZ[excludeBot:, :]
+
+        return [uX, uY, uZ]
+
+    read.reader = "foamFile"
+    return read
+
+
+def read_points_foamfile(readPath):
+    """Read the coordinates of the points from a foamFile-format file.
+
+
+    Reads in the locations of the face centers, stored in foamFile
+    format by OpenFOAM.
+
+    Parameters
+    ----------
+    readPath : str
+        The path to the file containing the points.
+
+    Returns
+    -------
+    List of ndarrays
+        Two arrays corresponding to y and z components of the points.
+
+    """
+    with open(readPath) as pointsFile:
+        points = [line.rstrip(')\n') for line in pointsFile]
+
+    points = [line.lstrip('(') for line in points]
+    points = points[3:-1]
+    points = np.genfromtxt(points)[:, 1:]
+
+    return [points[:, 0], points[:, 1]]
+
+
+def read_velocity_foamfile(baseReadPath, surfaceName):
+    """Read the values of the velocity field from a foamFile-format file.
+
+    Reads in the values of the velocity components stored in the
+    foamFile file-format.
+
+    Parameters
+    ----------
+    baseReadPath : str
+        The path where the time-directories with the velocity values are
+        located.
+    surfaceName: str
+        The name of the surface that was used for sampling.
+
+    Returns
+    -------
+    function
+        A function of one variable (the time-value) that will actually
+        perform the reading.
+
+    """
+    def read(time):
+        """
+        A function that will actually perform the reading.
+
+        Parameters
+        ----------
+        time, float or string
+            The value of the time, will be converted to a string.
+
+        Returns
+        -------
+        List of ndarrays
+            Three arrays corresponding to the three components of
+            velocity
+
+        """
+        readUPath = os.path.join(baseReadPath, str(time), surfaceName,
+                                 "vectorField", "U")
+        with open(readUPath) as UFile:
+            u = [line.rstrip(')\n') for line in UFile]
+
+        u = [line.lstrip('(') for line in u]
+        u = u[3:-1]
+        u = np.genfromtxt(u)
+
 
         return [uX, uY, uZ]
 

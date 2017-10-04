@@ -53,7 +53,7 @@ def create_hdf5(tmpdir, load_points, load_vel):
 def test_read_points_no_add_zeros_all_points(load_points, create_hdf5):
 
 
-    [pY, pZ] = read_points_from_hdf5(create_hdf5)
+    [pY, pZ] = read_structured_points_hdf5(create_hdf5)
 
     assert np.all(load_points[1] == pY)
     assert np.all(load_points[2] == pZ)
@@ -64,8 +64,8 @@ def test_read_points_exclude_top(load_points, create_hdf5):
 
     nPointsY = load_points[1].shape[0]
 
-    [pY, pZ,] = read_points_from_hdf5(create_hdf5,
-                                                 excludeTop=nPointsY-n)
+    [pY, pZ,] = read_structured_points_hdf5(create_hdf5,
+                                            excludeTop=nPointsY-n)
 
     assert np.all(load_points[1][:n, :] == pY)
     assert np.all(load_points[2][:n, :] == pZ)
@@ -73,8 +73,8 @@ def test_read_points_exclude_top(load_points, create_hdf5):
 def test_read_points_exclude_bot(load_points, create_hdf5):
     n = 10
 
-    [pY, pZ,] = read_points_from_hdf5(create_hdf5,
-                                      excludeBot=n)
+    [pY, pZ,] = read_structured_points_hdf5(create_hdf5,
+                                            excludeBot=n)
 
     assert np.all(load_points[1][n:, :] == pY)
     assert np.all(load_points[2][n:, :] == pZ)
@@ -88,7 +88,7 @@ def test_read_points_add_zeros_bot_top(load_points, create_hdf5):
     pointsY = np.append(pointsY, np.zeros((1, 72)), axis=0)
     pointsZ = np.append(pointsZ, np.array([pointsZ[0, :]]),  axis=0)
 
-    [pY, pZ] = read_points_from_hdf5(create_hdf5, addValBot=0, addValTop=0)
+    [pY, pZ] = read_structured_points_hdf5(create_hdf5, addValBot=0, addValTop=0)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
@@ -105,9 +105,9 @@ def test_read_points_add_zeros_bot_exclude_top_interp_top(load_points,
 
     nPointsY = load_points[1].shape[0]+1
 
-    [pY, pZ] = read_points_from_hdf5(create_hdf5, addValBot=0,
-                                                 excludeTop=nPointsY-n,
-                                                 exchangeValTop=1)
+    [pY, pZ] = read_structured_points_hdf5(create_hdf5, addValBot=0,
+                                           excludeTop=nPointsY-n,
+                                           exchangeValTop=1)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
@@ -122,9 +122,9 @@ def test_read_points_add_zeros_top_exclude_bot_interp_bot(load_points,
                         axis=0)[n:, :]
     pointsY[0, :] = 1.0
 
-    [pY, pZ] = read_points_from_hdf5(create_hdf5, addValTop=0,
-                                                 excludeBot=n,
-                                                 exchangeValBot=1)
+    [pY, pZ] = read_structured_points_hdf5(create_hdf5, addValTop=0,
+                                           excludeBot=n,
+                                           exchangeValBot=1)
 
     assert np.all(pointsY == pY)
     assert np.all(pointsZ == pZ)
@@ -133,7 +133,7 @@ def test_read_points_add_zeros_top_exclude_bot_interp_bot(load_points,
 # Tests for the velocity reader
 def test_read_velocity(load_vel, create_hdf5):
 
-    readFunc = read_velocity_from_hdf5(create_hdf5)
+    readFunc = read_structured_velocity_hdf5(create_hdf5)
 
     [uXR, uYR, uZR] = readFunc(0)
 
@@ -159,9 +159,9 @@ def test_read_velocity_add_zeros_bot_exclude_top_interp_top(load_vel,
     uZ = uZ[:nPointsY, :]
 
     readFunc = \
-        read_velocity_from_hdf5(create_hdf5, addValBot=(0, 0, 0),
-                                excludeTop=load_vel[1].shape[0]-nPointsY+1,
-                                interpValTop=1)
+        read_structured_velocity_hdf5(create_hdf5, addValBot=(0, 0, 0),
+                                      excludeTop=load_vel[1].shape[0]-nPointsY+1,
+                                      interpValTop=1)
     [uXR, uYR, uZR] = readFunc(0)
 
     assert np.all(uX == uXR)
@@ -185,8 +185,8 @@ def test_read_velocity_add_zeros_top_exclude_bot_interp_bot(load_vel,
     uY = uY[nPointsY:, :]
     uZ = uZ[nPointsY:, :]
 
-    readFunc = read_velocity_from_hdf5(create_hdf5, addValTop=(0, 0, 0),
-                                       excludeBot=nPointsY, interpValBot=1)
+    readFunc = read_structured_velocity_hdf5(create_hdf5, addValTop=(0, 0, 0),
+                                             excludeBot=nPointsY, interpValBot=1)
 
     [uXR, uYR, uZR] = readFunc(0)
 

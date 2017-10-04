@@ -4,8 +4,8 @@ import os
 import numpy as np
 import h5py
 from mpi4py import MPI
-from eddylicious.readers.foamfile_readers import read_points_from_foamfile
-from eddylicious.readers.foamfile_readers import read_velocity_from_foamfile
+from eddylicious.readers.foamfile_readers import read_structured_points_foamfile
+from eddylicious.readers.foamfile_readers import read_structured_velocity_foamfile
 from eddylicious.generators.helper_functions import chunks_and_offsets
 import argparse
 
@@ -67,7 +67,7 @@ def main():
 
 
 # Read in the points
-    [pointsY, pointsZ, yInd, zInd] = read_points_from_foamfile(
+    [pointsY, pointsZ, yInd, zInd] = read_structured_points_foamfile(
         os.path.join(dataDir, times[0], surfaceName, "faceCentres"),
         addValBot=y[0], addValTop=y[-1])
 
@@ -115,10 +115,10 @@ def main():
 
     [chunks, offsets] = chunks_and_offsets(nProcs, len(times))
 
-    readFunc = read_velocity_from_foamfile(dataDir, surfaceName,
-                                           nPointsZ, yInd, zInd,
-                                           addValBot=(uMeanX[0], uMeanY[0], 0),
-                                           addValTop=(uMeanX[-1], uMeanY[-1],
+    readFunc = read_structured_velocity_foamfile(dataDir, surfaceName,
+                                                 nPointsZ, yInd, zInd,
+                                                 addValBot=(uMeanX[0], uMeanY[0], 0),
+                                                 addValTop=(uMeanX[-1], uMeanY[-1],
                                                       0))
 
 # Read in the fluctuations

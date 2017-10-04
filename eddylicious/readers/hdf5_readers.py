@@ -4,13 +4,13 @@
 import numpy as np
 import h5py
 
-__all__ = ["read_points_from_hdf5", "read_velocity_from_hdf5"]
+__all__ = ["read_structured_points_hdf5", "read_structured_velocity_hdf5"]
 
 
-def read_points_from_hdf5(readPath, addValBot=float('nan'),
-                          addValTop=float('nan'), excludeBot=0,
-                          excludeTop=0, exchangeValBot=float('nan'),
-                          exchangeValTop=float('nan')):
+def read_structured_points_hdf5(readPath, addValBot=float('nan'),
+                                addValTop=float('nan'), excludeBot=0,
+                                excludeTop=0, exchangeValBot=float('nan'),
+                                exchangeValTop=float('nan')):
     """Read the coordinates of the points from a hdf5 file.
 
 
@@ -87,12 +87,13 @@ def read_points_from_hdf5(readPath, addValBot=float('nan'),
     return [pointsY, pointsZ]
 
 
-def read_velocity_from_hdf5(readPath, addValBot=(float('nan'), float('nan'),
-                                                 float('nan')),
-                            addValTop=(float('nan'), float('nan'),
+def read_structured_velocity_hdf5(readPath,
+                                  addValBot=(float('nan'), float('nan'),
+                                                       float('nan')),
+                                  addValTop=(float('nan'), float('nan'),
                                        float('nan')),
-                            excludeBot=0, excludeTop=0,
-                            interpValBot=False, interpValTop=False):
+                                  excludeBot=0, excludeTop=0,
+                                  interpValBot=False, interpValTop=False):
     """ Read the values of the velocity field from a foamFile-format
     file.
 
