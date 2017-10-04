@@ -23,7 +23,7 @@ def interpolation_generate(readerFunction,
                            times):
     """Generate the the inflow velocity interpolation.
 
-    This function will use some precursor data and interpolate it
+    This function will take some precursor data and interpolate it
     on the grid at the inflow patch.
 
     Parameters
@@ -49,7 +49,7 @@ def interpolation_generate(readerFunction,
         The ending time for the simulation.
     points : ndarray
         A 2d array containing the values the points of the
-        source geometry.
+        source geometry or their Delaunay triangulation.
     pointsInfl : ndarray
         A 2d array containing the values the points of the
         inlet geometry.
