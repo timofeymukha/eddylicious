@@ -1,5 +1,5 @@
 """Functions for generating inflow velocity fields by
-interpolation of data (from a precursor)
+interpolation of data (from a precursor).
 
 """
 from __future__ import print_function
@@ -19,7 +19,6 @@ def interpolation_generate(readerFunction,
                            points,
                            pointsInfl,
                            idxPrec,
-                           kind,
                            times):
     """Generate the the inflow velocity interpolation.
 

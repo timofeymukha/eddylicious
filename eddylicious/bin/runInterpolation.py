@@ -137,11 +137,6 @@ def main():
     else:
         xOrigin = 0.0
 
-    if "yOrigin" in configDict:
-        yOrigin = float(configDict["yOrigin"])
-    else:
-        yOrigin = 0.0
-
 # Interpolation kind
     if "kind" in configDict:
         kind = (configDict["kind"])
@@ -177,20 +172,8 @@ def main():
                                       "faceCentres")
         [pointsY, pointsZ] = read_points_foamfile(pointsReadPath)
 
-    elif reader == "hdf5":
-
-        if not flipPrec:
-            [pointsY, pointsZ] = \
-                read_structured_points_hdf5(readPath,
-                                            excludeTop=totalPointsY-nPointsY,
-                                            exchangeValTop=centerY)
-        else:
-            [pointsY, pointsZ] = \
-                read_structured_points_hdf5(readPath,
-                                            excludeBot=totalPointsY-nPointsY,
-                                            exchangeValBot=centerY)
     else:
-        raise ValueError("Unknown reader: "+reader)
+        raise ValueError("Unsupported or unknown reader: "+reader)
 
     idxPrec = np.where((pointsY >= minYPrec) & (pointsY <= maxYPrec) &
                        (pointsZ >= minZPrec) & (pointsY <= maxZPrec))
@@ -208,7 +191,7 @@ def main():
     else:
         raise ValueError("Unknown inflow reader: "+inflowReader)
 
-
+    # Filter the points to those inside rectangle
     idxInfl = np.where((pointsYInfl >= minYInfl) & (pointsYInfl <= maxYInfl) &
                        (pointsZInfl >= minZInfl) & (pointsZInfl <= maxZInfl))
 
@@ -220,20 +203,8 @@ def main():
     if reader == "foamFile":
         dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
         readerFunc = read_velocity_foamfile(dataDir, sampleSurfaceName)
-
-    elif reader == "hdf5":
-        if not flipPrec:
-            readerFunc = read_structured_velocity_hdf5(
-                            readPath,
-                            excludeTop=totalPointsY-nPointsY,
-                            interpValTop=True)
-        else:
-            readerFunc = read_structured_velocity_hdf5(
-                            readPath,
-                            excludeBot=totalPointsY-nPointsY,
-                            interpValBot=True)
     else:
-        raise ValueError("Unknown reader: "+reader)
+        raise ValueError("Unsupported or unknown reader: "+reader)
 
     # Get the write path appropriate for the reader
     writePath = set_write_path(configDict)
@@ -248,7 +219,7 @@ def main():
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
-    # Transform inflo points to square    
+    # Transform inflow points to square
     pointsYInfl = (pointsYInfl - minYInfl)/lYInfl
     pointsZInfl = (pointsZInfl - minZInfl)/lZInfl
 
@@ -264,9 +235,7 @@ def main():
                            dt, t0, tEnd, timePrecision,
                            triangulation,
                            np.column_stack((pointsYInfl,pointsZInfl)),
-
-                                                      idxPrec,
-                           kind,
+                           idxPrec,
                            times)
 
     if rank == 0:
