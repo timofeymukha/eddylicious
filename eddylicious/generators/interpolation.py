@@ -47,18 +47,14 @@ def interpolation_generate(readerFunction,
         Number of points after the decimal to keep for the time value.
     tEnd : float
         The ending time for the simulation.
-    pointsY : int
-        A 1d array containing the values of y for the points of the
+    points : ndarray
+        A 2d array containing the values the points of the
         source geometry.
-    pointsZInfl : int
-        A 1d array containing the values of z for the points of the
-        source geometry.
-    pointsY : int
-        A 1d array containing the values of y for the points of the
-        inflow boundary.
-    pointsZInfl : int
-        A 1d array containing the values of z for the points of the
-        inflow boundary.
+    pointsInfl : ndarray
+        A 2d array containing the values the points of the
+        inlet geometry.
+    idxPrec : ndarray
+        Indices for filtering the read-in velocity
     times : list of floats or strings
         The times for which the velocity field was sampled in the
         precursor simulation.
