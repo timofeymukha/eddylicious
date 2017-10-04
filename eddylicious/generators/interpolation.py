@@ -6,21 +6,21 @@ from __future__ import print_function
 from __future__ import division
 import numpy as np
 from mpi4py import MPI
-from scipy.interpolate import interp1d
-from scipy.interpolate import interp2d
+from scipy.interpolate import LinearNDInterpolator 
 from .helper_functions import chunks_and_offsets
 from ..writers.ofnative_writers import write_velocity_to_ofnative
 from ..writers.hdf5_writers import write_velocity_to_hdf5
 
 __all__ = ["interpolation_generate"]
 
-def interpolate_generate(readerFunction,
-                  writer, writePath,
-                  dt, t0, tEnd, timePrecision,
-                  pointsY, pointsZ,
-                  pointsYInfl, pointsZInfl,
-                  kind,
-                  times):
+def interpolation_generate(readerFunction,
+                           writer, writePath,
+                           dt, t0, tEnd, timePrecision,
+                           points,
+                           pointsInfl,
+                           idxPrec,
+                           kind,
+                           times):
     """Generate the the inflow velocity interpolation.
 
     This function will use some precursor data and interpolate it
@@ -94,9 +94,13 @@ def interpolate_generate(readerFunction,
         else:
             raise ValueError("Unknown reader")
 
-        uXInfl = interp2d(pointsZ, pointsY, uX, bounds_error=True, kind=kind)
-        uYInfl = interp2d(pointsZ, pointsY, uY, bounds_error=True, kind=kind)
-        uZInfl = interp2d(pointsZ, pointsY, uZ, bounds_error=True, kind=kind)
+        uXInterp = LinearNDInterpolator(points, uX[idxPrec])
+        uYInterp = LinearNDInterpolator(points, uY[idxPrec])
+        uZInterp = LinearNDInterpolator(points, uZ[idxPrec])
+
+        uXInfl = uXInterp(pointsInfl)
+        uYInfl = uYInterp(pointsInfl)
+        uZInfl = uZInterp(pointsInfl)
 
         # Write
         if writer == "ofnative":

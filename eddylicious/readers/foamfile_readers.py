@@ -343,7 +343,7 @@ def read_velocity_foamfile(baseReadPath, surfaceName):
         u = np.genfromtxt(u)
 
 
-        return [uX, uY, uZ]
+        return [u[:, 0], u[:, 1], u[:, 2]]
 
     read.reader = "foamFile"
     return read

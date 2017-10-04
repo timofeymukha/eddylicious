@@ -12,6 +12,8 @@ from eddylicious.readers.hdf5_readers import read_structured_points_hdf5
 from eddylicious.readers.hdf5_readers import read_structured_velocity_hdf5
 from eddylicious.writers.ofnative_writers import write_points_to_ofnative
 from eddylicious.writers.hdf5_writers import write_points_to_hdf5
+from eddylicious.generators.lund_rescaling import lund_generate
+from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
 
 
 def set_write_path(config):
@@ -67,6 +69,35 @@ def get_times(reader, readPath):
         raise ValueError("Unknown reader: "+reader)
 
     return times
+
+
+def get_umean_prec(reader, readPath, flip):
+    """Reed the mean velocity profile of the precursor
+       and the total number of points in the y direction.
+
+    """
+    if reader == "foamFile":
+        uMeanTimes = os.listdir(os.path.join(readPath, "postProcessing",
+                                             "collapsedFields"))
+        uMean = np.genfromtxt(os.path.join(readPath, "postProcessing",
+                                           "collapsedFields",
+                                           uMeanTimes[-1],
+                                           "UMean_X.xy"))
+        uMeanX = uMean[:, 1]
+        if uMean.shape[1] == 3:
+            uMeanY = uMean[:, 2]
+        else:
+            uMeanY = np.zeros(uMeanX.shape)
+    elif reader == "hdf5":
+        readPath = h5py.File(readPath, 'r', driver='mpio', comm=MPI.COMM_WORLD)
+        uMeanX = readPath["velocity"]["uMeanX"][:]
+        uMeanY = readPath["velocity"]["uMeanY"][:]
+        readPath.close()
+    else:
+        raise ValueError("Unknown reader: "+reader)
+
+    return uMeanX, uMeanY
+
 
 def get_y_prec(reader, readPath):
     """Read the mean velocity profile of the precursor
@@ -197,6 +228,28 @@ def main():
     else:
         raise ValueError("half should be either 'top' of 'bottom'")
 
+# Viscosity
+    nuInfl = float(configDict["nuInflow"])
+    nuPrec = float(configDict["nuPrecursor"])
+
+# Freestream velocity
+    u0Infl = float(configDict["Ue"])
+
+    if "delta99" in configDict:
+        deltaInfl = float(configDict["delta99"])
+        cfInfl = 0.02*pow(nuInfl/(u0Infl*deltaInfl), 1.0/6)
+    elif "theta" in configDict:
+        thetaInfl = float(configDict["theta"])
+        cfInfl = 0.013435*(thetaInfl*u0Infl/nuInfl - 373.83)**(-2/11)
+    else:
+        raise ValueError("The config file should provide delta99 or theta")
+
+    # Friction velocity
+    if configDict["uTauInflow"] == "compute":
+        uTauInfl = u0Infl*np.sqrt(cfInfl/2)
+    else:
+        uTauInfl = float(configDict["uTauInflow"])
+
 
 # Shift in coordinates
     xOrigin = float(configDict["xOrigin"])
@@ -217,6 +270,9 @@ def main():
 
     if rank == 0:
         print("Reading from database with "+str(len(times)) + " time-steps.")
+
+    # Get the mean velocity for the precursor
+    uMeanXPrec, uMeanYPrec = get_umean_prec(reader, readPath, flipPrec)
 
     yPrec = get_y_prec(reader, readPath)
     centerY = (yPrec[0] + yPrec[-1])/2
@@ -242,7 +298,7 @@ def main():
     nPointsY = uMeanXPrec.size
 
 # SET UP GEOMETRY
-# Read grid for the source plane
+# Read grid for the recycling plane
 
     times = get_times(reader, readPath)
     if reader == "foamFile":
@@ -253,29 +309,29 @@ def main():
         if not flipPrec:
             [pointsY, pointsZ, yInd, zInd] = \
                 read_structured_points_foamfile(pointsReadPath,
-                                                addValBot=yPrec[0],
-                                                addValTop=yPrec[-1],
-                                                excludeTop=totalPointsY-nPointsY,
-                                                exchangeValTop=centerY)
+                                          addValBot=yPrec[0],
+                                          addValTop=yPrec[-1],
+                                          excludeTop=totalPointsY-nPointsY,
+                                          exchangeValTop=centerY) 
         else:
             [pointsY, pointsZ, yInd, zInd] = \
                 read_structured_points_foamfile(pointsReadPath,
-                                                addValBot=yPrec[0],
-                                                addValTop=yPrec[-1],
-                                                excludeBot=totalPointsY-nPointsY,
-                                                exchangeValBot=centerY)
+                                          addValBot=yPrec[0],
+                                          addValTop=yPrec[-1],
+                                          excludeBot=totalPointsY-nPointsY,
+                                          exchangeValBot=centerY)
     elif reader == "hdf5":
 
         if not flipPrec:
             [pointsY, pointsZ] = \
                 read_structured_points_hdf5(readPath,
-                                            excludeTop=totalPointsY-nPointsY,
-                                            exchangeValTop=centerY)
+                                      excludeTop=totalPointsY-nPointsY,
+                                      exchangeValTop=centerY)
         else:
             [pointsY, pointsZ] = \
                 read_structured_points_hdf5(readPath,
-                                            excludeBot=totalPointsY-nPointsY,
-                                            exchangeValBot=centerY)
+                                      excludeBot=totalPointsY-nPointsY,
+                                      exchangeValBot=centerY)
     else:
         raise ValueError("Unknown reader: "+reader)
 
@@ -283,9 +339,8 @@ def main():
 
 # Read grid for the inflow plane
     if inflowReader == "foamFile":
-        [pointsYInfl, pointsZInfl] = \
-            read_structured_points_foamfile(os.path.join(inflowGeometryPath
-                                                         ))[:2]
+        [pointsYInfl, pointsZInfl] =\
+            read_structured_points_foamfile(os.path.join(inflowGeometryPath))[:2]
     else:
         raise ValueError("Unknown inflow reader: "+inflowReader)
 

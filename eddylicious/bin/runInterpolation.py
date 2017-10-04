@@ -123,11 +123,23 @@ def main():
     minZPrec = float(configDict["minZPrec"])
     maxZPrec = float(configDict["maxZPrec"])
 
+    lYInfl =  maxYInfl - minYInfl
+    lZInfl =  maxZInfl - minZInfl
+
+    lYPrec =  maxYPrec - minYPrec
+    lZPrec =  maxZPrec - minZPrec
+
 
 # Shift in coordinates
-    xOrigin = float(configDict["xOrigin"])
-    yOrigin = float(configDict["yOrigin"])
-    zOrigin = float(configDict["zOrigin"])
+    if "xOrigin" in configDict:
+        xOrigin = float(configDict["xOrigin"])
+    else:
+        xOrigin = 0.0
+
+    if "yOrigin" in configDict:
+        yOrigin = float(configDict["yOrigin"])
+    else:
+        yOrigin = 0.0
 
 # Interpolation kind
     if "kind" in configDict:
@@ -182,8 +194,9 @@ def main():
     idxPrec = np.where((pointsY >= minYPrec) & (pointsY <= maxYPrec) &
                        (pointsZ >= minZPrec) & (pointsY <= maxZPrec))
 
-    pointsY = pointsY[:, idxPrec]
-    pointsZ = pointsZ[:, idxPrec]
+    pointsY = (pointsY[idxPrec] - minYPrec)/lYPrec
+    pointsZ = (pointsZ[idxPrec] - minZPrec)/lZPrec
+
 
 # Read grid for the inflow plane
     if inflowReader == "foamFile":
@@ -195,8 +208,8 @@ def main():
     idxInfl = np.where((pointsYInfl >= minYInfl) & (pointsYInfl <= maxYInfl) &
                        (pointsZInfl >= minZInfl) & (pointsYInfl <= maxZInfl))
 
-    pointsYInfl = pointsYInfl[:, idxInfl]
-    pointsZInfl = pointsZInfl[:, idxInfl]
+    pointsYInfl = pointsYInfl[idxInfl]
+    pointsZInfl = pointsZInfl[idxInfl]
 
 
 # Create the reader functions
@@ -231,6 +244,11 @@ def main():
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
+    # Transform inflo points to square    
+    pointsYInfl = (pointsYInfl - minYPrec)/lYPrec
+    pointsZInfl = (pointsZInfl - minZPrec)/lZPrec
+
+
 # Generate the inflow fields
     if rank == 0:
         print("Interpolating")
@@ -240,10 +258,10 @@ def main():
     interpolation_generate(readerFunc,
                            writer, writePath,
                            dt, t0, tEnd, timePrecision,
-                           pointsY,
-                           pointsZ,
-                           pointsYInfl,
-                           pointsZInfl,
+                           np.column_stack((pointsY, pointsZ)),
+                           np.column_stack((pointsYInfl,pointsZInfl)),
+
+                                                      idxPrec,
                            kind,
                            times)
 
