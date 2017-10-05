@@ -50,7 +50,7 @@ def write_velocity_to_hdf5(hdf5File, t, uX, uY, uZ, iteration):
     Will also write the corresponding time value.
 
     Parameters
-    ---------
+    ----------
     hdf5File : h5py.File
         The the HDF5 file.
     t : float

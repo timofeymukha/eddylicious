@@ -94,9 +94,9 @@ def read_structured_points_hdf5(readPath, addValBot=float('nan'),
 
 def read_structured_velocity_hdf5(readPath,
                                   addValBot=(float('nan'), float('nan'),
-                                                       float('nan')),
+                                             float('nan')),
                                   addValTop=(float('nan'), float('nan'),
-                                       float('nan')),
+                                             float('nan')),
                                   excludeBot=0, excludeTop=0,
                                   interpValBot=False, interpValTop=False):
     """ Read the values of the velocity field from a foamFile-format
@@ -109,7 +109,7 @@ def read_structured_velocity_hdf5(readPath,
     optional parameters.
 
     Parameters
-    ---------
+    ----------
     readPath : str
         The path to the file containing the velocity field.
     addValBot : tuple of three floats, optional

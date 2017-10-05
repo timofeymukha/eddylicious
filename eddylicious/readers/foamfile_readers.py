@@ -133,9 +133,9 @@ def read_structured_points_foamfile(readPath, addValBot=float('nan'),
 def read_structured_velocity_foamfile(baseReadPath, surfaceName, nPointsZ,
                                       yInd, zInd,
                                       addValBot=(float('nan'), float('nan'),
-                                           float('nan')),
+                                                 float('nan')),
                                       addValTop=(float('nan'), float('nan'),
-                                           float('nan')),
+                                                 float('nan')),
                                       excludeBot=0, excludeTop=0,
                                       interpValBot=False, interpValTop=False):
     """Read the values of the velocity field from a foamFile-format file.

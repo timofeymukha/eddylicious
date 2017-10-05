@@ -20,7 +20,7 @@ def test_point_writer(tmpdir):
     writePath = writeFile.strpath
     write_points_to_ofnative(writePath, pointsY, pointsZ, xVal)
 
-    with file(writePath) as pointsFile:
+    with open(writePath) as pointsFile:
         writtenPoints = [line.rstrip(')\n') for line in pointsFile]
 
     writtenPoints = [line.lstrip('(') for line in writtenPoints]
@@ -48,11 +48,11 @@ def test_velocity_writer(tmpdir):
     writePath = writeFile.strpath
     write_velocity_to_ofnative(writePath, "0.1", uX, uY, uZ)
 
-    with file(path.join(writePath, "0.1", "U")) as uFile:
+    with open(path.join(writePath, "0.1", "U")) as uFile:
         writtenU= [line.rstrip(')\n') for line in uFile]
 
     writtenU = [line.lstrip('(') for line in writtenU]
-    writtenU = writtenU[10:-1]
+    writtenU = writtenU[11:-1]
     writtenU = np.genfromtxt(writtenU)
 
     uX = uX.reshape((uX.size, -1), order='F')[:, 0]
