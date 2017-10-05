@@ -17,7 +17,7 @@ from eddylicious.generators.interpolation import interpolation_generate
 
 
 def set_write_path(config):
-    """Sets the writePath variable in concordance with the writer.
+    """Set the writePath variable in concordance with the writer.
 
     For the ofnative writer: the path to constant/boundaryData directory.
     For the hdf5 writer: the hdf5 file itself.
@@ -113,36 +113,13 @@ def main():
     inflowReader = configDict["inflowGeometryReader"]
     writer = configDict["writer"]
 
-# Bounds for the points
-    minYInfl = float(configDict["minYInfl"])
-    maxYInfl = float(configDict["maxYInfl"])
-    minZInfl = float(configDict["minZInfl"])
-    maxZInfl = float(configDict["maxZInfl"])
-
-    minYPrec = float(configDict["minYPrec"])
-    maxYPrec = float(configDict["maxYPrec"])
-    minZPrec = float(configDict["minZPrec"])
-    maxZPrec = float(configDict["maxZPrec"])
-
-    lYInfl =  maxYInfl - minYInfl
-    lZInfl =  maxZInfl - minZInfl
-
-    lYPrec =  maxYPrec - minYPrec
-    lZPrec =  maxZPrec - minZPrec
 
 
-# Shift in coordinates
+# Shift x in coordinates
     if "xOrigin" in configDict:
         xOrigin = float(configDict["xOrigin"])
     else:
         xOrigin = 0.0
-
-# Interpolation kind
-    if "kind" in configDict:
-        kind = (configDict["kind"])
-    else:
-        kind = "linear"
-
 
 # Time-step and initial time for the writer
     dt = float(configDict["dt"])
@@ -175,12 +152,37 @@ def main():
     else:
         raise ValueError("Unsupported or unknown reader: "+reader)
 
+    # Bounds for the points
+
+    if "minYPrec" in configDict:
+        minYPrec = float(configDict["minYPrec"])
+    else:
+        minYPrec = pointsY.min()
+
+    if "maxYPrec" in configDict:
+        maxYPrec = float(configDict["maxYPrec"])
+    else:
+        maxYPrec = pointsY.max()
+
+    if "minZPrec" in configDict:
+        minZPrec = float(configDict["minZPrec"])
+    else:
+        minZPrec = pointsZ.min()
+
+
+    if "maxZPrec" in configDict:
+        maxZPrec = float(configDict["maxZPrec"])
+    else:
+        maxZPrec = pointsZ.max()
+
+    
+
     idxPrec = np.where((pointsY >= minYPrec) & (pointsY <= maxYPrec) &
                        (pointsZ >= minZPrec) & (pointsY <= maxZPrec))
 
     # Normalize to unit square
-    pointsY = (pointsY[idxPrec] - minYPrec)/lYPrec
-    pointsZ = (pointsZ[idxPrec] - minZPrec)/lZPrec
+    pointsY = (pointsY[idxPrec] - minYPrec)/(maxYPrec - minYPrec)
+    pointsZ = (pointsZ[idxPrec] - minZPrec)/(maxZPrec - minZPrec)
 
     triangulation = Delaunay(np.column_stack((pointsY, pointsZ)))
 
@@ -190,6 +192,27 @@ def main():
             read_points_foamfile(os.path.join(inflowGeometryPath))
     else:
         raise ValueError("Unknown inflow reader: "+inflowReader)
+
+    # Bound the points
+    if "minYInfl" in configDict:
+        minYInfl = float(configDict["minYInfl"])
+    else:
+        minYInfl = pointsYInfl.min()
+
+    if "maxYInfl" in configDict:
+        maxYInfl = float(configDict["maxYInfl"])
+    else:
+        maxYInfl = pointsYInfl.max()
+
+    if "minZInfl" in configDict:
+        minZInfl = float(configDict["minZInfl"])
+    else:
+        minZInfl = pointsZInfl.min()
+
+    if "maxZInfl" in configDict:
+        maxZInfl = float(configDict["maxZInfl"])
+    else:
+        maxZInfl = pointsZInfl.max()
 
     # Filter the points to those inside rectangle
     idxInfl = np.where((pointsYInfl >= minYInfl) & (pointsYInfl <= maxYInfl) &
@@ -220,8 +243,8 @@ def main():
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
 
     # Transform inflow points to square
-    pointsYInfl = (pointsYInfl - minYInfl)/lYInfl
-    pointsZInfl = (pointsZInfl - minZInfl)/lZInfl
+    pointsYInfl = (pointsYInfl - minYInfl)/(maxYInfl - minYInfl)
+    pointsZInfl = (pointsZInfl - minZInfl)/(maxZInfl - minZInfl)
 
 
 # Generate the inflow fields
