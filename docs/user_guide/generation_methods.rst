@@ -283,8 +283,8 @@ Interpolation
 Theory
 ______
 This is a simple generator that just interpolates data from one two-dimensional
-point cloud to another.
-This may be useful when some inflow data already exists and it should be
+point set to another.
+This may be useful when some inflow data already generated and it should be
 applied for different inflow patches, discretized by a different mesh.
 In particular example can be applying the method proposed in :cite:`Mukha2017`,
 where a channel flow precursor is used to generate inflow for a turbulent
@@ -292,15 +292,46 @@ boundary layer simulation.
 Given precursor data, it only remains to interpolate it onto the mesh of the
 inflow boundary patch.
 
-The interpolation type used is linear.
-It is possible to constrain the source and target points to those bound by a
-rectangle.
-The rectangles are defined by their bounds.
+.. _fig-interpolation:
 
-Each patch is scaled to a unit square prior to interpolation.
-It is important to note that the grid at both the source and target patches
-does not have to rectangular or even structured.
-The bounds defining the rectangles are simply used to fi
+.. figure:: /figures/interpolation.*
+   :align: center
+
+   Schematic showing how the interpolation is performed.
+   Thick solid lines represent the geometry of the patches,
+   Blue circles represent the grid points.
+   For the inflow patch, a user-defined bounding box is used, this filtering
+   out a part of the points.
+
+The interpolation type used is linear.
+A bounding box is found for each set of points.
+Alternatively, the bounding boxes can be prescribed explicitly by the user,
+allowing to filter out a part of the points, see
+:numref:`fig-interpolation`.
+The points are then scaled to lie in unit square prior to interpolation.
+
+Usage and practical information
+_______________________________
+
+The `runInterpolation` script should be used to generate the fields.
+The script is parallelized using MPI, so it is possible to take advantage of
+all the available cores present on the machine.
+
+As usual, all parameters associated with the chosen input and output formats
+should be included in the config file.
+Refer to the associated parts of the User guide for information.
+The following additional, optional, parameters can be included as well.
+
+
+   * ``xOrigin`` --- the streamwise location of the inflow patch.
+
+   * ``minYPrec``, ``maxYPrec`` --- wall-normal bounds for the source points.
+
+   * ``minZPrec``, ``maxZPrec`` --- spanwise bounds for the source points.
+
+   * ``minYInfl``, ``maxYInfl`` --- wall-normal bounds for the target points.
+
+   * ``minZInfl``, ``maxZInfl`` --- spanwise bounds for the target points.
 
 
 
