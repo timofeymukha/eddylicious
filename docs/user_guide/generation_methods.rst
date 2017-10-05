@@ -274,3 +274,33 @@ define the following parameters.
 
 Example configuration files can be found in the tutorial
 :ref:`tut_of_channel_lund`.
+
+.. _interpolation:
+
+Interpolation
+-------------
+
+Theory
+______
+This is a simple generator that just interpolates data from one two-dimensional
+point cloud to another.
+This may be useful when some inflow data already exists and it should be
+applied for different inflow patches, discretized by a different mesh.
+In particular example can be applying the method proposed in :cite:`Mukha2017`,
+where a channel flow precursor is used to generate inflow for a turbulent
+boundary layer simulation.
+Given precursor data, it only remains to interpolate it onto the mesh of the
+inflow boundary patch.
+
+The interpolation type used is linear.
+It is possible to constrain the source and target points to those bound by a
+rectangle.
+The rectangles are defined by their bounds.
+
+Each patch is scaled to a unit square prior to interpolation.
+It is important to note that the grid at both the source and target patches
+does not have to rectangular or even structured.
+The bounds defining the rectangles are simply used to fi
+
+
+
