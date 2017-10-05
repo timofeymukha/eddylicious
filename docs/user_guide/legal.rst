@@ -7,7 +7,7 @@ Legal information
 Eddylicious is free software and is provided under the `GNU GPL
 Version 3 <http://www.gnu.org/licenses/gpl-3.0.en.html>`_.
 
-The copyright to the code and documentation is owned by the author of the code,
+The copyright to the code and documentation is belongs to the author,
 Timofey Mukha.
 
 Please take notice of the following disclaimers.
