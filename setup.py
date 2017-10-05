@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 setup(name='eddylicious',
-      version='0.0.5',
+      version='0.1.0',
       description='A package for generating inflow fields for LES and DNS',
       url='https://github.com/timofeymukha/eddylicious',
       author='Timofey Mukha',
