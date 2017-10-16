@@ -159,20 +159,10 @@ def main():
 
     # Bounds for the points
 
-    if "minYPrec" in configDict:
-        minYPrec = float(configDict["minYPrec"])
-    else:
-        minYPrec = pointsY.min()
-
-    if "maxYPrec" in configDict:
-        maxYPrec = float(configDict["maxYPrec"])
-    else:
-        maxYPrec = pointsY.max()
-
-    if "minZPrec" in configDict:
-        minZPrec = float(configDict["minZPrec"])
-    else:
-        minZPrec = pointsZ.min()
+    minYPrec = float(configDict["minYPrec"])
+    maxYPrec = float(configDict["maxYPrec"])
+    minZPrec = float(configDict["minZPrec"])
+    minZPrec = pointsZ.min()
 
 
     if "maxZPrec" in configDict:
@@ -205,25 +195,10 @@ def main():
         raise ValueError("Unknown inflow reader: "+inflowReader)
 
     # Bound the points
-    if "minYInfl" in configDict:
-        minYInfl = float(configDict["minYInfl"])
-    else:
-        minYInfl = pointsYInfl.min()
-
-    if "maxYInfl" in configDict:
-        maxYInfl = float(configDict["maxYInfl"])
-    else:
-        maxYInfl = pointsYInfl.max()
-
-    if "minZInfl" in configDict:
-        minZInfl = float(configDict["minZInfl"])
-    else:
-        minZInfl = pointsZInfl.min()
-
-    if "maxZInfl" in configDict:
-        maxZInfl = float(configDict["maxZInfl"])
-    else:
-        maxZInfl = pointsZInfl.max()
+    minYInfl = float(configDict["minYInfl"])
+    maxYInfl = float(configDict["maxYInfl"])
+    minZInfl = float(configDict["minZInfl"])
+    maxZInfl = float(configDict["maxZInfl"])
 
     if rank == 0:
         print("\nTotal number of target points,", pointsYInfl.shape[0]) 
