@@ -180,7 +180,10 @@ def main():
     else:
         maxZPrec = pointsZ.max()
 
-    
+    if rank == 0:
+        print("\nTotal number of source points,", pointsY.shape[0]) 
+        print("Filtering source points with bounding box, y:[", minYPrec,
+              maxYPrec, "] z:[", minZPrec, maxZPrec, "]")
 
     idxPrec = np.where((pointsY >= minYPrec) & (pointsY <= maxYPrec) &
                        (pointsZ >= minZPrec) & (pointsY <= maxZPrec))
@@ -188,6 +191,9 @@ def main():
     # Normalize to unit square
     pointsY = (pointsY[idxPrec] - minYPrec)/(maxYPrec - minYPrec)
     pointsZ = (pointsZ[idxPrec] - minZPrec)/(maxZPrec - minZPrec)
+
+    if rank == 0:
+        print("Source points after filtering:", pointsY.shape[0])
 
     triangulation = Delaunay(np.column_stack((pointsY, pointsZ)))
 
@@ -219,6 +225,11 @@ def main():
     else:
         maxZInfl = pointsZInfl.max()
 
+    if rank == 0:
+        print("\nTotal number of target points,", pointsYInfl.shape[0]) 
+        print("Filtering target points with bounding box, y:[", minYInfl,
+              maxYInfl, "] z:[", minZInfl, maxZInfl, "]")
+
     # Filter the points to those inside rectangle
     idxInfl = np.where((pointsYInfl >= minYInfl) & (pointsYInfl <= maxYInfl) &
                        (pointsZInfl >= minZInfl) & (pointsZInfl <= maxZInfl))
@@ -226,6 +237,9 @@ def main():
 
     pointsYInfl = pointsYInfl[idxInfl]
     pointsZInfl = pointsZInfl[idxInfl]
+
+    if rank == 0:
+        print("Target points after filtering:", pointsYInfl.shape[0])
 
 # Create the reader functions
     if reader == "foamFile":
