@@ -31,7 +31,7 @@
      inkscape:snap-grids="true"
      showguides="false"
      inkscape:zoom="3.2270258"
-     inkscape:cx="142.00226"
+     inkscape:cx="164.65997"
      inkscape:cy="122.51419"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
@@ -422,7 +422,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <cc:license
            rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
       </cc:Work>
@@ -746,5 +746,12 @@
        cx="377.39435"
        cy="488.90665"
        r="3.4904304" />
+    <rect
+       y="487.60138"
+       x="112.43454"
+       height="60.979679"
+       width="103.24342"
+       id="rect4138-7-5"
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.54873228;stroke-miterlimit:4;stroke-dasharray:3.29239379, 0.54873229;stroke-dashoffset:0;stroke-opacity:1" />
   </g>
 </svg>

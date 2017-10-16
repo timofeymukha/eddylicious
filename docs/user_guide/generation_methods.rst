@@ -300,13 +300,13 @@ inflow boundary patch.
    Schematic showing how the interpolation is performed.
    Thick solid lines represent the geometry of the patches,
    Blue circles represent the grid points.
-   For the inflow patch, a user-defined bounding box is used, this filtering
-   out a part of the points.
+   The dashed rectangles represent the user-defined bounding boxes,
+   thus filtering out some of the points.
 
-The interpolation type used is linear.
-A bounding box is found for each set of points.
-Alternatively, the bounding boxes can be prescribed explicitly by the user,
-allowing to filter out a part of the points, see
+The interpolation type used is currently nearest-neighbour.
+A bounding box for the points has to be prescribed explicitly by the user,
+both for the source and target points.
+This allows to filter out a part of the points, see
 :numref:`fig-interpolation`.
 The points are then scaled to lie in unit square prior to interpolation.
 
@@ -320,7 +320,7 @@ all the available cores present on the machine.
 As usual, all parameters associated with the chosen input and output formats
 should be included in the config file.
 Refer to the associated parts of the User guide for information.
-The following additional, optional, parameters can be included as well.
+The following parameters should be included as well.
 
 
    * ``xOrigin`` --- the streamwise location of the inflow patch.
