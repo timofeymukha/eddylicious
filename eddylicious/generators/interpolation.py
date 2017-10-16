@@ -11,7 +11,7 @@ from __future__ import print_function
 from __future__ import division
 import numpy as np
 from mpi4py import MPI
-from scipy.interpolate import LinearNDInterpolator 
+from scipy.interpolate import NearestNDInterpolator 
 from .helper_functions import chunks_and_offsets
 from ..writers.ofnative_writers import write_velocity_to_ofnative
 from ..writers.hdf5_writers import write_velocity_to_hdf5
@@ -94,9 +94,9 @@ def interpolation_generate(readerFunction,
         else:
             raise ValueError("Unknown reader")
 
-        uXInterp = LinearNDInterpolator(points, uX[idxPrec])
-        uYInterp = LinearNDInterpolator(points, uY[idxPrec])
-        uZInterp = LinearNDInterpolator(points, uZ[idxPrec])
+        uXInterp = NearestNDInterpolator(points.points, uX[idxPrec])
+        uYInterp = NearestNDInterpolator(points.points, uY[idxPrec])
+        uZInterp = NearestNDInterpolator(points.points, uZ[idxPrec])
 
         uXInfl = uXInterp(pointsInfl)
         uYInfl = uYInterp(pointsInfl)
