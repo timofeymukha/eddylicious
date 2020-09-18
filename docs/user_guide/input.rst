@@ -32,7 +32,7 @@ That includes the coordinates of the points, a list of faces each defined as
 list of points, and the coordinates of the face centres.
 Since the data resides in the face centres, they are used in eddylicious to
 represent the geometry of the surface.
-A folder ``vectorField`` is created to store field with vector-valued data.
+A folder ``vectorField`` is created to store fields with vector-valued data.
 In particular, the field ``U`` which represents the velocity field, will be
 located there.
 
