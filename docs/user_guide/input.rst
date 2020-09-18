@@ -23,6 +23,10 @@ The foamFile format
 
 This file format is associated with the CFD solver OpenFOAM.
 Data from a user-defined sampling surface can be saved in this format.
+The name ``foamFile`` was used in the previous versions of the software, and
+currently it is changed to just ``foam``.
+Here the old name will continue to be used for now.
+
 OpenFOAM creates a catalog each time the data is output, named with the value
 of the simulation time.
 Inside this catalog yet another folder is created, named identically to the
@@ -73,13 +77,14 @@ In order for eddylicious to read in previously sampled velocity fields stored
 in the foamFile format the following should be added to the
 configuration file. ::
 
-   reader                  foamFile
-   readPath                /path/to/OpenFOAM/case
-   sampleSurfaceName       name of sample surface as defined in controlDict
+   reader                   foamFile
+   readPath                 /path/to/OpenFOAM/case
+   sampleFunctionObjectName name of the 'surfaces' function object used for sampling
+   sampleSurfaceName        name of sample surface as defined in the function object
 
 Eddylicious will search for the catalogs containing the data for different
 time steps in
-``readPath/postProcessing/sampledSurface/*time_value*/sampleSurfaceName``.
+``readPath/postProcessing/sampledFunctionObjectName/*time_value*/sampleSurfaceName``.
 
 .. important::
 

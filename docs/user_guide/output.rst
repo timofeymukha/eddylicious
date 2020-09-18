@@ -63,8 +63,7 @@ with the data.
 The data for each available field is stored in its own file named identically
 to the internal name of the field in OpenFOAM (for instance ``U`` for the
 velocity field).
-The format of each such file is quite similar to the :ref:`foamfile_format`
-but has some additional headers.
+The format of each such file is quite similar to the :ref:`foamfile_format`.
 
 The following parameters need to be provided in the configuration file in
 order to output the velocity fields in the OpenFOAM native format. ::

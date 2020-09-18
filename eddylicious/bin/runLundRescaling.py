@@ -62,8 +62,7 @@ def get_times(reader, readPath):
 
     # Grab the existing times and sort them
     if reader == "foamFile":
-        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
-        times = os.listdir(dataDir)
+        times = os.listdir(readPath)
         times = np.sort(times)
     elif reader == "hdf5":
         # Set the readPath to the file itself
@@ -270,11 +269,6 @@ def main():
     if rank == 0:
         print("Producing database with "+str(size)+" time-steps.")
 
-    # get the times in the precursor database
-    times = get_times(reader, readPath)
-
-    if rank == 0:
-        print("Reading from database with "+str(len(times)) + " time-steps.")
 
     # Get the mean velocity for the precursor
     uMeanXPrec, uMeanYPrec = get_umean_prec(reader, readPath, flipPrec)
@@ -305,10 +299,11 @@ def main():
 # SET UP GEOMETRY
 # Read grid for the recycling plane
 
-    times = get_times(reader, readPath)
     if reader == "foamFile":
         sampleSurfaceName = configDict["sampleSurfaceName"]
-        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
+        sampleFunctionObjectName = configDict["sampleFunctionObjectName"]
+        dataDir = os.path.join(readPath, "postProcessing", sampleFunctionObjectName)
+        times = get_times(reader, dataDir)
         pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
                                       "faceCentres")
         if not flipPrec:
@@ -326,6 +321,7 @@ def main():
                                           excludeBot=totalPointsY-nPointsY,
                                           exchangeValBot=centerY)
     elif reader == "hdf5":
+        times = get_times(reader, readPath)
 
         if not flipPrec:
             [pointsY, pointsZ] = \
@@ -339,6 +335,9 @@ def main():
                                       exchangeValBot=centerY)
     else:
         raise ValueError("Unknown reader: "+reader)
+
+    if rank == 0:
+        print("Reading from database with "+str(len(times)) + " time-steps.")
 
     [nPointsY, nPointsZ] = pointsY.shape
 
@@ -390,7 +389,7 @@ def main():
 
 # Create the reader functions
     if reader == "foamFile":
-        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
+        dataDir = os.path.join(readPath, "postProcessing", sampleFunctionObjectName)
         if not flipPrec:
             readerFunc = read_structured_velocity_foamfile(
                             dataDir,

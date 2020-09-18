@@ -62,8 +62,7 @@ def get_times(reader, readPath):
 
     # Grab the existing times and sort them
     if reader == "foamFile":
-        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
-        times = os.listdir(dataDir)
+        times = os.listdir(readPath)
         times = np.sort(times)
     elif reader == "hdf5":
         # Set the readPath to the file itself
@@ -133,15 +132,9 @@ def main():
     timePrecision = int(configDict["tPrecision"])
     size = int((tEnd-t0)/dt+1)
 
-    # get the times in the precursor database
-    times = get_times(reader, readPath)
-
     if rank == 0:
         print("Producing database with "+str(size)+" time-steps.")
-        print("Reading from database with "+str(len(times)) + " time-steps.")
 
-    if size > len(times):
-        raise ValueError("desired time-span is too large!")
 
 # SET UP GEOMETRY
 # Read grid for the recycling plane
@@ -149,13 +142,21 @@ def main():
     times = get_times(reader, readPath)
     if reader == "foamFile":
         sampleSurfaceName = configDict["sampleSurfaceName"]
-        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
+        sampleFunctionObjectName = configDict["sampleFunctionObjectName"]
+        dataDir = os.path.join(readPath, "postProcessing", sampleFunctionObjectName)
+        times = get_times(reader, dataDir)
         pointsReadPath = os.path.join(dataDir, times[0], sampleSurfaceName,
                                       "faceCentres")
         [pointsY, pointsZ] = read_points_foamfile(pointsReadPath)
 
     else:
         raise ValueError("Unsupported or unknown reader: "+reader)
+
+    if rank == 0:
+        print("Reading from database with "+str(len(times)) + " time-steps.")
+
+    if size > len(times):
+        raise ValueError("desired time-span is too large!")
 
     # Bounds for the points
 
@@ -218,7 +219,7 @@ def main():
 
 # Create the reader functions
     if reader == "foamFile":
-        dataDir = os.path.join(readPath, "postProcessing", "sampledSurface")
+        dataDir = os.path.join(readPath, "postProcessing", sampleFunctionObjectName)
         readerFunc = read_velocity_foamfile(dataDir, sampleSurfaceName)
     else:
         raise ValueError("Unsupported or unknown reader: "+reader)

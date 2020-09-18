@@ -144,11 +144,11 @@ Please follow the following steps.
 
          momentumSource
          {
-            type            patchMeanVelocityForce;
+            type            meanVelocityForce;
             active          on;
             selectionMode   all;
 
-            patchMeanVelocityForceCoeffs
+            meanVelocityForceCoeffs
             {
                 selectionMode   all;
                 fields  (U);

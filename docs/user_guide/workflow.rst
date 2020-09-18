@@ -35,13 +35,18 @@ ____________________________________
 
 Specifying the geometry boils down to producing the list of face centres
 located at the inlet boundary.
-The coordinates of the face centres can be used using the ``sample`` utility
-shipped with OpenFOAM.
+The coordinates of the face centres can be used using the ``postProcess``
+utility shipped with OpenFOAM.
 
-In the ``system/sampleDict`` file, create a sampling surface with the type
-``patch``, and specify the inlet patch as the basis for the surface.
+A new file should be created in the ``system`` directory, the name is
+arbitrary, for example, ``inletSurface``.
+In the file a function object of type ``surfaces`` should be created.
+It is improtant that th name of the function object is the same as that
+of the file.
+Inside the function object one should define a surface of type ``patch``,
+and specify the name inlet patch.
 It is better to turn off triangulation to preserve the original geometry.
-Choose ``foamFile`` as the write format for surfaces.
+Choose ``foam`` as the write format for surface.
 
 Even though we are only interested in the geometry, a field for sampling has
 to be chosen.
@@ -49,44 +54,33 @@ Any field can be chosen, besides for the velocity field ``U``.
 This is because  the sample utility will attempt to read in the field,
 and, since we didn't generate it yet, the field-values simply don't exist yet.
 
-A ``sampleDict`` for a case with the inlet patch named ``inlet`` might look
-something like this. ::
+An example of the function object for a case with the inlet patch named ``inlet``
+can look something like this. ::
 
-   *--------------------------------*- C++ -*----------------------------------*\
-   | =========                 |                                                 |
-   | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-   |  \\    /   O peration     | Version:  2.3.1                                 |
-   |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
-   |    \\/     M anipulation  |                                                 |
-   \*---------------------------------------------------------------------------*/
-   FoamFile
+   inletSurface
    {
-       version     2.0;
-       format      ascii;
-       class       dictionary;
-       object      sampleDict;
+       type surfaces;
+       fields
+       (
+          p
+       );
+       surfaceFormat foam;
+       interpolationScheme cellPoint;
+       surfaces
+       (
+           inlet
+           {
+               type patch;
+               patches (inlet);
+               interpolate false;
+               triangulate false;
+           }
+       );
    }
-   surfaceFormat foamFile;
 
-   fields
-   (
-      p
-   );
-
-   surfaces
-   (
-       inlet
-       {
-           type patch;
-           patches (inlet);
-           interpolate false;
-           triangulate false;
-       }
-
-   );
-
+The geometry, then be extracted with ``postProcess -func inletSurface``
 The produced file can be read using the ``foamFile`` inflow geometry reader.
-The path to the ``faceCenters`` file should also be provided.
+The path to the produced ``faceCenters`` file should be provided.
 This is done by adding the following lines to the configuration file for the
 inflow generation script. ::
 
