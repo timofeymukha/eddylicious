@@ -36,6 +36,10 @@ def main():
                         type=str,
                         help='The name of the surface that contains the data.',
                         required=True)
+    parser.add_argument('--fo',
+                        type=str,
+                        help='The name of the function object with the sampling surface.',
+                        required=True)
     parser.add_argument('--filename',
                         type=str,
                         help='The name hdf5 file to create.',
@@ -52,9 +56,10 @@ def main():
     surfaceName = args.surface
     uMeanFile = args.umean
     fileName = args.filename
+    foName = args.fo
 
     dataDir = os.path.join(precursorCaseDir, "postProcessing",
-                           "sampledSurface")
+                           foName)
 
 # Grab the existing times and sort
     times = os.listdir(dataDir)
