@@ -14,6 +14,7 @@ setup(name='eddylicious',
               'precursorStats=eddylicious.bin.precursorStats:main',
               'runLundRescaling=eddylicious.bin.runLundRescaling:main',
               'runInterpolation=eddylicious.bin.runInterpolation:main',
+              'runRandomFluctuations=eddylicious.bin.runRandomFluctuations:main',
               'convertFoamFileToHDF5=eddylicious.bin.convertFoamFileToHDF5:main'
                             ]
       },
