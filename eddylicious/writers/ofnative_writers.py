@@ -41,7 +41,7 @@ def write_points_to_ofnative(writePath, pointsY, pointsZ, xVal):
                comments="", fmt='(%e %e %e)')
 
 
-def write_velocity_to_ofnative(writePath, t, uX, uY, uZ):
+def write_velocity_to_ofnative(writePath, t, position, uX, uY, uZ):
     """Write the velocity field in a format used by OpenFOAM's
     timeVaryingMappedFixedValue boundary condition.
 
@@ -52,6 +52,8 @@ def write_velocity_to_ofnative(writePath, t, uX, uY, uZ):
         files. Commonly constant/boundaryData/nameOfInletPatch.
     t : float
         The value of time associated with the written velocity field.
+    position : int
+        Not used here, present to comply with common writer interface.
     uX : ndarray
         A 2d ndarray containing the streamwise component of the velocity
         field.
