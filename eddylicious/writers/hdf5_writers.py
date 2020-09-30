@@ -44,7 +44,7 @@ def write_points_to_hdf5(hdf5File, pointsY, pointsZ, xVal):
     hdf5File.create_dataset("points", data=points)
 
 
-def write_velocity_to_hdf5(hdf5File, t, uX, uY, uZ, iteration):
+def write_velocity_to_hdf5(hdf5File, t, uX, uY, uZ, position):
     """Write the velocity field into an HDF5 file.
 
     Will also write the corresponding time value.
@@ -56,6 +56,8 @@ def write_velocity_to_hdf5(hdf5File, t, uX, uY, uZ, iteration):
     t : float
         The value of time associated with the written
         velocity field.
+    position: int
+        The position of the data along the time axis.
     uX : ndarray
         A 2d ndarray containing the streamwise component of the velocity
         field.
@@ -66,8 +68,6 @@ def write_velocity_to_hdf5(hdf5File, t, uX, uY, uZ, iteration):
     uZ : ndarray
         A 2d ndarray containing the spanwise component of the velocity
         field.
-    iteration: int
-        The position of along the time axis.
 
     """
 
@@ -79,8 +79,8 @@ def write_velocity_to_hdf5(hdf5File, t, uX, uY, uZ, iteration):
 
     size = hdf5File["time"].size
 
-    if iteration >= size:
+    if position >= size:
         raise ValueError("Write position larger than total database size.")
 
-    hdf5File["time"][iteration] = t
-    hdf5File["velocity"][iteration, :, :] = u
+    hdf5File["time"][position] = t
+    hdf5File["velocity"][position, :, :] = u
