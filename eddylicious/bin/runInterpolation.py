@@ -46,7 +46,7 @@ def main():
 # Parse the command-line arguments
     parser = argparse.ArgumentParser(
             description="A script for generating inflow \
-                            velocity fields using Lund et al's rescaling.")
+                         by interpolating a precursor database.")
 
     parser.add_argument('--config',
                         type=str,
@@ -67,7 +67,6 @@ def main():
     reader = configDict["reader"]
     inflowReader = configDict["inflowGeometryReader"]
     writer = configDict["writer"]
-
 
 
 # Shift x in coordinates
@@ -111,16 +110,14 @@ def main():
 
     # Bounds for the points
 
-    minYPrec = float(configDict["minYPrec"])
-    maxYPrec = float(configDict["maxYPrec"])
-    minZPrec = float(configDict["minZPrec"])
-    minZPrec = pointsZ.min()
-
-
-    if "maxZPrec" in configDict:
-        maxZPrec = float(configDict["maxZPrec"])
-    else:
-        maxZPrec = pointsZ.max()
+    minYPrec = float(configDict["minYPrec"]) if "minYPrec" in configDict \
+        else pointsY.min()
+    maxYPrec = float(configDict["maxYPrec"]) if "maxYPrec" in configDict \
+        else pointsY.max()
+    minZPrec = float(configDict["minZPrec"]) if "minZPrec" in configDict \
+        else pointsZ.min()
+    maxZPrec = float(configDict["maxZPrec"]) if "maxZPrec" in configDict \
+        else pointsZ.max()
 
     if rank == 0:
         print("\nTotal number of source points,", pointsY.shape[0]) 
@@ -146,11 +143,15 @@ def main():
     else:
         raise ValueError("Unknown inflow reader: "+inflowReader)
 
-    # Bound the points
-    minYInfl = float(configDict["minYInfl"])
-    maxYInfl = float(configDict["maxYInfl"])
-    minZInfl = float(configDict["minZInfl"])
-    maxZInfl = float(configDict["maxZInfl"])
+    # Bound the points on the inflow plane
+    minYInfl = float(configDict["minYInfl"]) if "minYInfl" in configDict \
+        else pointsYInfl.min()
+    maxYInfl = float(configDict["maxYInfl"]) if "maxYInfl" in configDict \
+        else pointsYInfl.max()
+    minZInfl = float(configDict["minZInfl"]) if "minZInfl" in configDict \
+        else pointsZInfl.min()
+    maxZInfl = float(configDict["maxZInfl"]) if "maxZInfl" in configDict \
+        else pointsZInfl.max()
 
     if rank == 0:
         print("\nTotal number of target points,", pointsYInfl.shape[0]) 
