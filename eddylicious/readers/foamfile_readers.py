@@ -9,9 +9,32 @@
 import numpy as np
 import os
 
-__all__ = ["read_structured_points_foamfile",
+__all__ = ["read_foamfile",
+           "read_structured_points_foamfile",
            "read_structured_velocity_foamfile",
            "read_points_foamfile", "read_velocity_foamfile"]
+
+
+def read_foamfile(readPath):
+    """Read data stored in foamFile format.
+
+    Parameters
+    ----------
+    readPath : str
+        The path to the file.
+
+    Returns
+    -------
+    ndarray
+        Contains the read data
+
+    """
+    with open(readPath) as dataFile:
+        data = [line.rstrip(')\n') for line in dataFile]
+
+    data = [line.lstrip('(') for line in data]
+    data = data[3:-1]
+    return np.genfromtxt(data)
 
 
 def read_structured_points_foamfile(readPath, addValBot=float('nan'),
@@ -69,12 +92,8 @@ def read_structured_points_foamfile(readPath, addValBot=float('nan'),
         The sorting indices from the sorting performed.
 
     """
-    with open(readPath) as pointsFile:
-        points = [line.rstrip(')\n') for line in pointsFile]
-
-    points = [line.lstrip('(') for line in points]
-    points = points[3:-1]
-    points = np.genfromtxt(points)[:, 1:]
+    points = read_foamfile(readPath)
+    points = points[:, 1:]
 
 # Sort the points
 # Sort along y first
@@ -291,12 +310,8 @@ def read_points_foamfile(readPath):
         Two arrays corresponding to y and z components of the points.
 
     """
-    with open(readPath) as pointsFile:
-        points = [line.rstrip(')\n') for line in pointsFile]
-
-    points = [line.lstrip('(') for line in points]
-    points = points[3:-1]
-    points = np.genfromtxt(points)[:, 1:]
+    points = read_foamfile(readPath)
+    points = points[:, 1:]
 
     return [points[:, 0], points[:, 1]]
 
@@ -340,13 +355,7 @@ def read_velocity_foamfile(baseReadPath, surfaceName):
         """
         readUPath = os.path.join(baseReadPath, str(time), surfaceName,
                                  "vectorField", "U")
-        with open(readUPath) as UFile:
-            u = [line.rstrip(')\n') for line in UFile]
-
-        u = [line.lstrip('(') for line in u]
-        u = u[3:-1]
-        u = np.genfromtxt(u)
-
+        u = read_foamfile(readUPath)
 
         return [u[:, 0], u[:, 1], u[:, 2]]
 
