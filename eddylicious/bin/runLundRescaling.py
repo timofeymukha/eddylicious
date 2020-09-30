@@ -10,51 +10,18 @@ import numpy as np
 import argparse
 from mpi4py import MPI
 import h5py
-from eddylicious.generators.helper_functions import *
+import functools
+from eddylicious.helper_functions import config_to_dict, blending_function, set_write_path
+from eddylicious.helper_functions import momentum_thickness, delta_99, delta_star
 from eddylicious.readers.foamfile_readers import read_structured_points_foamfile
 from eddylicious.readers.foamfile_readers import read_structured_velocity_foamfile
 from eddylicious.readers.hdf5_readers import read_structured_points_hdf5
 from eddylicious.readers.hdf5_readers import read_structured_velocity_hdf5
-from eddylicious.writers.ofnative_writers import write_points_to_ofnative
-from eddylicious.writers.hdf5_writers import write_points_to_hdf5
+from eddylicious.writers.ofnative_writers import write_points_to_ofnative, write_velocity_to_ofnative
+from eddylicious.writers.hdf5_writers import write_points_to_hdf5, write_velocity_to_hdf5
+from eddylicious.writers.vtk_writers import write_data_to_vtk
 from eddylicious.generators.lund_rescaling import lund_generate
 from eddylicious.generators.lund_rescaling import lund_rescale_mean_velocity
-
-
-def set_write_path(config):
-    """Sets the writePath variable in concordance with the writer.
-
-    For the ofnative writer: the path to constant/boundaryData directory.
-    For the hdf5 writer: the hdf5 file itself.
-
-    """
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    writer = config["writer"]
-    writePath = config["writePath"]
-
-    if writer == "ofnative":
-        inletPatchName = config["inletPatchName"]
-        writePath = os.path.join(writePath, "constant", "boundaryData",
-                                 inletPatchName)
-        if rank == 0:
-            if not os.path.exists(writePath):
-                os.makedirs(writePath)
-
-    elif writer == "hdf5":
-        writePath = os.path.join(writePath, config["hdf5FileName"])
-        # If the hdf5 file exists, delete it.
-        if rank == 0 and os.path.isfile(writePath):
-            print("HDF5 database already exists. It it will be overwritten.")
-            os.remove(writePath)
-
-        # We change the writePath to be the hdf5 file itself
-        writePath = h5py.File(writePath, 'a', driver='mpio',
-                              comm=MPI.COMM_WORLD)
-    else:
-        raise ValueError("Unknown writer: "+writer)
-
-    return writePath
 
 
 def get_times(reader, readPath):
@@ -179,19 +146,6 @@ def print_tbl_properties(theta, deltaStar, delta, uTau, u0, nu,
     print("    U0 "+str(u0))
     print("    cf "+str(2*(uTau/u0)**2))
     print("    y+_1 "+str(yPlus1))
-
-
-def config_to_dict(configFile):
-    """Parse a config file to a dictionary."""
-
-    configDict = {}
-
-    for line in configFile:
-        if (line[0] == '#') or (line == '\n'):
-            continue
-        configDict[line.split()[0]] = line.split()[1]
-
-    return configDict
 
 
 def main():
