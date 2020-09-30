@@ -30,6 +30,84 @@ Which parameters should be present depends on the method that is being
 used.
 They are therefore described for each method individually below.
 
+.. _random_fluctuations:
+
+Random fluctuations with specified :math:`U_i` and :math:`\langle u'_i u'_j\rangle`
+-----------------------------------------------------------------------------------
+
+Theory
+______
+
+This method is presented in the appendix of :cite:`Lund1998`.
+For each point of the inflow patch, for each time-step, three random
+values, :math:`\tilde u, \tilde v, \tilde w`, are drawn from the normal
+distribution with 0 mean and standard deviation 1.
+The following transformation is then applied to obtain the values of the
+velocity components:
+
+.. math::
+
+   & u = U + a_{11} \tilde u, \\
+   & v = V + a_{21} \tilde u + a_{22} \tilde v, \\
+   & w = W + a_{31} \tilde u + a_{32} \tilde v + a_{33} \tilde w. \\
+
+Here, :math:`a_{ij}` is the Cholesky decomposition of the Reynolds stress
+tensor.
+Both the mean velocity components and the Reynolds stress tensor components
+should be provided by the user at each point of the inflow patch.
+It is easy to prove that the generated signal will adher to the prescribed
+values.
+
+The critical flaw of this method is that the generated velocity signals
+are not correlated in neither space or time, meaning that no coherent
+structures are introduced at the inlet.
+The accuracy of the method can therefore be expected to be poor, and it is
+therefore recommended to not use for practical flow simulations.
+The method can be useful for academic studies wishing to compare the
+performance of a more advanced techniques to a baseline synthetic generation
+method.
+
+Usage and practical information
+_______________________________
+
+The `runRandomFluctuations` script should be used to generate the fields.
+The script is parallelized using MPI, so it is possible to take advantage of
+all the available cores present on the machine.
+
+As described above, the method requires the value of the mean velocity and
+the Reynolds stress tensor for each inflow patch point.
+These are expected to be provided in a simple text format:
+
+   * For the mean velocity, each row should contain 3 space-delimited numbers,
+     corresponding to :math:`U`, :math:`V`, and :math:`W`, respectively.
+   * For the Reynolds stress tensor, each row should contain 6 space-delimited
+     numbers, corresponding to :math:`\langle u'u' \rangle`,
+     :math:`\langle u'v' \rangle`, :math:`\langle u'w' \rangle`,
+     :math:`\langle v'v' \rangle`, :math:`\langle v'w' \rangle`, and
+     :math:`\langle w'w' \rangle`.
+
+The ordering of the rows should correspond to the order of points, as read by
+the inflow geometry reader.
+It is the user's responsibility to ensure this.
+
+The configuration file should define the following parameters.
+
+   * All parameters associated with the chosen input and output formats.
+     Refer to the associated parts of the User guide for information.
+
+   * ``uMeanFile`` --- the path to the file containing the mean velocity values.
+
+   * ``reynoldsStressFile`` --- the path to the file containing the Reynolds stresses.
+
+   * ``dt``--- the time-step in the main simulation.
+
+   * ``t0`` --- the start-time of the main simulation.
+
+   * ``tEnd`` --- the end-time of the simulation.
+
+   * ``tPrecision`` --- write precision for time values.
+     Should be chosen according to ``dt``.
+
 .. _lund_rescaling:
 
 Lund's rescaling
