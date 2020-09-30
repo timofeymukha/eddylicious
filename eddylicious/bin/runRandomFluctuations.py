@@ -14,6 +14,7 @@ from eddylicious.helper_functions import config_to_dict, set_write_path
 from eddylicious.readers.foamfile_readers import read_points_foamfile
 from eddylicious.writers.ofnative_writers import write_points_to_ofnative, write_velocity_to_ofnative
 from eddylicious.writers.hdf5_writers import write_points_to_hdf5, write_velocity_to_hdf5
+from eddylicious.writers.vtk_writers import write_data_to_vtk
 from eddylicious.generators.random_fluctuations import random_fluctuations_generate
 
 
@@ -90,6 +91,9 @@ def main():
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
         writerFunc = functools.partial(write_velocity_to_hdf5, writePath)
+    elif writer == "vtk":
+        writerFunc = functools.partial(write_data_to_vtk, writePath,
+                                       xOrigin, pointsYInfl, pointsZInfl)
     else:
         raise ValueError("Unknown writer: "+writer)
 
@@ -107,7 +111,7 @@ def main():
                                  np.column_stack((pointsYInfl, pointsZInfl)),
                                  uMean,
                                  reynoldsStress,
-                                 dt, t0, tEnd, timePrecision)
+                                 dt, t0, timePrecision, tEnd)
 
     if rank == 0:
         print("Process 0 done, waiting for the others...")
