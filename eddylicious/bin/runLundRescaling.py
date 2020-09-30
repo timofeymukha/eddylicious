@@ -377,15 +377,23 @@ def main():
     # Get the write path appropriate for the reader
     writePath = set_write_path(configDict)
 
+
     if writer == "ofnative":
         if rank == 0:
             write_points_to_ofnative(os.path.join(writePath, "points"),
                                      pointsYInfl, pointsZInfl, xOrigin)
+        writerFunc = functools.partial(write_velocity_to_ofnative, writePath)
     elif writer == "hdf5":
         writePath.create_dataset("time", data=t0*np.ones((size, 1)))
         writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
+        writerFunc = functools.partial(write_velocity_to_hdf5, writePath)
+    elif writer == "vtk":
+        writerFunc = functools.partial(write_data_to_vtk, writePath,
+                                       xOrigin, pointsYInfl, pointsZInfl)
+    else:
+        raise ValueError("Unknown writer: "+writer)
 
     uMeanXInfl, uMeanYInfl = lund_rescale_mean_velocity(etaPrec, yPlusPrec,
                                                         uMeanXPrec, uMeanYPrec,
@@ -408,7 +416,7 @@ def main():
     comm.Barrier()
 
     lund_generate(readerFunc,
-                  writer, writePath,
+                  writerFunc,
                   dt, t0, tEnd, timePrecision,
                   uMeanXPrec, uMeanXInfl,
                   uMeanYPrec, uMeanYInfl,

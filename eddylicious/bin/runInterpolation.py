@@ -182,11 +182,18 @@ def main():
         if rank == 0:
             write_points_to_ofnative(os.path.join(writePath, "points"),
                                      pointsYInfl, pointsZInfl, xOrigin)
+        writerFunc = functools.partial(write_velocity_to_ofnative, writePath)
     elif writer == "hdf5":
         writePath.create_dataset("time", data=t0*np.ones((size, 1)))
         writePath.create_dataset("velocity", (size, pointsZInfl.size, 3),
                                  dtype=np.float64)
         write_points_to_hdf5(writePath, pointsYInfl, pointsZInfl, xOrigin)
+        writerFunc = functools.partial(write_velocity_to_hdf5, writePath)
+    elif writer == "vtk":
+        writerFunc = functools.partial(write_data_to_vtk, writePath,
+                                       xOrigin, pointsYInfl, pointsZInfl)
+    else:
+        raise ValueError("Unsupported or unknown writer: "+writer)
 
     # Transform inflow points to square
     pointsYInfl = (pointsYInfl - minYInfl)/(maxYInfl - minYInfl)
@@ -200,7 +207,7 @@ def main():
     comm.Barrier()
 
     interpolation_generate(readerFunc,
-                           writer, writePath,
+                           writerFunc,
                            dt, t0, tEnd, timePrecision,
                            triangulation,
                            np.column_stack((pointsYInfl,pointsZInfl)),
@@ -214,6 +221,7 @@ def main():
 
     if rank == 0:
         print("Done\n")
+
 
 if __name__ == "__main__":
     main()
