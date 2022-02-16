@@ -12,7 +12,8 @@ import os
 import h5py
 
 __all__ = ["blending_function", "delta_99", "delta_star", "momentum_thickness",
-           "chunks_and_offsets", "config_to_dict", "set_write_path"]
+           "chunks_and_offsets", "config_to_dict", "set_write_path",
+           "read_float_array", "read_integer_array"]
 
 
 def blending_function(eta, alpha=4, b=0.2):
@@ -215,3 +216,56 @@ def set_write_path(config):
         raise ValueError("Unknown writer: "+writer)
 
     return writePath
+
+def read_integer_array(fileId, eMode, n):
+    """Read in an integer array from a binary file.
+
+    Parameters
+    ----------
+    fileId :
+        opened file
+    eMode : {'<', '>'}
+        Endian model.
+    n : int
+        Number of intergers to read in
+
+    Returns
+    -------
+    ndarray
+        The read in integers
+
+"""
+    import struct
+    iSize = 4
+    data = fileId.read(iSize*n)
+    data = list(struct.unpack(eMode + n*'i', data))
+    return data
+
+
+def read_float_array(fileId, eMode, wordSize, n):
+    """Read in an array of floats from a binary file.
+
+    Parameters
+    ----------
+    fileId :
+        opened file
+    eMode : {'<', '>'}
+        Endian model.
+    wordSize : {4, 8}
+        Size of the float, corresponding to single or double precision.
+    n : int
+        Number of floats to read in
+
+    Returns
+    -------
+    ndarray
+        The read in floats
+
+"""
+    if wordSize == 4:
+        realtype = 'f'
+    elif wordSize == 8:
+        realtype = 'd'
+    data = fileId.read(wordSize * n)
+    data = np.frombuffer(data , dtype=eMode + realtype, count=n)
+    return data 

@@ -3,32 +3,26 @@
 # The code is released under the GNU GPL Version 3 licence.
 # See LICENCE.txt and the Legal section in the User Guide for more information
 
-"""Functions for writing to the vtk format, the data is written as points,
-no surface topology is included.
+"""Functions for writing into the computer's memory, i.e. some variable
 
 """
 import os
 import numpy as np
 from os.path import join
 
-__all__ = ["write_data_to_vtk"]
+__all__ = ["write_data_to_ram"]
 
 
-def write_data_to_vtk(writePath, xOrigin, pointsY, pointsZ, t, position, uX, uY, uZ):
-    """Write the velocity field in a format used by OpenFOAM's
-    timeVaryingMappedFixedValue boundary condition.
+def write_data_to_ram(storage, t, position, uX, uY, uZ):
+    """Write the velocity field to an ndarray stored in memory
+
+    Useful for studying different generation methods rapidly, avoiding
+    hard disk IO.
 
     Parameters
     ----------
-    writePath : str
-        The path where to write the time directories containing the U
-        files. Commonly constant/boundaryData/nameOfInletPatch.
-    xOrigin : float
-        The position of the inlet along x.
-    pointsY: ndarray
-        The locations of the inflow patch points along y.
-    pointsZ: ndarray
-        The locations of the inflow patch points along z.
+    storage : ndarray
+        The variable that will be stored 
     t : float
         The value of time associated with the written velocity field.
         Not used here, included to comply with the writer interface.
@@ -45,8 +39,6 @@ def write_data_to_vtk(writePath, xOrigin, pointsY, pointsZ, t, position, uX, uY,
         field.
 
     """
-
-    import pyevtk
 
     if not os.path.exists(writePath):
         os.mkdir(os.path.join(writePath))
