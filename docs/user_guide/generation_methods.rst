@@ -364,7 +364,7 @@ This is a simple generator that just interpolates data from one two-dimensional
 point set to another.
 This may be useful when some inflow data already generated and it should be
 applied for different inflow patches, discretized by a different mesh.
-In particular example can be applying the method proposed in :cite:`Mukha2017`,
+A particular example can be applying the method proposed in :cite:`Mukha2017`,
 where a channel flow precursor is used to generate inflow for a turbulent
 boundary layer simulation.
 Given precursor data, it only remains to interpolate it onto the mesh of the

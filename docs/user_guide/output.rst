@@ -53,7 +53,7 @@ OpenFOAM native format
 
 This is natively supported by OpenFOAM.
 In order to read in boundary data from the hard-drive OpenFOAM has a special
-boundary conidtion called ``timeVaryingMappedFixedValue``.
+boundary condition called ``timeVaryingMappedFixedValue``.
 This boundary condition expects a folder called ``boundaryData/\<patchname\>``
 to be located in the ``constant`` directory of the case.
 Inside the folder a file named ``points`` should reside.

@@ -6,7 +6,7 @@ Channel flow in OpenFOAM using Lund's rescaling
 .. important::
    The tutorial was tested with OpenFOAM v1812.
    Kindly report any difficulties with using newer versions.
-   This tutorial for OpenFOAM 2.3.1 can be found in olderversions of the
+   This tutorial for OpenFOAM 2.3.1 can be found in older versions of the
    documentation.
 
    This offering is not approved or endorsed by OpenCFD Limited, producer
