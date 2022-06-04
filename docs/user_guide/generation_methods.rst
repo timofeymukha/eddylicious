@@ -38,7 +38,7 @@ Random fluctuations with specified :math:`U_i` and :math:`\langle u'_i u'_j\rang
 Theory
 ______
 
-This method is presented in the appendix of :cite:`Lund1998`.
+This method is presented in the appendix of :cite:p:`Lund1998`.
 For each point of the inflow patch, for each time-step, three random
 values, :math:`\tilde u, \tilde v, \tilde w`, are drawn from the normal
 distribution with 0 mean and standard deviation 1.
