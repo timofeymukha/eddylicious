@@ -1,3 +1,6 @@
+numpy
+scipy
 mock
+matplotlib
 sphinxcontrib-bibtex
 sphinx-rtd-theme

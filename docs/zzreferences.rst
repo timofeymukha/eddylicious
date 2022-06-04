@@ -1,5 +1,5 @@
 List of references
 ==================
 
-.. bibliography:: bibl.bib
+.. bibliography::
     :all:
